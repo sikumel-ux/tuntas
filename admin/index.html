@@ -1,1 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#064E3B">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Admin Panel (Sheets)</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        nav button.active { color: #064e3b; font-weight: 800; border-top: 4px solid #064e3b; }
+        /* Custom Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #064e3b;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center">
+
+    <!-- ========================================================================= -->
+    <!-- 1. LAYAR LOADING GLOBAL -->
+    <!-- ========================================================================= -->
+    <div id="global-loading" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-all duration-300">
+        <div class="spinner mb-4"></div>
+        <p class="text-sm font-bold text-emerald-900 animate-pulse tracking-wide uppercase">Memuat Basis Data Sheets...</p>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. LAYAR LOGIN ADMIN (Muncul Pertama Kali) -->
+    <!-- ========================================================================= -->
+    <div id="screen-login-admin" class="min-h-screen flex items-center justify-center p-4 w-full max-w-md hidden">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full shadow-xl border border-slate-100 relative overflow-hidden">
+            <div class="h-4 bg-emerald-800 w-full absolute top-0 left-0"></div>
+            
+            <div class="text-center mt-4 mb-8">
+                <h1 class="text-3xl font-black text-emerald-900 tracking-tighter">TUNTAS.</h1>
+                <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-[0.2em] mt-1">Panel Pengurus / Admin</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Username Admin</label>
+                    <input type="text" id="adminUser" placeholder="Masukkan username..." class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-600 font-semibold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+                    <input type="password" id="adminPass" placeholder="Masukkan password..." class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-600 font-semibold text-slate-800">
+                </div>
+                
+                <button onclick="prosesLoginAdmin()" class="w-full bg-emerald-800 text-white font-bold p-4 rounded-2xl shadow-lg shadow-emerald-900/20 hover:bg-emerald-900 transition-all text-sm uppercase tracking-wider pt-4">
+                    Masuk Ke Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. LAYAR DASHBOARD UTAMA ADMIN -->
+    <!-- ========================================================================= -->
+    <div id="screen-dashboard-admin" class="hidden w-full max-w-md bg-white min-h-screen flex flex-col shadow-2xl relative pb-24">
+        
+        <!-- Header Panel -->
+        <div class="bg-emerald-800 text-white p-6 rounded-b-[2rem] shadow-lg shadow-emerald-950/20">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tighter">TUNTAS. ADMIN</h1>
+                    <p class="text-xs text-emerald-200 font-medium">Sistem Pengelolaan Terpadu Warga</p>
+                </div>
+                <button onclick="logoutAdmin()" class="bg-emerald-900/60 hover:bg-rose-700 transition-all text-white p-2.5 rounded-xl flex items-center justify-center shadow-inner" title="Logout">
+                    <span class="material-symbols-rounded text-sm">logout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== TAB KAS ==================== -->
+        <div id="screen-kas" class="tab-content active p-6 space-y-6">
+            <div class="bg-slate-50 rounded-3xl p-5 border border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-800">add_card</span> Catat Transaksi Kas
+                </h3>
+                <div class="space-y-4">
+                    <input type="date" id="kTgl" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border border-slate-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-white cursor-pointer font-bold text-sm text-slate-600 has-[:checked]:border-emerald-600 has-[:checked]:text-emerald-800">
+                            <input type="radio" name="kKat" value="masuk" checked class="accent-emerald-700"> Pemasukan
+                        </label>
+                        <label class="border border-slate-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-white cursor-pointer font-bold text-sm text-slate-600 has-[:checked]:border-emerald-600 has-[:checked]:text-emerald-800">
+                            <input type="radio" name="kKat" value="keluar" class="accent-emerald-700"> Pengeluaran
+                        </label>
+                    </div>
+                    <input type="text" id="kKet" placeholder="Keterangan transaksi..." class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    <input type="number" id="kNom" placeholder="Nominal (Rp)..." class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-800">
+                    <button onclick="simpanKas()" class="w-full bg-emerald-800 text-white font-bold p-3.5 rounded-xl text-sm tracking-wide uppercase hover:bg-emerald-900 transition-all">Simpan Kas</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-3xl p-5 border border-slate-100 space-y-4">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-800">picture_as_pdf</span> Cetak Rekap Kas PDF
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="date" id="fMulai" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                    <input type="date" id="fSelesai" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                </div>
+                <button onclick="downloadPDF()" class="w-full bg-slate-800 text-white font-bold p-3.5 rounded-xl text-sm tracking-wide uppercase hover:bg-slate-900 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-rounded text-sm">download</span> Unduh PDF Otomatis
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== TAB IURAN ==================== -->
+        <div id="screen-iuran" class="tab-content p-6 space-y-6">
+            <div class="bg-slate-50 rounded-3xl p-5 border border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-800">payments</span> Input Pembayaran Iuran
+                </h3>
+                <div class="space-y-4">
+                    <input type="date" id="pTgl" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    <select id="pNama" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold uppercase text-slate-800">
+                        <option value="">-- Pilih Warga --</option>
+                    </select>
+                    <select id="pKet" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800">
+                        <option value="">-- Untuk Bulan --</option>
+                        <option value="Januari">Januari</option>
+                        <option value="Februari">Februari</option>
+                        <option value="Maret">Maret</option>
+                        <option value="April">April</option>
+                        <option value="Mei">Mei</option>
+                        <option value="Juni">Juni</option>
+                        <option value="Juli">Juli</option>
+                        <option value="Agustus">Agustus</option>
+                        <option value="September">September</option>
+                        <option value="Oktober">Oktober</option>
+                        <option value="November">November</option>
+                        <option value="Desember">Desember</option>
+                    </select>
+                    <input type="number" id="pNom" placeholder="Nominal Iuran (Rp)..." class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-800">
+                    <button onclick="simpanIuran()" class="w-full bg-emerald-800 text-white font-bold p-3.5 rounded-xl text-sm tracking-wide uppercase hover:bg-emerald-900 transition-all">Simpan Iuran</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB SAMPAH ==================== -->
+        <div id="screen-sampah" class="tab-content p-6 space-y-6">
+            <div class="bg-slate-50 rounded-3xl p-5 border border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-800">delete_sweep</span> Absen Pengambilan Sampah
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Tanggal Operasional</label>
+                        <input type="date" id="sTgl" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Nama Warga/Keluarga</label>
+                        <select id="sNama" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold uppercase text-slate-800">
+                            <option value="">-- Pilih Warga --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Status Pengambilan</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 bg-white cursor-pointer text-xs font-bold text-slate-600 has-[:checked]:border-emerald-600 has-[:checked]:text-emerald-800">
+                                <input type="radio" name="sStatus" value="Diambil" checked class="accent-emerald-700"> Diambil
+                            </label>
+                            <label class="border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 bg-white cursor-pointer text-xs font-bold text-slate-600 has-[:checked]:border-amber-500 has-[:checked]:text-amber-700">
+                                <input type="radio" name="sStatus" value="Tidak Diambil" class="accent-amber-500"> Lewat
+                            </label>
+                            <label class="border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 bg-white cursor-pointer text-xs font-bold text-slate-600 has-[:checked]:border-slate-500 has-[:checked]:text-slate-700">
+                                <input type="radio" name="sStatus" value="Kosong" class="accent-slate-500"> Kosong
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="simpanLaporanSampah()" class="w-full bg-emerald-800 text-white font-bold p-3.5 rounded-xl text-sm tracking-wide uppercase hover:bg-emerald-900 transition-all mt-2">Kirim Laporan Sampah</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB WARGA ==================== -->
+        <div id="screen-warga" class="tab-content p-6 space-y-6">
+            <div class="bg-slate-50 rounded-3xl p-5 border border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-800">person_add</span> Daftarkan Warga Baru
+                </h3>
+                <div class="space-y-4">
+                    <input type="text" id="wNama" placeholder="Nama Lengkap Warga..." class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold uppercase text-slate-800">
+                    <input type="number" id="wHp" placeholder="Nomor WhatsApp (Contoh: 08123...)" class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    <input type="text" id="wPass" placeholder="Password Akses Aplikasi..." class="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold">
+                    <button onclick="simpanWarga()" class="w-full bg-emerald-800 text-white font-bold p-3.5 rounded-xl text-sm tracking-wide uppercase hover:bg-emerald-900 transition-all">Simpan Database Warga</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigasi Menu Bawah -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-slate-50 border-t border-slate-200 grid grid-cols-4 h-20 rounded-t-3xl shadow-inner z-10">
+            <button id="n-kas" onclick="st('kas')" class="active flex flex-col items-center justify-center text-slate-400 gap-1 transition-all">
+                <span class="material-symbols-rounded">account_balance_wallet</span>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Kas</span>
+            </button>
+            <button id="n-iuran" onclick="st('iuran')" class="flex flex-col items-center justify-center text-slate-400 gap-1 transition-all">
+                <span class="material-symbols-rounded">payments</span>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Iuran</span>
+            </button>
+            <button id="n-sampah" onclick="st('sampah')" class="flex flex-col items-center justify-center text-slate-400 gap-1 transition-all">
+                <span class="material-symbols-rounded">delete_sweep</span>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Sampah</span>
+            </button>
+            <button id="n-warga" onclick="st('warga')" class="flex flex-col items-center justify-center text-slate-400 gap-1 transition-all">
+                <span class="material-symbols-rounded">group</span>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Warga</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. MODAL ALERT CUSTOM (PENGGANTI ALERT BAWAAN BROWSER) -->
+    <!-- ========================================================================= -->
+    <div id="customAlert" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 p-4 flex items-center justify-center hidden">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-xs text-center shadow-2xl border border-slate-100 space-y-4 transform scale-95 transition-all">
+            <div id="alertIconBox" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-emerald-100 text-emerald-800">
+                <span id="alertIcon" class="material-symbols-rounded text-3xl">check_circle</span>
+            </div>
+            <div>
+                <h4 id="alertTitle" class="text-lg font-black text-slate-800 tracking-tight">Judul Notifikasi</h4>
+                <p id="alertMessage" class="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">Pesan rincian alert ada disini...</p>
+            </div>
+            <button onclick="closeAlert()" class="w-full bg-slate-900 text-white font-bold p-3 rounded-xl text-xs uppercase tracking-wider hover:bg-black">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 5. KABEL SISTEM JAVASCRIPT & INTEGRASI DATA -->
+    <!-- ========================================================================= -->
+    <script>
+        // KODE .GS SINKRONISASI 100% TERPUSAT KEMBARAN URL YANG ANDA KIRIM
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhJPbsJKoVa_8ngi-waqQ-FBtDSiV5R2j8DiIk9XcCBqF9nthAVQOlOkJknHE8_Df31w/exec";
+        
+        let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [], admin: [] };
+        let onConfirmSuccess = null;
+
+        // Custom Notification Engine
+        function tuntasAlert(title, msg, type = "success") {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = msg;
+            
+            const iconBox = document.getElementById('alertIconBox');
+            const icon = document.getElementById('alertIcon');
+            
+            if(type === "error") {
+                iconBox.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-rose-100 text-rose-700";
+                icon.innerText = "error";
+            } else {
+                iconBox.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-emerald-100 text-emerald-800";
+                icon.innerText = "check_circle";
+            }
+            
+            document.getElementById('customAlert').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('customAlert').classList.add('hidden');
+            if(onConfirmSuccess) {
+                let tempFunc = onConfirmSuccess;
+                onConfirmSuccess = null;
+                tempFunc();
+            }
+        }
+
+        function showLoading() { document.getElementById('global-loading').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('global-loading').classList.add('hidden'); }
+
+        // Navigasi Tab Menu
+        function st(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('screen-'+tabId).classList.add('active');
+            
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('n-'+tabId).classList.add('active');
+        }
+
+        // Ambil data Global dari 5 Tab Sheets
+        async function loadDataDariSheets() {
+            try {
+                showLoading();
+                let res = await fetch(SCRIPT_URL);
+                let json = await res.json();
+                
+                if (json.status === "success") {
+                    dbGlobal = json.data;
+                    populasiDropdownWarga();
+                } else {
+                    tuntasAlert("Gagal Sinkron", json.message || "Gagal menarik data.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                tuntasAlert("Koneksi Putus", "Tidak bisa terhubung ke server Google Sheets.", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Isi data dropdown warga di form Iuran dan Sampah otomatis dari Tab ANGGOTA
+        function populasiDropdownWarga() {
+            const arrAnggota = dbGlobal.anggota || [];
+            const selectIuran = document.getElementById('pNama');
+            const selectSampah = document.getElementById('sNama');
+            
+            // Simpan selection yang sedang dipilih (jika ada)
+            let curIuran = selectIuran.value;
+            let curSampah = selectSampah.value;
+
+            selectIuran.innerHTML = '<option value="">-- Pilih Warga --</option>';
+            selectSampah.innerHTML = '<option value="">-- Pilih Warga --</option>';
+
+            // Sorting nama A-Z agar rapi
+            arrAnggota.sort((a,b) => (a.Nama || '').localeCompare(b.Nama || ''));
+
+            arrAnggota.forEach(w => {
+                if(w.Nama) {
+                    let optStr = `<option value="${w.Nama.trim().toUpperCase()}">${w.Nama.trim().toUpperCase()}</option>`;
+                    selectIuran.insertAdjacentHTML('beforeend', optStr);
+                    selectSampah.insertAdjacentHTML('beforeend', optStr);
+                }
+            });
+
+            selectIuran.value = curIuran;
+            selectSampah.value = curSampah;
+        }
+
+        // Jalur Pengiriman POST ke Sheets
+        async function kirimKeSheets(payload) {
+            try {
+                showLoading();
+                let res = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                let json = await res.json();
+                if(json.status === "success") {
+                    return true;
+                } else {
+                    tuntasAlert("Gagal Simpan", json.message || "Data ditolak oleh Sheets.", "error");
+                    return false;
+                }
+            } catch (err) {
+                tuntasAlert("Koneksi Gagal", "Gagal mengirimkan data transaksi.", "error");
+                return false;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== OPERASIONAL CRUD ====================
+
+        async function simpanKas() {
+            const tgl = document.getElementById('kTgl').value;
+            const kat = document.querySelector('input[name="kKat"]:checked').value;
+            const ket = document.getElementById('kKet').value.trim();
+            const nom = document.getElementById('kNom').value;
+
+            if(!tgl || !ket || !nom) {
+                return tuntasAlert("Lengkapi Form", "Mohon isi semua kolom transaksi kas!", "error");
+            }
+
+            let sukses = await kirimKeSheets({
+                action: "simpanKas",
+                tanggal: tgl,
+                kategori: kat,
+                keterangan: ket,
+                nominal: nom
+            });
+
+            if(sukses) {
+                onConfirmSuccess = () => {
+                    document.getElementById('kKet').value = "";
+                    document.getElementById('kNom').value = "";
+                    loadDataDariSheets();
+                };
+                tuntasAlert("Sukses", "Transaksi Kas berhasil dicatat ke Sheets.");
+            }
+        }
+
+        async function simpanIuran() {
+            const tgl = document.getElementById('pTgl').value;
+            const nama = document.getElementById('pNama').value;
+            const ket = document.getElementById('pKet').value;
+            const nom = document.getElementById('pNom').value;
+
+            if(!tgl || !nama || !ket || !nom) {
+                return tuntasAlert("Lengkapi Form", "Mohon pilih tanggal, nama warga, bulan, dan nominal!", "error");
+            }
+
+            // Generate kode unik kuitansi iuran
+            const kodeUnik = "TRX-" + Date.now().toString().slice(-6);
+
+            let sukses = await kirimKeSheets({
+                action: "simpanPembayaran",
+                kode: kodeUnik,
+                nama: nama,
+                tanggal: tgl,
+                keterangan: ket,
+                nominal: nom
+            });
+
+            if(sukses) {
+                onConfirmSuccess = () => {
+                    document.getElementById('pNom').value = "";
+                    loadDataDariSheets();
+                };
+                tuntasAlert("Sukses", `Iuran ${nama} bulan ${ket} tersimpan dengan Kode: ${kodeUnik}`);
+            }
+        }
+
+        async function simpanLaporanSampah() {
+            const tgl = document.getElementById('sTgl').value;
+            const nama = document.getElementById('sNama').value;
+            const status = document.querySelector('input[name="sStatus"]:checked').value;
+
+            if(!tgl || !nama || !status) {
+                return tuntasAlert("Lengkapi Form", "Mohon tentukan tanggal operasional dan nama warga!", "error");
+            }
+
+            let sukses = await kirimKeSheets({
+                action: "simpanSampah",
+                tanggal: tgl,
+                nama: nama,
+                status: status
+            });
+
+            if(sukses) {
+                onConfirmSuccess = () => { loadDataDariSheets(); };
+                tuntasAlert("Berhasil Sync", `Status sampah ${nama} diatur: ${status}. Sinkron ke warga!`);
+            }
+        }
+
+        async function simpanWarga() {
+            const nama = document.getElementById('wNama').value.trim().toUpperCase();
+            const hp = document.getElementById('wHp').value.trim();
+            const pass = document.getElementById('wPass').value.trim();
+
+            if(!nama || !hp || !pass) {
+                return tuntasAlert("Lengkapi Form", "Seluruh kolom data warga wajib diisi!", "error");
+            }
+
+            let sukses = await kirimKeSheets({
+                action: "simpanAnggota",
+                nama: nama,
+                hp: hp,
+                password: pass
+            });
+
+            if(sukses) {
+                onConfirmSuccess = () => {
+                    document.getElementById('wNama').value = "";
+                    document.getElementById('wHp').value = "";
+                    document.getElementById('wPass').value = "";
+                    loadDataDariSheets();
+                };
+                tuntasAlert("Sukses", `Warga baru bernama ${nama} sukses ditambahkan.`);
+            }
+        }
+
+        // Cetak AutoTable PDF Kas Lokal
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            const tglAwal = document.getElementById('fMulai').value;
+            const tglAkhir = document.getElementById('fSelesai').value;
+
+            if(!tglAwal || !tglAkhir) {
+                return tuntasAlert("Filter Tanggal", "Tentukan tanggal mulai dan tanggal selesai cetak laporan!", "error");
+            }
+
+            // Filter data dari dbGlobal.kas
+            let dataFiltered = (dbGlobal.kas || []).filter(item => {
+                let tglItem = item.Tanggal ? item.Tanggal.split('T')[0] : '';
+                return tglItem >= tglAwal && tglItem <= tglAkhir;
+            });
+
+            if(dataFiltered.length === 0) {
+                return tuntasAlert("Data Kosong", "Tidak ditemukan data transaksi pada rentang tanggal tersebut.", "error");
+            }
+
+            doc.setFontSize(22); doc.setTextColor(6, 78, 59); doc.setFont("helvetica", "bold");
+            doc.text("TUNTAS.", 14, 20);
+            doc.setFontSize(10); doc.setTextColor(100); 
+            doc.text(`Laporan Rekap Kas: ${tglAwal} s/d ${tglAkhir}`, 14, 28);
+            
+            // Urutkan berdasarkan tanggal tertua
+            dataFiltered.sort((a,b) => (a.Tanggal || '').localeCompare(b.Tanggal || ''));
+
+            let barisTabel = dataFiltered.map(t => {
+                let nominalClean = Number(t.Nominal || 0).toLocaleString('id-ID');
+                return [
+                    t.Tanggal ? t.Tanggal.split('T')[0] : '-',
+                    (t.Keterangan || '').toUpperCase(),
+                    (t.Kategori || '').toUpperCase(),
+                    `Rp ${nominalClean}`
+                ];
+            });
+
+            doc.autoTable({
+                startY: 36,
+                head: [['Tanggal', 'Keterangan', 'Kategori', 'Nominal']],
+                body: barisTabel,
+                headStyles: { fillColor: [6, 78, 59], fontStyle: 'bold' },
+                styles: { fontSize: 9, font: "helvetica" }
+            });
+
+            doc.save(`Laporan_Kas_TUNTAS_${tglAwal}_ke_${tglAkhir}.pdf`);
+        }
+
+        // ==================== AUTHENTICATION SYSTEM ====================
+
+        function prosesLoginAdmin() {
+            const userIn = document.getElementById('adminUser').value.trim();
+            const passIn = document.getElementById('adminPass').value.trim();
+
+            if(!userIn || !passIn) {
+                return tuntasAlert("Lengkapi Data", "Username dan Password tidak boleh kosong!", "error");
+            }
+
+            const daftarAdmin = dbGlobal.admin || [];
+
+            // Validasi baris akun di tab ADMIN (Header: Username & Password)
+            const akunCocok = daftarAdmin.find(akun => {
+                return (akun.Username || '').toString().trim() === userIn && 
+                       (akun.Password || '').toString().trim() === passIn;
+            });
+
+            if (akunCocok) {
+                localStorage.setItem('tuntas_admin_logged', 'true');
+                localStorage.setItem('tuntas_admin_name', userIn);
+                bypassKeDashboard();
+                tuntasAlert("Login Berhasil", `Selamat bertugas kembali, ${userIn}!`);
+            } else {
+                tuntasAlert("Akses Ditolak", "Username atau Password Admin salah!", "error");
+            }
+        }
+
+        function bypassKeDashboard() {
+            document.getElementById('screen-login-admin').classList.add('hidden');
+            document.getElementById('screen-dashboard-admin').classList.remove('hidden');
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('tuntas_admin_logged');
+            localStorage.removeItem('tuntas_admin_name');
+            window.location.reload();
+        }
+
+        // Hook Inisialisasi Sistem saat Aplikasi Dibuka
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Pasang default tanggal hari ini di form inputs
+            const hariIni = new Date().toISOString().split('T')[0];
+            document.getElementById('kTgl').value = hariIni;
+            document.getElementById('pTgl').value = hariIni;
+            document.getElementById('sTgl').value = hariIni;
+
+            // Load data sheets utama
+            await loadDataDariSheets(); 
+            
+            const statusLoginAdmin = localStorage.getItem('tuntas_admin_logged');
+            if (statusLoginAdmin === 'true') {
+                bypassKeDashboard();
+            } else {
+                document.getElementById('screen-login-admin').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
