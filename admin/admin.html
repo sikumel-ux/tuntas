@@ -228,7 +228,6 @@
     </div>
 
     <script>
-        // PASTIKAN URL DI BAWAH INI ADALAH URL HASIL DEPLOY TERBARU GOOGLE APPS SCRIPT ANDA
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhJPbsJKoVa_8ngi-waqQ-FBtDSiV5R2j8DiIk9XcCBqF9nthAVQOlOkJknHE8_Df31w/exec";
         
         let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [], admin: [] };
@@ -298,12 +297,17 @@
             selectIuran.innerHTML = '<option value="">-- Pilih Warga --</option>';
             selectSampah.innerHTML = '<option value="">-- Pilih Warga --</option>';
 
-            // Membaca Properti "Nama" (Huruf Depan Kapital) hasil konversi objek baru
-            arrAnggota.sort((a,b) => (a.Nama || '').localeCompare(b.Nama || ''));
+            // Mendukung fleksibilitas huruf kolom 'Nama' atau 'nama'
+            arrAnggota.sort((a,b) => {
+                let nameA = a.Nama || a.nama || '';
+                let nameB = b.Nama || b.nama || '';
+                return nameA.toString().localeCompare(nameB.toString());
+            });
 
             arrAnggota.forEach(w => {
-                if(w.Nama) {
-                    let optStr = `<option value="${w.Nama.trim().toUpperCase()}">${w.Nama.trim().toUpperCase()}</option>`;
+                let namaWarga = w.Nama || w.nama;
+                if(namaWarga) {
+                    let optStr = `<option value="${namaWarga.toString().trim().toUpperCase()}">${namaWarga.toString().trim().toUpperCase()}</option>`;
                     selectIuran.insertAdjacentHTML('beforeend', optStr);
                     selectSampah.insertAdjacentHTML('beforeend', optStr);
                 }
@@ -447,9 +451,9 @@
                 return tuntasAlert("Filter Tanggal", "Tentukan tanggal mulai dan tanggal selesai cetak laporan!", "error");
             }
 
-            // Membaca Properti "Tanggal" (Huruf Depan Kapital)
             let dataFiltered = (dbGlobal.kas || []).filter(item => {
-                let tglItem = item.Tanggal ? item.Tanggal.split('T')[0] : '';
+                let tglItem = item.Tanggal || item.tanggal || '';
+                if (tglItem.includes('T')) tglItem = tglItem.split('T')[0];
                 return tglItem >= tglAwal && tglItem <= tglAkhir;
             });
 
@@ -462,15 +466,24 @@
             doc.setFontSize(10); doc.setTextColor(100); 
             doc.text(`Laporan Rekap Kas: ${tglAwal} s/d ${tglAkhir}`, 14, 28);
             
-            dataFiltered.sort((a,b) => (a.Tanggal || '').localeCompare(b.Tanggal || ''));
+            dataFiltered.sort((a,b) => {
+                let tglA = a.Tanggal || a.tanggal || '';
+                let tglB = b.Tanggal || b.tanggal || '';
+                return tglA.toString().localeCompare(tglB.toString());
+            });
 
-            // Membaca Properti Kapital (Tanggal, Keterangan, Kategori, Nominal)
             let barisTabel = dataFiltered.map(t => {
-                let nominalClean = Number(t.Nominal || 0).toLocaleString('id-ID');
+                let rawTgl = t.Tanggal || t.tanggal || '-';
+                if (rawTgl.includes('T')) rawTgl = rawTgl.split('T')[0];
+                let rawKet = t.Keterangan || t.keterangan || '';
+                let rawKat = t.Kategori || t.kategori || '';
+                let rawNom = t.Nominal || t.nominal || 0;
+                
+                let nominalClean = Number(rawNom).toLocaleString('id-ID');
                 return [
-                    t.Tanggal ? t.Tanggal.split('T')[0] : '-',
-                    (t.Keterangan || '').toUpperCase(),
-                    (t.Kategori || '').toUpperCase(),
+                    rawTgl,
+                    rawKet.toString().toUpperCase(),
+                    rawKat.toString().toUpperCase(),
                     `Rp ${nominalClean}`
                 ];
             });
@@ -486,6 +499,7 @@
             doc.save(`Laporan_Kas_TUNTAS_${tglAwal}_ke_${tglAkhir}.pdf`);
         }
 
+        // PERBAIKAN SISTEM LOGIN: KEBAL TERHADAP HURUF BESAR KECIL HEADER KOLOM SPREADSHEET
         function prosesLoginAdmin() {
             const userIn = document.getElementById('adminUser').value.trim();
             const passIn = document.getElementById('adminPass').value.trim();
@@ -496,10 +510,12 @@
 
             const daftarAdmin = dbGlobal.admin || [];
 
-            // Membaca Properti Kapital "Username" dan "Password" dari tab ADMIN
             const akunCocok = daftarAdmin.find(akun => {
-                return (akun.Username || '').toString().trim() === userIn && 
-                       (akun.Password || '').toString().trim() === passIn;
+                let sheetUser = akun.Username || akun.username || akun.USERNAME || '';
+                let sheetPass = akun.Password || akun.password || akun.PASSWORD || '';
+                
+                return sheetUser.toString().trim() === userIn && 
+                       sheetPass.toString().trim() === passIn;
             });
 
             if (akunCocok) {
