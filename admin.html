@@ -63,7 +63,7 @@
 <div id="mainApp" class="max-w-md mx-auto p-5">
     <header class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-2">
-            <div class="w-10 h-10 rounded-xl bg-emerald-900 flex items-center justify-center text-white"><span class="material-symbols-rounded">wallet</span></div>
+            <img src="logo.png" alt="Logo Tuntas" class="w-10 h-10 object-contain rounded-xl">
             <h1 class="text-xl font-black text-emerald-900">Tuntas.</h1>
         </div>
     </header>
@@ -247,7 +247,6 @@
 <script>
     const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     
-    // Struktur data lokal kosong untuk template statis
     let dbGlobal = { kas: [], pembayaran: [], anggota: [] };
     let cacheAllTrx = []; 
     let onConfirmSuccess = null;
@@ -306,8 +305,6 @@
     }
 
     function renderDataTabel() {
-        // Fungsi rendering visual struktur tabel statis dasar
-        // Di sini Anda bisa menyematkan logika pembacaan localStorage atau state management pilihan Anda.
     }
 
     function simpanIuran() {
