@@ -4,7 +4,7 @@
  * Upload Foto Profil, & Format Tampilan Tanggal Bergabung Warga.
  */
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhJPbsJKoVa_8ngi-waqQ-FBtDSiV5R2j8DiIk9XcCBqF9nthAVQOlOkJknHE8_Df31w/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwI8UM92CtLbTAE5F8UVjnm3qT-8ITco_-bPIQIjBfokGojFhYkRfl0YP9zCpVaRfTIpg/exec";
 
 const labelBln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 let sessionWarga = null; 
