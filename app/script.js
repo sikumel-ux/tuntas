@@ -1,3 +1,9 @@
+/**
+ * TUNTAS SYSTEM - FRONTEND ENGINE (script.js)
+ * Fitur: Autentikasi Login, Render Dashboard Kas/Iuran, Kalender Sampah, 
+ * Upload Foto Profil, & Format Tampilan Tanggal Bergabung Warga.
+ */
+
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhJPbsJKoVa_8ngi-waqQ-FBtDSiV5R2j8DiIk9XcCBqF9nthAVQOlOkJknHE8_Df31w/exec";
 
 const labelBln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -56,21 +62,39 @@ async function prosesLoginWarga() {
                 sessionWarga = (userFound.Nama || userFound.nama || '').toString().trim().toUpperCase();
                 sessionHpRaw = (userFound.Hp || userFound.hp || '').toString().trim();
                 
-                // Mengambil data Bulan Bergabung dari kolom baru di Sheets
-                let bulanBergabung = userFound.Bergabung || userFound.bergabung || '';
+                // 1. Mengambil data Bulan Bergabung dari kolom baru di Sheets
+                let bulanBergabung = (userFound.Bergabung || userFound.bergabung || '').toString().trim();
 
-                // Memasang data ke UI (Tanda plus '+' sudah dihapus murni angka)
+                // PETA NAMA BULAN INDONESIA
+                const namaBulanIndo = {
+                  "01": "Januari", "02": "Februari", "03": "Maret", "04": "April",
+                  "05": "Mei", "06": "Juni", "07": "Juli", "08": "Agustus",
+                  "09": "September", "10": "Oktober", "11": "November", "12": "Desember"
+                };
+
+                // Logika konversi otomatis jika format di sheets terbaca tanggal YYYY-MM-DD
+                if (bulanBergabung.includes("-")) {
+                  let parts = bulanBergabung.split("-");
+                  if (parts.length >= 2) {
+                    let tahun = parts[0];
+                    let kodeBulan = parts[1];
+                    let namaBulan = namaBulanIndo[kodeBulan] || kodeBulan;
+                    bulanBergabung = `${namaBulan} ${tahun}`;
+                  }
+                }
+
+                // 2. Memasang data teks ke UI (Tanda plus '+' sudah dihapus murni angka)
                 document.getElementById('topNamaWarga').innerText = sessionWarga;
                 document.getElementById('topHpWarga').innerText = sessionHpRaw;
                 document.getElementById('infoNamaUser').innerText = sessionWarga;
                 document.getElementById('infoHpUser').innerText = sessionHpRaw;
 
-                // Mengubah tampilan badge bawah foto profil menjadi Bulan Bergabung
+                // 3. Mengubah tampilan badge bawah foto profil menjadi Bergabung Sejak
                 const badgeBergabung = document.getElementById('infoBergabung');
                 if (bulanBergabung) {
-                    badgeBergabung.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> MEMBER SEJAK ${bulanBergabung.toUpperCase()}`;
+                    badgeBergabung.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> Bergabung Sejak ${bulanBergabung}`;
                 } else {
-                    badgeBergabung.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> TERDAFTAR AKTIF`;
+                    badgeBergabung.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> Terdaftar Aktif`;
                 }
 
                 let dbFoto = userFound.Foto || userFound.foto || '';
@@ -425,6 +449,7 @@ function togglePasswordLogin(inputId, iconId) {
     }
 }
 
+// KLIPBOARD TRANSFER BANK
 function salinRekening() {
     navigator.clipboard.writeText(document.getElementById('noRekText').innerText);
     tuntasAlert("Tersalin", "Nomor rekening iuran berhasil disalin ke clipboard.");
