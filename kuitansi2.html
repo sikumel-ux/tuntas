@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - E-Kuitansi</title>
+    
+    <!-- Tailwind CSS & Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Hubungan ke File CSS Terpisah -->
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+    <!-- 1. SKELETON / LOADING ANIMATION -->
+    <div id="loading" class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-emerald-100 border-t-emerald-800 rounded-full animate-spin"></div>
+        <p class="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">Memproses Kuitansi...</p>
+    </div>
+
+    <!-- 2. SCREEN ERROR 404 (DATA TIDAK DITEMUKAN) -->
+    <div id="penyusup" class="bento-card p-10 text-center hidden">
+        <div class="line-accent bg-rose-600"></div>
+        <div class="flex justify-center mb-6 mt-6">
+            <div class="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-rose-600 floating border border-slate-100">
+                <i class="fa-solid fa-file-circle-xmark text-4xl"></i>
+            </div>
+        </div>
+        <h1 class="text-5xl font-black text-slate-900 tracking-tighter">404</h1>
+        <p class="text-lg font-extrabold text-slate-800 uppercase mt-2 text-[13px] tracking-widest">Data Tidak Ditemukan</p>
+    </div>
+
+    <!-- 3. MAIN COMPONENT KUITANSI BENTO -->
+    <div id="konten" class="bento-card hidden">
+        <div class="line-accent"></div>
+        
+        <div class="p-8 pt-12">
+            <!-- Branding Header -->
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-black text-emerald-900 leading-none tracking-tighter">TUNTAS.</h1>
+                <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-[0.3em] mt-2">Turun Tangan Atasi Sampah</p>
+                
+                <div class="mt-8">
+                    <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">BUKTI PEMBAYARAN</h2>
+                    <div class="w-8 h-1 bg-emerald-500 mx-auto mt-2 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Rincian Data Transaksi -->
+            <div class="text-[12px] text-slate-600 leading-relaxed">
+                <p class="mb-4 text-center">
+                    Diterima dari Bapak/Ibu <strong id="d-nama" class="text-slate-900 uppercase font-bold"></strong>, untuk iuran sampah bulan <strong id="d-bulan" class="text-slate-900 uppercase font-bold text-emerald-700 leading-relaxed"></strong>, sebesar:
+                </p>
+
+                <!-- Box Nominal & Terbilang -->
+                <div class="bg-ijo-muda p-6 rounded-[2rem] text-center shadow-sm border border-emerald-50 mb-6">
+                    <p id="d-nominal" class="text-3xl font-black text-emerald-900"></p>
+                    <div class="w-12 h-[1px] bg-emerald-200 mx-auto my-3"></div>
+                    <p id="d-terbilang" class="text-[9px] text-emerald-700 italic font-bold uppercase leading-tight px-2"></p>
+                </div>
+
+                <!-- Barcode QR Verifikasi Realtime -->
+                <div class="flex flex-col items-center mb-6">
+                    <div class="p-2 bg-white rounded-3xl border-4 border-slate-50 shadow-inner">
+                        <img id="qrcodeimg" alt="QR Code" class="w-32 h-32">
+                    </div>
+                </div>
+
+                <p class="text-center italic font-black text-[9px] text-slate-600 py-3 border-y border-dashed border-slate-100 uppercase tracking-widest">
+                    Terima kasih atas partisipasi Anda
+                </p>
+            </div>
+
+            <!-- Meta ID & Tanda Tangan Pengurus -->
+            <div class="mt-6 flex justify-between items-center">
+                <div class="text-[9px] text-slate-400 font-bold leading-tight bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    TANGGAL : <span id="d-tgl" class="text-slate-700"></span><br>
+                    ID : <span id="d-kode" class="text-slate-700"></span>
+                </div>
+                <div class="text-right">
+                    <p class="text-[8px] font-bold text-slate-400 uppercase leading-none">PENGURUS TUNTAS</p>
+                    <p class="text-[11px] font-black text-emerald-900 uppercase mt-1 leading-none">APRIYANTO</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. BOTTOM FOOTER BRANDING -->
+    <div id="footer-brand" class="sekawan-footer hidden">
+        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em]">
+            Generated by <span class="text-emerald-800">TUNTAS</span> Management
+        </p>
+    </div>
+
+    <!-- Hubungan ke File JavaScript Terpisah -->
+    <script src="kuitansi2.js"></script>
+</body>
+</html>
