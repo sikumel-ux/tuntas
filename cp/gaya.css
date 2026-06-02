@@ -10,34 +10,33 @@
 
 body {
     font-family: 'Space Grotesk', sans-serif;
-    background-color: #070a13;
-    color: #f8fafc;
+    background-color: #f8fafc; /* Latar belakang putih abu-abu bersih */
+    color: #1e293b;
     overflow-x: hidden;
 }
 
 /* ==========================================================================
-   UI COMPONENTS (GLASSMORPHISM & MODERN UTILITIES)
+   UI COMPONENTS (LIGHT MODE & TUNTAS GREEN)
    ========================================================================== */
-/* Efek Kaca Transparan Premium */
+/* Card Putih Bersih dengan Bayangan Lembut */
 .glass {
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
 }
 
 /* Bayangan tegas untuk Header & Nav Bar */
 .shd-b {
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Desain Input & Select Box Modern */
+/* Input Form Sesuai Gambar Bawaan */
 .modern-in {
-    background: rgba(15, 23, 42, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
     padding: 0.75rem 1rem !important;
-    border-radius: 0.75rem !important;
-    color: #ffffff !important;
+    border-radius: 1rem !important; /* Melengkung halus */
+    color: #0f172a !important;
     width: 100% !important;
     font-size: 0.875rem !important;
     transition: all 0.2s ease;
@@ -45,59 +44,37 @@ body {
 
 .modern-in:focus {
     outline: none !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+    border-color: #045936 !important; /* Hijau Tuntas */
+    background: #ffffff !important;
 }
 
-/* Custom Scrollbar untuk Daftar Kas/Warga agar rapi di HP */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 4px;
-    height: 4px;
-}
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: #cbd5e1;
     border-radius: 4px;
 }
 
 /* ==========================================================================
-   TAB / SCREEN MANAGEMENT (Kunci agar tidak Numpuk)
+   FOOTER NAVIGATION BAR (Sesuai Gambar Asli)
    ========================================================================== */
-.tab-content {
-    transition: opacity 0.2s ease-in-out;
-}
-
-/* ==========================================================================
-   FOOTER NAVIGATION BAR BUTTONS (Efek Menyala Terang)
-   ========================================================================== */
-/* Tombol Menu Bawah (Kondisi Redup / Default) */
+/* Tombol Menu Bawah Default (Redup Abu/Hijau Tua) */
 .nav-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    color: #94a3b8 !important; /* Warna slate-400 redup */
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: none;
+    color: #64748b !important;
+    transition: all 0.2s ease;
 }
 
-/* Hover effect untuk desktop/browser */
-.nav-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: #f1f5f9 !important;
-}
-
-/* Tombol Menu Bawah Saat AKTIF (Menyala Biru Sempurna) */
+/* Tombol Menu Bawah Saat Aktif */
 .nav-btn.active {
-    background: #3b82f6 !important; /* Warna Biru Utama */
-    border-color: #3b82f6 !important;
-    color: #ffffff !important; /* Icon & Teks jadi Putih Terang */
-    box-shadow: 0 0 16px rgba(59, 130, 246, 0.45);
+    color: #045936 !important; /* Hijau Tuntas Menyala */
     font-weight: 700;
 }
 
-/* Merubah warna icon di dalam tombol aktif secara otomatis */
 .nav-btn.active i {
-    color: #ffffff !important;
+    color: #045936 !important;
     transform: scale(1.1);
-    transition: transform 0.2s ease;
 }
