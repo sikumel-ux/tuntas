@@ -1,3 +1,4 @@
+// URL REST API Google Apps Script & SDK Firebase Integration Engine
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9JsUb0saYvFnH8vpCn2JZu_AzdrXXXmQIcGfMW0dsTvPndFQC_CtKyLhMx_6Kjd_IEg/exec";
 
 const firebaseConfig = {
@@ -18,6 +19,8 @@ let onConfirmSuccess = null;
 
 function showLoading() { document.getElementById('loading').style.display = 'flex'; }
 function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+// Sinkronisasi DOM & CSS Active Figma Glassmorphism
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -29,6 +32,7 @@ function tuntasAlert(title, message, type = 'success') {
     icon.innerHTML = '<span class="material-symbols-rounded">' + (type === 'error' ? 'gpp_maybe' : 'check_circle') + '</span>';
     openModal('customAlert');
 }
+
 function closeAlert() { closeModal('customAlert'); }
 
 function tuntasConfirm(message, onYes) {
@@ -36,8 +40,13 @@ function tuntasConfirm(message, onYes) {
     onConfirmSuccess = onYes;
     openModal('customConfirm');
 }
-function closeConfirm() { closeModal('customConfirm'); }
-document.getElementById('confirmBtnOk').onclick = function() { if (onConfirmSuccess) onConfirmSuccess(); closeConfirm(); };
+
+function closeConfirm() { closeModal('customConfirm'); onConfirmSuccess = null; }
+
+document.getElementById('confirmBtnOk').onclick = function() {
+    if (onConfirmSuccess) onConfirmSuccess();
+    closeConfirm();
+};
 
 function formatRupiah(num) { return "Rp " + parseFloat(num || 0).toLocaleString('id-ID'); }
 
@@ -51,19 +60,20 @@ function init() {
     
     const grid = document.getElementById('gridBulan');
     const thr = document.getElementById('th-rekap');
-    grid.innerHTML = ''; thr.innerHTML = '<th class="sticky-col p-4 bg-white">Nama Warga</th>';
+    grid.innerHTML = ''; 
+    thr.innerHTML = '<th class="sticky-col p-4 bg-white">Nama Warga</th>';
     
     daftarBulan.forEach(bln => {
-        grid.innerHTML += '<label class="relative block"><input type="checkbox" name="blnCek" value="' + bln + '" class="hidden peer"><div class="cursor-pointer text-[9px] font-black py-3 text-center border rounded-xl bg-white text-slate-300 peer-checked:bg-emerald-900 peer-checked:text-white uppercase">' + bln.substring(0,3) + '</div></label>';
+        grid.innerHTML += '<label class="relative block"><input type="checkbox" name="blnCek" value="' + bln + '" class="hidden peer"><div class="cursor-pointer text-[9px] font-black py-3 text-center border rounded-xl bg-white text-slate-300 peer-checked:bg-emerald-900 peer-checked:text-white uppercase transition-all">' + bln.substring(0,3) + '</div></label>';
         thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">' + bln.substring(0,3) + '</th>';
     });
     thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">AKSI</th>';
+    
     reloadData();
 }
 
 function reloadData() {
     showLoading();
-    // Menggunakan penyambungan string biasa (+) untuk menjamin parameter 'action' terkirim utuh ke URL
     var urlAmbilData = SCRIPT_URL + "?action=readAllData";
     
     fetch(urlAmbilData)
@@ -88,7 +98,11 @@ function reloadData() {
                 sNama.insertAdjacentHTML('beforeend', opt);
             });
             renderDataTabel();
-        }).catch(function() { hideLoading(); tuntasAlert("Error", "Gagal load data dari server", "error"); });
+        })
+        .catch(function() { 
+            hideLoading(); 
+            tuntasAlert("Error", "Gagal load data dari server. Periksa koneksi internet Anda.", "error"); 
+        });
 }
 
 function renderDataTabel() {
@@ -108,13 +122,17 @@ function renderDataTabel() {
         const tTrx = new Date(trx.tanggal);
         if(tTrx >= tMulai && tTrx <= tSelesai) {
             if(isMsk) f_masuk += nil; else f_keluar += nil;
-            cont.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl">' +
+            cont.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl animate-fade-in">' +
                 '<div><p class="text-xs font-black uppercase text-slate-700">' + trx.keterangan + '</p><p class="text-[9px] font-bold text-slate-400 mt-0.5">' + trx.tanggal + '</p></div>' +
                 '<div class="text-right flex items-center gap-2"><p class="text-xs font-black ' + (isMsk ? 'text-emerald-600' : 'text-red-500') + '">' + (isMsk ? '+' : '-') + ' ' + formatRupiah(nil) + '</p>' +
                 '<button onclick="hapusTrx(\'kas\', \'' + trx.id + '\')" class="text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
             '</div>';
         }
     });
+
+    if(cont.innerHTML === "") {
+        cont.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data transaksi.</p>';
+    }
 
     document.getElementById('saldoSelamanya').innerText = formatRupiah(s_selamanya);
     document.getElementById('totalSaldo').innerText = formatRupiah(f_masuk - f_keluar);
@@ -123,11 +141,15 @@ function renderDataTabel() {
 
     const cWarga = document.getElementById('tBodyWarga'); cWarga.innerHTML = "";
     dbGlobal.anggota.forEach(w => {
-        cWarga.innerHTML += '<div class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-2xl">' +
+        cWarga.innerHTML += '<div class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-2xl animate-fade-in">' +
             '<div><p class="text-xs font-black text-slate-800 uppercase">' + w.nama + '</p><p class="text-[9px] text-slate-400 font-bold mt-0.5"><i class="fa-brands fa-whatsapp"></i> ' + (w.hp || '-') + '</p></div>' +
             '<button onclick="hapusTrx(\'anggota\', \'' + w.id + '\')" class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-md">delete</span></button>' +
         '</div>';
     });
+    
+    if(dbGlobal.anggota.length === 0) {
+        cWarga.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data warga.</p>';
+    }
 
     const tbRekap = document.getElementById('tb-rekap'); tbRekap.innerHTML = "";
     dbGlobal.anggota.forEach(w => {
@@ -136,40 +158,77 @@ function renderDataTabel() {
             const lunas = dbGlobal.pembayaran.some(p => p.nama.toLowerCase() === w.nama.toLowerCase() && p.bulan === bln);
             tr += '<td class="text-center border-b p-2"><span class="inline-block w-5 h-5 rounded-md ' + (lunas ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-300') + ' font-black text-[10px] flex items-center justify-center mx-auto">' + (lunas ? '✓' : '—') + '</span></td>';
         });
-        tr += '<td class="text-center border-b p-2"><button onclick="bukaDetailIuranWarga(\'' + w.nama + '\')" class="text-emerald-700 font-black text-[10px]">LIHAT</button></td></tr>';
+        tr += '<td class="text-center border-b p-2"><button onclick="bukaDetailIuranWarga(\'' + w.nama + '\')" class="text-emerald-700 font-black text-[10px] hover:underline">LIHAT</button></td></tr>';
         tbRekap.insertAdjacentHTML('beforeend', tr);
     });
+
+    if(dbGlobal.anggota.length === 0) {
+        tbRekap.innerHTML = '<tr><td colspan="14" class="text-center p-4 text-slate-400 font-semibold">Data masih kosong.</td></tr>';
+    }
 }
 
 function postToSheets(fd, msg) {
     showLoading();
     fetch(SCRIPT_URL, { method: 'POST', body: fd })
         .then(res => res.json())
-        .then(res => { hideLoading(); tuntasAlert("Berhasil", msg); reloadData(); })
-        .catch(() => { hideLoading(); tuntasAlert("Gagal", "Koneksi terputus", "error"); });
+        .then(res => { 
+            hideLoading(); 
+            tuntasAlert("Berhasil", msg); 
+            reloadData(); 
+        })
+        .catch(() => { 
+            hideLoading(); 
+            tuntasAlert("Gagal", "Koneksi terputus dengan gerbang Spreadsheet", "error"); 
+        });
 }
 
 function simpanKas() {
-    const tgl = document.getElementById('kTgl').value, kat = document.getElementById('kKat').value, ket = document.getElementById('kKet').value.trim(), nom = document.getElementById('kNom').value;
-    if(!tgl || !ket || !nom) return tuntasAlert("Error", "Isi semua form", "error");
-    const fd = new FormData(); fd.append('action', 'insertKas'); fd.append('tanggal', tgl); fd.append('jenis', kat); fd.append('keterangan', ket); fd.append('jumlah', nom);
-    closeModal('mKas'); postToSheets(fd, "Kas berhasil dicatat!");
+    const tgl = document.getElementById('kTgl').value;
+    const kat = document.getElementById('kKat').value;
+    const ket = document.getElementById('kKet').value.trim();
+    const nom = document.getElementById('kNom').value;
+    if(!tgl || !ket || !nom) return tuntasAlert("Error", "Isi semua form input kas!", "error");
+    
+    const fd = new FormData(); 
+    fd.append('action', 'insertKas'); 
+    fd.append('tanggal', tgl); 
+    fd.append('jenis', kat); 
+    fd.append('keterangan', ket); 
+    fd.append('jumlah', nom);
+    
+    closeModal('mKas'); 
+    postToSheets(fd, "Kas umum berhasil dicatat!");
 }
 
 function simpanAnggota() {
-    const name = document.getElementById('aNama').value.trim(), hp = document.getElementById('aHp').value.trim();
-    if(!name || !hp) return tuntasAlert("Error", "Lengkapi form", "error");
-    const fd = new FormData(); fd.append('action', 'insertAnggota'); fd.append('nama', name); fd.append('hp', hp);
-    closeModal('mAnggota'); postToSheets(fd, "Warga berhasil ditambahkan!");
+    const name = document.getElementById('aNama').value.trim();
+    const hp = document.getElementById('aHp').value.trim();
+    if(!name || !hp) return tuntasAlert("Error", "Lengkapi data nama dan nomor WhatsApp!", "error");
+    
+    const fd = new FormData(); 
+    fd.append('action', 'insertAnggota'); 
+    fd.append('nama', name); 
+    fd.append('hp', hp);
+    
+    closeModal('mAnggota'); 
+    postToSheets(fd, "Data warga berhasil ditambahkan!");
 }
 
 function simpanIuran() {
-    const nama = document.getElementById('iNama').value, nominal = document.getElementById('iNom').value, tgl = document.getElementById('iTgl').value;
+    const nama = document.getElementById('iNama').value;
+    const nominal = document.getElementById('iNom').value;
+    const tgl = document.getElementById('iTgl').value;
     const bulan = Array.from(document.querySelectorAll('input[name="blnCek"]:checked')).map(c => c.value);
-    if(!nama || !nominal || bulan.length === 0) return tuntasAlert("Error", "Lengkapi input", "error");
+    if(!nama || !nominal || bulan.length === 0) return tuntasAlert("Error", "Lengkapi nama warga, nominal, dan pilihan bulan!", "error");
 
     const noRef = "T-" + Math.floor(100000 + Math.random() * 900000);
-    const fd = new FormData(); fd.append('action', 'insertPembayaran'); fd.append('tanggal', tgl); fd.append('nama', nama); fd.append('bulan', bulan.join(', ')); fd.append('jumlah', nominal); fd.append('referensi', noRef);
+    const fd = new FormData(); 
+    fd.append('action', 'insertPembayaran'); 
+    fd.append('tanggal', tgl); 
+    fd.append('nama', nama); 
+    fd.append('bulan', bulan.join(', ')); 
+    fd.append('jumlah', nominal); 
+    fd.append('referensi', noRef);
 
     const target = dbGlobal.anggota.find(w => w.nama.toLowerCase() === nama.toLowerCase());
     if(target && target.hp) {
@@ -182,17 +241,22 @@ function simpanIuran() {
 }
 
 function simpanLaporanSampah() {
-    const tgl = document.getElementById('sTgl').value, nama = document.getElementById('sNama').value;
+    const tgl = document.getElementById('sTgl').value;
+    const nama = document.getElementById('sNama').value;
     const status = document.querySelector('input[name="sStatus"]:checked').value;
-    if(!tgl || !nama) return tuntasAlert("Error", "Lengkapi data", "error");
+    if(!tgl || !nama) return tuntasAlert("Error", "Lengkapi tanggal operasional dan nama warga!", "error");
 
     showLoading();
-    const parsed = new Date(tgl), pathBulan = parsed.getFullYear() + "-" + (parsed.getMonth() + 1).toString().padStart(2, '0'), hari = parsed.getDate();
+    const parsed = new Date(tgl);
+    const pathBulan = parsed.getFullYear() + "-" + (parsed.getMonth() + 1).toString().padStart(2, '0');
+    const hari = parsed.getDate();
     const jm = new Date().getHours().toString().padStart(2,'0') + ":" + new Date().getMinutes().toString().padStart(2,'0');
 
     dbFirebase.ref("data_sampah/" + nama.toUpperCase() + "/" + pathBulan + "/" + hari).set({ status: status, waktu: jm }, function(err) {
-        if(err) { hideLoading(); tuntasAlert("Error", "Gagal simpan Firebase", "error"); } 
-        else {
+        if(err) { 
+            hideLoading(); 
+            tuntasAlert("Error", "Gagal simpan real-time data ke Firebase", "error"); 
+        } else {
             const fd = new FormData();
             fd.append('action', 'insertSampah');
             fd.append('tanggal', tgl);
@@ -200,16 +264,25 @@ function simpanLaporanSampah() {
             fd.append('status', status);
             
             fetch(SCRIPT_URL, { method: 'POST', body: fd })
-                .then(function() { hideLoading(); tuntasAlert("Berhasil", "Laporan Sampah tersinkronisasi sempurna!"); })
-                .catch(function() { hideLoading(); tuntasAlert("Parsial", "Tersimpan di Firebase, gagal ke Backup Sheet.", "error"); });
+                .then(function() { 
+                    hideLoading(); 
+                    tuntasAlert("Berhasil", "Laporan Operasional Sampah tersinkronisasi sempurna!"); 
+                })
+                .catch(function() { 
+                    hideLoading(); 
+                    tuntasAlert("Parsial", "Tersimpan di Firebase, gagal ke Backup Sheet.", "error"); 
+                });
         }
     });
 }
 
 function hapusTrx(kelompok, id) {
     tuntasConfirm("Hapus data ini secara permanen?", function() {
-        const fd = new FormData(); fd.append('action', 'deleteData'); fd.append('type', kelompok); fd.append('id', id);
-        postToSheets(fd, "Data berhasil dihapus.");
+        const fd = new FormData(); 
+        fd.append('action', 'deleteData'); 
+        fd.append('type', kelompok); 
+        fd.append('id', id);
+        postToSheets(fd, "Data berhasil dihapus dari server.");
     });
 }
 
@@ -220,23 +293,49 @@ function bukaDetailIuranWarga(namaWarga) {
     
     if(riwayat.length > 0) {
         riwayat.forEach(r => {
-            list.innerHTML += '<div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-[11px]">' +
+            list.innerHTML += '<div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-[11px] animate-fade-in">' +
                 '<div><p class="font-black text-emerald-900">Periode: ' + r.bulan + '</p><p class="text-[9px] text-slate-400 font-bold">' + r.tanggal + '</p></div>' +
                 '<div class="flex items-center gap-2"><span class="font-extrabold text-slate-700">' + formatRupiah(r.jumlah) + '</span>' +
                 '<button onclick="closeModal(\'mDetailIuran\'); hapusTrx(\'pembayaran\', \'' + r.id + '\')" class="text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
             '</div>';
         });
-    } else { list.innerHTML = "<p class='text-center text-slate-400 py-4'>Belum ada riwayat.</p>"; }
+    } else { 
+        list.innerHTML = "<p class='text-center text-slate-400 py-4 font-semibold'>Belum ada riwayat pembayaran.</p>"; 
+    }
     openModal('mDetailIuran');
 }
 
+// Navigasi SPA dengan pembersihan display CSS (Menghilangkan Tumpukan)
 function st(t) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.getElementById('screen-'+t).classList.add('active');
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById('n-'+t).classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(function(screen) {
+        screen.style.display = 'none'; 
+        screen.classList.remove('active');
+    });
+    
+    const targetScreen = document.getElementById('screen-' + t);
+    if (targetScreen) {
+        targetScreen.style.display = 'block'; 
+        targetScreen.classList.add('active');
+    }
+    
+    document.querySelectorAll('nav button').forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    
+    const targetBtn = document.getElementById('n-' + t);
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
 }
 
-function logout() { tuntasConfirm("Keluar sistem?", function() { window.location.href = "index.html"; }); }
+function downloadPDF() {
+    tuntasAlert("Cetak Dokumen", "Fitur cetak PDF siap dihubungkan dengan data transaksi Anda.");
+}
+
+function logout() { 
+    tuntasConfirm("Keluar dari area sistem administrator?", function() { 
+        window.location.href = "index.html"; 
+    }); 
+}
 
 window.onload = init;
