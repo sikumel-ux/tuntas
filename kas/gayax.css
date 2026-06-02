@@ -1,0 +1,166 @@
+/* ==========================================================================
+   TUNTAS - Premium Minimalist Stylesheet (Figma Style)
+   ========================================================================== */
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8fafc; /* Slate 50 - Background bersih */
+    color: #0f172a; /* Slate 900 */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* --- Loading Overlay --- */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 78, 59, 0.95); /* Emerald 900 dengan opacity */
+    color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    backdrop-filter: blur(8px);
+}
+
+/* --- Modern Custom Input & Select --- */
+.modern-in {
+    width: 100%;
+    background-color: #f1f5f9; /* Slate 100 */
+    border: 1px solid #e2e8f0; /* Slate 200 */
+    padding: 14px 16px;
+    border-radius: 1.25rem; /* rounded-2xl */
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    transition: all 0.25s ease;
+}
+
+.modern-in:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #059669; /* Emerald 600 */
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+}
+
+/* --- Premium Modal (Glassmorphism & Pop Effect) --- */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.4); /* Slate 900 semitransparan */
+    backdrop-filter: blur(8px); /* Efek blur kaca di belakang modal */
+    display: none; /* Default disembunyikan */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Triggered via skrip.js memakai classList.add('active') */
+.modal.active {
+    display: flex !important;
+    opacity: 1;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 28px 24px;
+    border-radius: 2.5rem; /* Super rounded khas UI modern */
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efek pop membal bounce */
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+/* --- SPA Tab Content Display Navigation --- */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- Table & Scroll Responsive Style --- */
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 1.5rem;
+}
+
+.table-scroll::-webkit-scrollbar {
+    height: 5px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 10px;
+}
+
+/* Kolom nama warga tetap beku (sticky) saat digeser ke kanan */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background-color: #ffffff;
+    z-index: 10;
+    box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.05);
+}
+
+tr:hover .sticky-col {
+    background-color: #f8fafc;
+}
+
+/* --- Bottom Navbar Active State --- */
+nav button {
+    color: #94a3b8; /* Slate 400 default */
+    transition: all 0.2s ease;
+}
+
+nav button.active {
+    color: #064e3b; /* Emerald 900 aktif */
+    transform: translateY(-2px);
+}
+
+nav button.active span.material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; /* Isi icon jadi solid saat aktif */
+}
+
+/* --- Animation Utilities --- */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.35s ease forwards;
+}
+
+/* Custom List Scrollbar */
+#mdList::-webkit-scrollbar,
+#listRiwayat::-webkit-scrollbar {
+    width: 4px;
+}
+
+#mdList::-webkit-scrollbar-thumb,
+#listRiwayat::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+}
