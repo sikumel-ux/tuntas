@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #0b0f19; color: #f8fafc; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.2s; }
+        .glass-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.1); }
+        .glass-btn.active { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .modern-in { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.75rem; border-radius: 0.75rem; color: #fff; width: 100%; font-size: 0.875rem; transition: all 0.2s; }
+        .modern-in:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .shd-b { box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+    </style>
+</head>
+<body class="bg-[#070a13] min-h-screen pb-24 select-none">
+
+    <!-- HEADER UTAMA -->
+    <header class="sticky top-0 z-40 glass border-b border-white/5 px-4 py-3 flex items-center justify-between shd-b">
+        <!-- HEADER KIRI: Menggunakan logo.png agar serasi dengan Halaman User -->
+        <div class="flex items-center gap-2">
+            <img src="logo.png" alt="Logo Tuntas" class="h-8 w-auto object-contain" onerror="this.onerror=null; this.insertAdjacentHTML('afterend', '<span class=\'text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent\'>TUNTAS</span>'); this.remove();">
+        </div>
+        
+        <!-- HEADER KANAN: Tombol Akses Cepat Reload & Logout Berbasis Ikon -->
+        <div class="flex items-center gap-4">
+            <!-- Tombol Reload Data Instan -->
+            <button onclick="if(typeof loadDataDariSheets === 'function'){ loadDataDariSheets(); } else { location.reload(); }" class="text-slate-400 hover:text-blue-400 p-2 transition-colors duration-200" title="Reload Data Sheets">
+                <i class="fa-solid fa-arrow-rotate-right text-lg"></i>
+            </button>
+            <!-- Tombol Keluar / Logout Sistem Admin -->
+            <button onclick="if(typeof logoutAdmin === 'function'){ logoutAdmin(); } else { alert('Logout Berhasil'); }" class="text-slate-400 hover:text-red-400 p-2 transition-colors duration-200" title="Keluar Aplikasi">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- LOADING SCREEN OVERLAY -->
+    <div id="loading" class="fixed inset-0 z-50 bg-[#070a13]/90 flex flex-col items-center justify-center gap-4">
+        <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+        <p class="text-xs text-slate-400 font-medium tracking-wider uppercase">Menghubungkan Ke Sheets...</p>
+    </div>
+
+    <!-- AREA KONTEN UTAMA -->
+    <main class="max-w-md mx-auto p-4 space-y-4">
+
+        <!-- SCREEN 1: KAS (DASHBOARD) -->
+        <section id="scr-kas" class="screen active space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass rounded-xl p-4 relative overflow-hidden">
+                    <div class="absolute -right-2 -bottom-2 text-blue-500/5 text-6xl font-bold"><i class="fa-solid fa-wallet"></i></div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Saldo Kas</p>
+                    <p id="vTotalKas" class="text-xl font-bold mt-1 text-blue-400">Rp 0</p>
+                </div>
+                <div class="glass rounded-xl p-4 relative overflow-hidden">
+                    <div class="absolute -right-2 -bottom-2 text-indigo-500/5 text-6xl font-bold"><i class="fa-solid fa-users"></i></div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Warga</p>
+                    <p id="vTotalWarga" class="text-xl font-bold mt-1 text-indigo-400">0</p>
+                </div>
+            </div>
+            
+            <div class="glass rounded-xl p-4 space-y-3">
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-money-bill-transfer mr-1.5 text-blue-500"></i>Alur Kas Terakhir</h3>
+                    <button class="text-[10px] font-bold text-blue-400 uppercase">Semua</button>
+                </div>
+                <div id="listKas" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: WARGA (LIST & PROFIL) -->
+        <section id="scr-warga" class="screen space-y-4">
+            <div class="glass rounded-xl p-3 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 ml-1"></i>
+                <input type="text" id="cariWarga" placeholder="CARI NAMA WARGA..." class="bg-transparent text-sm w-full focus:outline-none uppercase font-medium">
+            </div>
+            <div id="listWarga" class="space-y-2 max-h-[450px] overflow-y-auto pr-1"></div>
+        </section>
+
+        <!-- SCREEN 3: BAYAR (INPUT TRANSAKSI) -->
+        <section id="scr-bayar" class="screen glass rounded-xl p-4 space-y-4">
+            <div class="border-b border-white/5 pb-2">
+                <h2 class="text-sm font-bold uppercase tracking-wider"><i class="fa-solid fa-receipt mr-2 text-blue-500"></i>Input Iuran Warga</h2>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1">Tanggal</label>
+                    <input type="date" id="iTgl" class="modern-in font-medium">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1">Nama Warga</label>
+                    <select id="iNama" class="modern-in font-bold uppercase"></select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1">Pilih Bulan</label>
+                    <div id="gridBulan" class="grid grid-cols-3 gap-2"></div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1">Nominal (Rp)</label>
+                    <input type="number" id="iNom" placeholder="Contoh: 20000" class="modern-in font-bold">
+                </div>
+
+                <button onclick="simpanIuran()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all shadow-lg shadow-blue-600/20 uppercase tracking-wider mt-2">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Pembayaran
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: TRASH (SAMPAH LOG) -->
+        <section id="scr-trash" class="screen space-y-4">
+            <div class="glass rounded-xl p-4 space-y-3">
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-trash-can mr-1.5 text-red-500"></i>Log Angkutan Sampah</h3>
+                </div>
+                <div id="listSampah" class="space-y-2 max-h-[420px] overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER NAVIGATION BAR (TOMBOL MENUS) -->
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-2 py-2 shd-b z-40">
+        <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
+            <button onclick="pindahScreen('kas')" id="btn-kas" class="glass-btn active flex flex-col items-center gap-1 py-2.5 rounded-xl text-slate-400">
+                <i class="fa-solid fa-chart-pie text-base"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wider">Kas</span>
+            </button>
+            <button onclick="pindahScreen('warga')" id="btn-warga" class="glass-btn flex flex-col items-center gap-1 py-2.5 rounded-xl text-slate-400">
+                <i class="fa-solid fa-users text-base"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wider">Warga</span>
+            </button>
+            <button onclick="pindahScreen('bayar')" id="btn-bayar" class="glass-btn flex flex-col items-center gap-1 py-2.5 rounded-xl text-slate-400">
+                <i class="fa-solid fa-cash-register text-base"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wider">Bayar</span>
+            </button>
+            <button onclick="pindahScreen('trash')" id="btn-trash" class="glass-btn flex flex-col items-center gap-1 py-2.5 rounded-xl text-slate-400">
+                <i class="fa-solid fa-dumpster text-base"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wider">Sampah</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- EMBED INTERNAL MODAL POPUP ALERT (IF NEEDED BY SCRIPT) -->
+    <div id="alertModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="glass max-w-xs w-full rounded-2xl p-4 text-center space-y-3 shadow-2xl border-white/10">
+            <div id="alertIcon" class="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl"></div>
+            <h3 id="alertTitle" class="text-sm font-bold uppercase tracking-wider"></h3>
+            <p id="alertMsg" class="text-xs text-slate-400 font-medium leading-relaxed"></p>
+            <button onclick="tutupAlert()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-2 rounded-xl text-xs uppercase tracking-wider transition-all">OK</button>
+        </div>
+    </div>
+
+    <!-- LINKER FILE LOGIKA UTAMANYA -->
+    <script src="admin4.js"></script>
+    <script>
+        // Jalankan fungsi navigasi standar bawaan halaman admin jika tombol menu diklik
+        function pindahScreen(target) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            const scr = document.getElementById('scr-' + target);
+            const btn = document.getElementById('btn-' + target);
+            if(scr) scr.classList.add('active');
+            if(btn) btn.classList.add('active');
+        }
+
+        // Fungsi kontrol penutup modal custom alert panel admin
+        function tutupAlert() {
+            document.getElementById('alertModal').classList.replace('flex', 'hidden');
+        }
+        function tuntasAlert(title, msg, type="success") {
+            const m = document.getElementById('alertModal');
+            const ico = document.getElementById('alertIcon');
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            
+            if(type === "error") {
+                ico.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl bg-red-500/10 text-red-400 border border-red-500/20";
+                ico.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            } else {
+                ico.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl bg-green-500/10 text-green-400 border border-green-500/20";
+                ico.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            }
+            m.classList.replace('hidden', 'flex');
+        }
+    </script>
+</body>
+</html>
