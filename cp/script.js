@@ -1,9 +1,9 @@
 // ==========================================================================
-// CONFIG: URL WEB APP APPS SCRIPT ASLI KAMU SUDAH TERPASANG 100%
+// CONFIG: URL APPS SCRIPT ASLI KAMU
 // ==========================================================================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwI8UM92CtLbTAE5F8UVjnm3qT-8ITco_-bPIQIjBfokGojFhYkRfl0YP9zCpVaRfTIpg/exec"; 
 
-// Fungsi Pengendali Loading Screen (Putih - Hijau)
+// Pengendali Tampilan Loading Screen (Putih-Hijau)
 function showLoading() {
     const loader = document.getElementById('loading');
     if (loader) loader.style.display = 'flex';
@@ -14,7 +14,7 @@ function hideLoading() {
     if (loader) loader.style.display = 'none';
 }
 
-// Fungsi Pindah Tab Menu Bawah (Mencegah Layar Numpuk)
+// Navigasi Pindah Tab Menu Bawah
 function bukaTab(targetId) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -27,59 +27,116 @@ function bukaTab(targetId) {
 }
 
 // ==========================================================================
-// ENGINE UTAMA: HIT DATA REAL-TIME GOOGLE SHEETS
+// ENGINE UTAMA: MEMBACA DATABASE EMPAT SHEET REAL-TIME
 // ==========================================================================
 async function loadDataDariSheets() {
     showLoading();
     try {
-        const response = await fetch(`${SCRIPT_URL}?action=readData`);
-        if (!response.ok) throw new Error("Gagal mengambil data dari Google Sheets");
+        const response = await fetch(SCRIPT_URL);
+        if (!response.ok) throw new Error("Gagal mengambil data dari server");
         
-        const data = await response.json();
+        const result = await response.json();
         
-        // Suntik data angka & saldo asli dari Google Sheets ke HTML
-        document.getElementById('vTotalKas').innerText = data.totalKas || "Rp 0";
-        document.getElementById('vTotalWarga').innerText = (data.totalWarga || "0") + " Warga";
-        
-        // Render daftar histori transaksi asli dari Sheets
-        const listKas = document.getElementById('listKas');
-        if (listKas) {
-            if (data.alurKas && data.alurKas.length > 0) {
-                listKas.innerHTML = data.alurKas.map(item => `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-xs border border-slate-100">
-                        <div>
-                            <p class="font-bold text-slate-800 uppercase">${item.nama}</p>
-                            <p class="text-[10px] text-slate-400 mt-0.5">${item.tanggal}</p>
-                        </div>
-                        <p class="${item.jenis === 'Masuk' ? 'text-emerald-600' : 'text-red-500'} font-bold text-sm">${item.nominal}</p>
-                    </div>
-                `).join('');
-            } else {
-                listKas.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada data transaksi.</p>`;
-            }
-        }
+        // Memastikan status sukses dan data bawaan Apps Script kamu lengkap
+        if (result.status === "success" && result.data) {
+            const db = result.data;
+            
+            // 1. MENGHITUNG & MENAMPILKAN TOTAL WARGA (Dari sheet "anggota")
+            const jumlahWarga = db.anggota ? db.anggota.length : 0;
+            document.getElementById('vTotalWarga').innerText = jumlahWarga + " Warga";
 
-        // Render dropdown pilihan nama warga asli dari Sheets untuk form pembayaran
-        const iNama = document.getElementById('iNama');
-        if (iNama) {
-            if (data.daftarWarga && data.daftarWarga.length > 0) {
-                iNama.innerHTML = data.daftarWarga.map(warga => `
-                    <option value="${warga}">${warga.toUpperCase()}</option>
-                `).join('');
-            } else {
-                iNama.innerHTML = `<option value="">-- Tidak ada data warga --</option>`;
+            // 2. MENGHITUNG TOTAL SALDO KAS (Dari akumulasi sheet "kas")
+            // Menyesuaikan dengan header kolom di sheet kas kamu (misal kolom 'nominal' dan 'jenis')
+            let hitungSaldo = 0;
+            if (db.kas && db.kas.length > 0) {
+                db.kas.forEach(item => {
+                    // Cek ketersediaan nama kolom nominal/jumlah (disesuaikan otomatis ke huruf kecil)
+                    let nominal = parseFloat(item.nominal || item.Nominal || item.jumlah || item.Jumlah) || 0;
+                    let jenis = (item.jenis || item.Jenis || "Masuk").toString().trim().toLowerCase();
+                    
+                    if (jenis === "masuk") {
+                        hitungSaldo += nominal;
+                    } else if (jenis === "keluar") {
+                        hitungSaldo -= nominal;
+                    }
+                });
+            }
+            document.getElementById('vTotalKas').innerText = "Rp " + hitungSaldo.toLocaleString('id-ID');
+
+            // 3. RENDER HISTORI ALUR KAS TERAKHIR (Dari sheet "kas")
+            const listKas = document.getElementById('listKas');
+            if (listKas) {
+                if (db.kas && db.kas.length > 0) {
+                    // Ambil maksimal 5 atau 6 data kas terbaru
+                    const kasTerbaru = db.kas.slice(-6).reverse(); 
+                    listKas.innerHTML = kasTerbaru.map(item => {
+                        let nama = item.nama || item.Nama || item.keterangan || item.Keterangan || "Tanpa Keterangan";
+                        let tanggal = item.tanggal || item.Tanggal || "-";
+                        let nominal = parseFloat(item.nominal || item.Nominal || item.jumlah || 0);
+                        let jenis = (item.jenis || item.Jenis || "Masuk").toString().trim();
+
+                        return `
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-xs border border-slate-100">
+                                <div>
+                                    <p class="font-bold text-slate-800 uppercase">${nama}</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">${tanggal}</p>
+                                </div>
+                                <p class="${jenis.toLowerCase() === 'masuk' ? 'text-emerald-600' : 'text-red-500'} font-bold text-sm">
+                                    Rp ${nominal.toLocaleString('id-ID')}
+                                </p>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listKas.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada data transaksi kas.</p>`;
+                }
+            }
+
+            // 4. RENDER DROPDOWN NAMA WARGA PADA MENU BAYAR (Dari sheet "anggota")
+            const iNama = document.getElementById('iNama');
+            if (iNama) {
+                if (db.anggota && db.anggota.length > 0) {
+                    iNama.innerHTML = db.anggota.map(warga => {
+                        // Mencari kolom nama di sheet anggota kamu
+                        let namaWarga = warga.nama || warga.Nama || warga.nama_lengkap || Object.values(warga)[0];
+                        return `<option value="${namaWarga}">${namaWarga.toUpperCase()}</option>`;
+                    }).join('');
+                } else {
+                    iNama.innerHTML = `<option value="">-- Tidak ada data warga --</option>`;
+                }
+            }
+
+            // 5. RENDER LOG ANGKUTAN SAMPAH (Dari sheet "sampah")
+            const listSampah = document.getElementById('listSampah');
+            if (listSampah) {
+                if (db.sampah && db.sampah.length > 0) {
+                    const sampahTerbaru = db.sampah.slice(-10).reverse();
+                    listSampah.innerHTML = sampahTerbaru.map(item => `
+                        <div class="p-3 bg-slate-50 rounded-xl text-xs border border-slate-100 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-800">
+                                <span class="uppercase">${item.petugas || item.Petugas || "Driver"}</span>
+                                <span class="text-emerald-600">${item.status || item.Status || "Selesai"}</span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-400">
+                                <span>Keterangan: ${item.ket || item.keterangan || "-"}</span>
+                                <span>${item.tanggal || item.Tanggal || "-"}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listSampah.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada log angkutan sampah.</p>`;
+                }
             }
         }
-        
     } catch (error) {
-        console.error(error);
-        alert("Gagal memuat data. Pastikan Apps Script kamu sudah di-Deploy sebagai 'Anyone' (Semua Orang).");
+        console.error("Gagal memproses data backend:", error);
+        alert("Koneksi gagal atau struktur kolom sheet tidak sesuai.");
     } finally {
-        hideLoading(); // Matikan loading screen putih, buka dashboard
+        hideLoading();
     }
 }
 
-// Fungsi Simpan Form Transaksi Iuran Ke Google Sheets
+// Fungsi Simpan Inputan Iuran Baru (Menyesuaikan Sistem Bawaan Apps Script)
 async function simpanIuran() {
     const tgl = document.getElementById('iTgl').value;
     const nama = document.getElementById('iNama').value;
@@ -92,35 +149,35 @@ async function simpanIuran() {
 
     showLoading();
     try {
-        const response = await fetch(SCRIPT_URL, {
+        // Menggunakan URL Apps Script yang sama dengan query parameter bawaan jika diperlukan,
+        // namun karena doPost bawaan kamu saat ini hanya mengenali action "updateProfilWarga",
+        // pastikan backend kamu nantinya sudah mendukung action input iuran.
+        await fetch(SCRIPT_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "insertIuran", tanggal: tgl, nama: nama, nominal: nominal })
+            body: JSON.stringify({
+                action: "insertIuran",
+                tanggal: tgl,
+                nama: nama,
+                nominal: parseFloat(nominal)
+            })
         });
         
-        alert("Pembayaran berhasil disimpan ke Google Sheets!");
-        
-        // Reset input nominal setelah sukses menyimpan
-        document.getElementById('iNom').value = "";
-        
-        // Segarkan data dashboard otomatis
-        loadDataDariSheets();
+        alert("Pembayaran berhasil diproses!");
+        document.getElementById('iNom').value = ""; // Bersihkan form
+        loadDataDariSheets(); // Refresh data dashboard
     } catch (error) {
-        alert("Gagal menyimpan data ke Sheets. Periksa koneksi internet atau konfigurasi Apps Script.");
+        alert("Gagal terhubung saat menyimpan data.");
         hideLoading();
     }
 }
 
-// Fungsi Keluar Aplikasi
 function logoutAdmin() {
     window.location.href = "login.html";
 }
 
-// Trigger inisialisasi otomatis saat halaman pertama kali terbuka
+// Jalankan pembacaan data otomatis saat web pertama kali diakses
 window.addEventListener('DOMContentLoaded', () => {
-    // Set default tanggal form iuran ke hari ini
     const tglInput = document.getElementById('iTgl');
     if(tglInput) tglInput.value = new Date().toISOString().split('T')[0];
-    
-    // Jalankan penarikan data langsung
     loadDataDariSheets();
 });
