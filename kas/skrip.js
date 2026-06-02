@@ -1,5 +1,5 @@
 // URL REST API Google Apps Script Integration Engine (Pure Google Sheets 2 ID)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9JsUb0saYvFnH8vpCn2JZu_AzdrXXXmQIcGfMW0dsTvPndFQC_CtKyLhMx_6Kjd_IEg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWBiydnhQ5fyhJp-4O4RvfDZyMzykqQWfF-DMQ3WqoEILQ1YO8e-8Fgw7cfjBbkmWt/exec";
 
 const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 // dbGlobal disesuaikan murni dengan struktur nama tab/properti baru dari Sheet kamu
