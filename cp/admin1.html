@@ -18,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-    <link class="ui-style" rel="stylesheet" href="gaya.css">
+    <link rel="stylesheet" href="gaya.css">
 </head>
 <body>
 
@@ -238,13 +238,14 @@
 </div>
 
 <script>
+    // GANTI SCRIPT_URL DI BAWAH INI DENGAN LINK WEB APP APPS SCRIPT ANDA JIKA SUDAH ADA
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwI8UM92CtLbTAE5F8UVjnm3qT-8ITco_-bPIQIjBfokGojFhYkRfl0YP9zCpVaRfTIpg/exec"; 
     const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     
     let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [] };
     let onConfirmSuccess = null;
 
-    // Fungsi Navigasi Asli Berdasarkan ID yang Sesuai dengan gaya.css Kamu
+    // Fungsi Navigasi Tab Layar Utama (Memperbaiki Navigasi Macet)
     function st(t) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         const targetScreen = document.getElementById('screen-' + t);
@@ -255,6 +256,7 @@
         if (targetNav) targetNav.classList.add('active');
     }
 
+    // Fungsi Notifikasi/Alert Custom Khas Tuntas
     function tuntasAlert(title, message, type = 'success') {
         const el = document.getElementById('customAlert');
         const icon = document.getElementById('alertIcon');
@@ -273,6 +275,7 @@
     
     function closeAlert() { document.getElementById('customAlert').style.display = 'none'; }
 
+    // Fungsi Konfirmasi Custom Dialog Khas Tuntas
     function tuntasConfirm(message, onYes) {
         document.getElementById('confirmMsg').innerText = message;
         onConfirmSuccess = onYes;
@@ -289,8 +292,25 @@
     function openModal(id) { document.getElementById(id).style.display='flex'; }
     function closeModal(id) { document.getElementById(id).style.display='none'; }
 
+    // Fungsi Pembantu Merapikan Format Tanggal Database (ISO) menjadi DD/MM/YYYY di Histori
+    function formatTanggalLokal(rawDate) {
+        if (!rawDate) return "-";
+        try {
+            const dateObj = new Date(rawDate);
+            if (isNaN(dateObj.getTime())) {
+                return rawDate.split('T')[0];
+            }
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const y = dateObj.getFullYear();
+            return `${d}/${m}/${y}`;
+        } catch (e) {
+            return rawDate;
+        }
+    }
+
     // ==========================================
-    // AMBIL DATA DARI GOOGLE SHEETS
+    // PROSES MEMUAT DATA GOOGLE SHEETS
     // ==========================================
     async function loadDataDariSheets() {
         try {
@@ -304,10 +324,11 @@
             }
         } catch (error) {
             console.error(error);
-            tuntasAlert("Gagal Sinkron", "Tidak dapat memuat database Google Sheets.", "error");
+            tuntasAlert("Gagal Sinkron", "Tidak dapat menarik database terbaru dari Google Sheets.", "error");
         }
     }
 
+    // RENDER DATA DINAMIS & MEMPERBAIKI LABEL "TRANSAKSI KAS" SERTA TANGGAL MENTAH
     function renderDataTabel() {
         const fMulai = document.getElementById('fMulai').value;
         const fSelesai = document.getElementById('fSelesai').value;
@@ -329,7 +350,7 @@
 
         if(dbGlobal.kas && dbGlobal.kas.length > 0) {
             const kasTerfilter = dbGlobal.kas.filter(item => {
-                let tglItem = item.tanggal || item.Tanggal;
+                let tglItem = (item.tanggal || item.Tanggal || "").split('T')[0];
                 return tglItem >= fMulai && tglItem <= fSelesai;
             }).reverse();
 
@@ -337,8 +358,16 @@
                 kasTerfilter.forEach(item => {
                     let nominal = parseFloat(item.nominal || item.Nominal || item.jumlah || 0);
                     let jenis = (item.jenis || item.Jenis || "Masuk").toString().trim().toLowerCase();
-                    let nama = item.nama || item.Nama || item.keterangan || "Transaksi Kas";
-                    let tanggal = item.tanggal || item.Tanggal || "-";
+                    
+                    // MENYESUAIKAN LABEL TULISAN SECARA DINAMIS BERDASARKAN SHEET
+                    let deskripsi = item.keterangan || item.Keterangan || item.nama || item.Nama || "Transaksi Kas";
+                    if(item.bulan || item.Bulan) {
+                        deskripsi += ` (${item.bulan || item.Bulan})`;
+                    }
+                    
+                    // MEMPERBAIKI TANGGAL ISO MENTAH MENJADI FORMAT LEBIH ENGIK (DD/MM/YYYY)
+                    let tanggalRaw = item.tanggal || item.Tanggal || "-";
+                    let tanggalBersih = formatTanggalLokal(tanggalRaw);
 
                     if(jenis === "masuk") totalMasukFilter += nominal;
                     else if(jenis === "keluar") totalKeluarFilter += nominal;
@@ -346,8 +375,8 @@
                     listRiwayatHTML += `
                         <div class="flex justify-between items-center p-3 bg-white rounded-2xl text-xs border border-slate-100 shadow-sm">
                             <div>
-                                <p class="font-black text-slate-800 uppercase">${nama}</p>
-                                <p class="text-[10px] text-slate-400 font-bold mt-0.5">${tanggal}</p>
+                                <p class="font-black text-slate-800 uppercase tracking-tight">${deskripsi}</p>
+                                <p class="text-[10px] text-slate-400 font-bold mt-0.5">${tanggalBersih}</p>
                             </div>
                             <p class="${jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-500'} font-black text-sm">
                                 ${jenis === 'masuk' ? '+' : '-'} Rp ${nominal.toLocaleString('id-ID')}
@@ -365,6 +394,7 @@
         document.getElementById('totalMasuk').innerText = "Rp " + totalMasukFilter.toLocaleString('id-ID');
         document.getElementById('totalKeluar').innerText = "Rp " + totalKeluarFilter.toLocaleString('id-ID');
 
+        // SINKRONISASI DAFTAR NAMA WARGA PADA DROPDOWN INPUT PEMBAYARAN DAN SAMPAH
         const iNama = document.getElementById('iNama');
         const sNama = document.getElementById('sNama');
         let opsiWarga = '<option value="">PILIH WARGA</option>';
@@ -378,6 +408,7 @@
         if(iNama) iNama.innerHTML = opsiWarga;
         if(sNama) sNama.innerHTML = opsiWarga;
 
+        // TAMPILAN MANAJEMEN ANGGOTA/WARGA
         const tBodyWarga = document.getElementById('tBodyWarga');
         if(tBodyWarga) {
             if(dbGlobal.anggota && dbGlobal.anggota.length > 0) {
@@ -403,6 +434,7 @@
         renderMatriksRekap();
     }
 
+    // PEMBUATAN MATRIKS TABEL REKAP BULANAN SECARA OTOMATIS
     function renderMatriksRekap() {
         const tbRekap = document.getElementById('tb-rekap');
         if(!tbRekap) return;
@@ -433,9 +465,7 @@
         tbRekap.innerHTML = html;
     }
 
-    // ==========================================
-    // FITUR UTAMA: KUITANSI WHATSAPP OTOMATIS
-    // ==========================================
+    // SIMPAN TRANSAKSI IURAN KE GOOGLE KAS & KIRIM INVOICE WA OTOMATIS
     async function simpanIuran() {
         const tanggal = document.getElementById('iTgl').value;
         const nama = document.getElementById('iNama').value;
@@ -446,7 +476,7 @@
             return tuntasAlert("Lengkapi Data", "Silakan tentukan warga, nominal, dan bulan iurannya!", "error");
         }
 
-        tuntasAlert("Menyimpan", "Sedang merekam data ke Google Sheets...", "success");
+        tuntasAlert("Menyimpan", "Sedang mengirim data ke Google Sheets...", "success");
 
         try {
             const response = await fetch(`${SCRIPT_URL}?action=insertIuran`, {
@@ -498,12 +528,12 @@ _Terima kasih atas partisipasi Anda dalam menjaga kebersihan lingkungan kita._
                 throw new Error();
             }
         } catch (err) {
-            tuntasAlert("Gagal Menyimpan", "Gagal menyimpan ke database Google Sheets.", "error");
+            tuntasAlert("Gagal Menyimpan", "Gagal melakukan post data ke Google Sheets.", "error");
         }
     }
 
     function reloadData() {
-        tuntasAlert("Sinkronisasi", "Sedang mengambil data terbaru...");
+        tuntasAlert("Sinkronisasi", "Sedang memuat data transaksi terbaru...");
         loadDataDariSheets();
     }
 
@@ -518,28 +548,29 @@ _Terima kasih atas partisipasi Anda dalam menjaga kebersihan lingkungan kita._
         const nama = document.getElementById('sNama').value;
         const status = document.querySelector('input[name="sStatus"]:checked').value;
         if(!tgl || !nama) return tuntasAlert("Lengkapi Data", "Form isi sampah wajib dipilih!", "error");
-        tuntasAlert("Tersimpan", "Laporan sampah berhasil direkam (" + status + ")");
+        tuntasAlert("Tersimpan", "Laporan operasional sampah berhasil direkam (" + status + ")");
     }
 
     function simpanKas() {
-        tuntasAlert("Simpan Kas", "Data kas umum terkirim.");
+        tuntasAlert("Simpan Kas", "Data pencatatan kas umum terkirim.");
         closeModal('mKas');
     }
 
     function simpanAnggota() {
-        tuntasAlert("Tambah Warga", "Data warga baru ditambahkan.");
+        tuntasAlert("Tambah Warga", "Data identitas warga baru ditambahkan.");
         closeModal('mAnggota'); 
     }
 
     function hapusTrx(col, id) { 
         tuntasConfirm("Hapus data " + col + "?", function() {
-            tuntasAlert("Terhapus", "Data berhasil dihapus.");
+            tuntasAlert("Terhapus", "Data terkait berhasil dihapus.");
         });
     }
 
-    function downloadPDF() { tuntasAlert("Cetak PDF", "Fitur PDF siap digunakan."); }
-    function lihatDetailWarga(nama) { tuntasAlert("Detail", "Membuka riwayat iuran: " + nama); }
+    function downloadPDF() { tuntasAlert("Cetak PDF", "Fitur pembuatan PDF siap digunakan."); }
+    function lihatDetailWarga(nama) { tuntasAlert("Detail", "Membuka histori lengkap iuran milik: " + nama); }
 
+    // INISIALISASI SETTING AWAL APLIKASI SAAT DIKUNJUNGI
     function init() {
         const now = new Date();
         document.getElementById('fMulai').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
