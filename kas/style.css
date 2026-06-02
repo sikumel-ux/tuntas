@@ -1,0 +1,100 @@
+/* =========================================================================
+   TUNTAS - Custom Styling Premium ala Figma (gaya.css)
+   ========================================================================= */
+
+/* 1. Global Reset & Base Setup */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #f8fafc; /* slate-50 */
+    color: #1e293b; /* slate-800 */
+    overflow-x: hidden;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 2. Custom Scrollbar untuk List Riwayat Kas */
+#listKasContainer::-webkit-scrollbar {
+    width: 5px;
+}
+
+#listKasContainer::-webkit-scrollbar-track {
+    background: #f1f5f9; /* slate-100 */
+    border-radius: 10px;
+}
+
+#listKasContainer::-webkit-scrollbar-thumb {
+    background: #cbd5e1; /* slate-300 */
+    border-radius: 10px;
+}
+
+#listKasContainer::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; /* slate-400 */
+}
+
+/* 3. Efek Premium Glassmorphism & Figma Shadows */
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.figma-shadow {
+    box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.03), 
+                0px 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+/* 4. Form Utilities & Focus State */
+.modern-in {
+    transition: all 0.2s ease-in-out;
+}
+
+.modern-in:focus {
+    background: #ffffff;
+    border-color: #064e3b; /* emerald-900 */
+    box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.1);
+}
+
+select.modern-in {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* 5. Custom Smooth Layer Animations */
+@keyframes popUp {
+    from { 
+        transform: scale(0.96); 
+        opacity: 0; 
+    }
+    to { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 6. Optimasi Khusus Perangkat Mobile (PWA Standalone) */
+@media (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Sentuhan interaksi tombol saat ditekan */
+button:active {
+    transform: scale(0.98);
+}
