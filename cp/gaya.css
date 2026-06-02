@@ -1,80 +1,71 @@
-/* ==========================================================================
-   RESET & BASE STYLES
-   ========================================================================== */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background: #F8FAFC; 
+    padding-bottom: 110px; 
+}
+.sticky-col { 
+    position: sticky; 
+    left: 0; 
+    background: white; 
+    z-index: 10; 
+    border-right: 2px solid #F1F5F9; 
+    min-width: 120px; 
+}
+.tab-content { 
+    display: none; 
+}
+.tab-content.active { 
+    display: block; 
+}
+.modal { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.4); 
+    z-index: 100; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px; 
+    backdrop-filter: blur(4px); 
+}
+.modal-content { 
+    background: white; 
+    padding: 24px; 
+    border-radius: 2rem; 
+    width: 100%; 
+    max-width: 400px; 
+    animation: popUp 0.2s ease-out; 
+}
+nav button.active { 
+    color: #064E3B; 
+    transform: translateY(-5px); 
+}
+nav button { 
+    color: #94A3B8; 
+    transition: all 0.3s; 
+}
+.modern-in { 
+    width: 100%; 
+    padding: 14px; 
+    background: #F1F5F9; 
+    border: 1px solid #E2E8F0; 
+    border-radius: 1rem; 
+    outline: none; 
+    font-size: 13px; 
+    font-weight: 600; 
+    color: #1E293B; 
+}
+.table-scroll { 
+    overflow-x: auto; 
+    border-radius: 1.5rem; 
+    border: 1px solid #E2E8F0; 
+    background: white; 
+}
+::-webkit-scrollbar { 
+    display: none; 
 }
 
-body {
-    font-family: 'Space Grotesk', sans-serif;
-    background-color: #f8fafc; /* Latar belakang putih abu-abu bersih */
-    color: #1e293b;
-    overflow-x: hidden;
-}
-
-/* ==========================================================================
-   UI COMPONENTS (LIGHT MODE & TUNTAS GREEN)
-   ========================================================================== */
-/* Card Putih Bersih dengan Bayangan Lembut */
-.glass {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
-}
-
-/* Bayangan tegas untuk Header & Nav Bar */
-.shd-b {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-/* Input Form Sesuai Gambar Bawaan */
-.modern-in {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    padding: 0.75rem 1rem !important;
-    border-radius: 1rem !important; /* Melengkung halus */
-    color: #0f172a !important;
-    width: 100% !important;
-    font-size: 0.875rem !important;
-    transition: all 0.2s ease;
-}
-
-.modern-in:focus {
-    outline: none !important;
-    border-color: #045936 !important; /* Hijau Tuntas */
-    background: #ffffff !important;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 4px;
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-/* ==========================================================================
-   FOOTER NAVIGATION BAR (Sesuai Gambar Asli)
-   ========================================================================== */
-/* Tombol Menu Bawah Default (Redup Abu/Hijau Tua) */
-.nav-btn {
-    background: transparent;
-    border: none;
-    color: #64748b !important;
-    transition: all 0.2s ease;
-}
-
-/* Tombol Menu Bawah Saat Aktif */
-.nav-btn.active {
-    color: #045936 !important; /* Hijau Tuntas Menyala */
-    font-weight: 700;
-}
-
-.nav-btn.active i {
-    color: #045936 !important;
-    transform: scale(1.1);
+@keyframes popUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
