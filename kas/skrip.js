@@ -1,5 +1,5 @@
-// URL REST API Google Apps Script Integration Engine (Pure Google Sheets)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXYGTce8zbAVZ90miolenY1CN7XKHPqozLRecQHaLEJoeimFSbHXHVcfMVxlWAdP9R/exec";
+// URL REST API Google Apps Script Terbaru (Pure Google Sheets)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9JsUb0saYvFnH8vpCn2JZu_AzdrXXXmQIcGfMW0dsTvPndFQC_CtKyLhMx_6Kjd_IEg/exec";
 
 const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 let dbGlobal = { kas: [], pembayaran: [], anggota: [] };
@@ -8,7 +8,6 @@ let onConfirmSuccess = null;
 function showLoading() { document.getElementById('loading').style.display = 'flex'; }
 function hideLoading() { document.getElementById('loading').style.display = 'none'; }
 
-// Sinkronisasi DOM & CSS Active Premium Modal
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -60,7 +59,7 @@ function init() {
     reloadData();
 }
 
-// Ambil data menggunakan URLSearchParams agar parameter aman lolos ke Google Apps Script
+// Menghindari action GET terpotong di browser
 function reloadData() {
     showLoading();
     
@@ -97,6 +96,7 @@ function reloadData() {
         });
 }
 
+// LOGIKA RENDER DATA SECARA PENUH KE INTERFACE TABEL & REKAP
 function renderDataTabel() {
     const tMulai = new Date(document.getElementById('fMulai').value);
     const tSelesai = new Date(document.getElementById('fSelesai').value);
@@ -232,7 +232,6 @@ function simpanIuran() {
     document.getElementById('iNom').value = "";
 }
 
-// PURE GOOGLE SHEETS: Fungsi laporan sampah diarahkan langsung ke Apps Script Spreadsheet
 function simpanLaporanSampah() {
     const tgl = document.getElementById('sTgl').value;
     const nama = document.getElementById('sNama').value;
@@ -277,7 +276,6 @@ function bukaDetailIuranWarga(namaWarga) {
     openModal('mDetailIuran');
 }
 
-// Navigasi SPA dengan pembersihan display CSS (Menghilangkan Tumpukan Konten)
 function st(t) {
     document.querySelectorAll('.tab-content').forEach(function(screen) {
         screen.style.display = 'none'; 
