@@ -274,7 +274,7 @@ function simpanIuran() {
 
     const target = dbGlobal.anggota.find(w => w.Nama && w.Nama.toLowerCase() === nama.toLowerCase());
     if(target && target.Hp) {
-        const txt = "Halo, pak/bu *" + nama.toUpperCase() + "*..\nPembayaran Anda telah kami terima dengan no referensi *" + noRef + "*.\n\n---------------------------\nCek e-Kuitansi Anda di:\nhttps://domain.com/kuitansi.html?id=" + noRef + "\n---------------------------\n\nTerimakasih atas partisipasinya.\n\nPengurus TUNTAS,\n\n*APRIL*";
+        const txt = "Halo, pak/bu *" + nama.toUpperCase() + "*..\nPembayaran Anda telah kami terima dengan no referensi *" + noRef + "*.\n\n---------------------------\nCek e-Kuitansi Anda di:\nhttps://tuntas.sekawan.my.id/kuitansi.html?id=" + noRef + "\n---------------------------\n\nTerimakasih atas partisipasinya.\n\nPengurus TUNTAS,\n\n*APRIYANTO*";
         window.open("https://wa.me/" + target.Hp + "?text=" + encodeURIComponent(txt), '_blank');
     }
     postToSheets(fd, "Iuran tercatat! No Ref: " + noRef);
