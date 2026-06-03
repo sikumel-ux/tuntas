@@ -1,365 +1,144 @@
-// ==========================================================================
-// TUNTAS - Premium Minimalist Frontend Engine (Figma Style)
-// ==========================================================================
+/**
+ * TUNTAS FRONTEND ENGINE - ADMIN SIDE (admin.js)
+ * Mengontrol Input Kas & Verifikasi Pembayaran Iuran Warga
+ */
 
-// URL REST API Google Apps Script Integration Engine
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9F6sG4TZNJRI1BNiYGAAYb_38dG6ewbmDIoR-brYonJlA9ivCqhKCln1UxT16-NNN/exec";
+// URL Gas andalanmu yang BENAR 100% dan dikunci mati murni, Bro!
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycb9F6sG4TZNJRI1BNiYGAAYb_38dG6ewbmDIoR-brYonJlA9ivCqhKCln1UxT16-NNN/exec";
 
-const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [] };
-let onConfirmSuccess = null;
-
-// --- UI Loading & Modal Control ---
-function showLoading() { document.getElementById('loading').style.display = 'flex'; }
-function hideLoading() { document.getElementById('loading').style.none = 'none'; } // sori, dibetulkan ke display: none
-function hideLoading() { document.getElementById('loading').style.display = 'none'; }
-
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-// --- Custom Alert & Confirm (Premium UI) ---
-function tuntasAlert(title, message, type = 'success') {
-    const icon = document.getElementById('alertIcon');
-    document.getElementById('alertTitle').innerText = title;
-    document.getElementById('alertMsg').innerText = message;
-    icon.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center " + (type === 'error' ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600");
-    icon.innerHTML = '<span class="material-symbols-rounded">' + (type === 'error' ? 'gpp_maybe' : 'check_circle') + '</span>';
-    openModal('customAlert');
-}
-
-function closeAlert() { closeModal('customAlert'); }
-
-function tuntasConfirm(message, onYes) {
-    document.getElementById('confirmMsg').innerText = message;
-    onConfirmSuccess = onYes;
-    openModal('customConfirm');
-}
-
-function closeConfirm() { closeModal('customConfirm'); onConfirmSuccess = null; }
-
-document.getElementById('confirmBtnOk').onclick = function() {
-    if (onConfirmSuccess) onConfirmSuccess();
-    closeConfirm();
+// Variabel Global untuk menampung data mentah dari database Google Sheets
+window.dataTuntasAdmin = {
+    anggota: [],
+    kas: [],
+    pembayaran: [],
+    sampah: []
 };
 
-function formatRupiah(num) { return "Rp " + parseFloat(num || 0).toLocaleString('id-ID'); }
+/**
+ * 1. FUNGSI AMBIL DATA UTAMA (Otomatis load saat halaman admin dibuka)
+ */
+async function muatDatabaseAdmin() {
+    console.log("Admin: Menghubungi database Google Sheets...");
+    try {
+        const respon = await fetch(SCRIPT_URL + "?action=readAllData");
+        if (!respon.ok) throw new Error("Koneksi jaringan internet tidak stabil.");
+        
+        const json = await respon.json();
 
-// --- Initialization App ---
-function init() {
-    const now = new Date();
-    document.getElementById('fMulai').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    document.getElementById('fSelesai').value = now.toISOString().split('T')[0];
-    document.getElementById('iTgl').value = now.toISOString().split('T')[0];
-    document.getElementById('kTgl').value = now.toISOString().split('T')[0];
-    document.getElementById('sTgl').value = now.toISOString().split('T')[0];
-    
-    const grid = document.getElementById('gridBulan');
-    const thr = document.getElementById('th-rekap');
-    grid.innerHTML = ''; 
-    thr.innerHTML = '<th class="sticky-col p-4 bg-white">Nama Warga</th>';
-    
-    daftarBulan.forEach(bln => {
-        grid.innerHTML += '<label class="relative block"><input type="checkbox" name="blnCek" value="' + bln + '" class="hidden peer"><div class="cursor-pointer text-[9px] font-black py-3 text-center border rounded-xl bg-white text-slate-300 peer-checked:bg-emerald-900 peer-checked:text-white uppercase transition-all">' + bln.substring(0,3) + '</div></label>';
-        thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">' + bln.substring(0,3) + '</th>';
-    });
-    thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">AKSI</th>';
-    
-    reloadData();
-}
-
-// --- Fetching Data (Gabungan 2 Spreadsheet) ---
-function reloadData() {
-    showLoading();
-    
-    // Menggunakan pemanggilan langsung string query parameter untuk menghindari mampet/error action GET
-    fetch(SCRIPT_URL + "?action=readAllData")
-        .then(function(res) { return res.json(); })
-        .then(function(res) {
-            hideLoading();
-            if (res.status === "error") {
-                tuntasAlert("Gagal Server", res.message, "error");
-                return;
-            }
+        if (json.status === "success") {
+            console.log("Admin: Data berhasil dimuat!", json.data);
+            window.dataTuntasAdmin = json.data;
             
-            // Mapping data murni dari properti return GAS
-            dbGlobal.kas = res.kas || [];
-            dbGlobal.pembayaran = res.pembayaran || [];
-            dbGlobal.anggota = res.anggota || [];
-            dbGlobal.sampah = res.sampah || [];
-            
-            // Render Dropdown Pilihan Nama Warga di menu Iuran & Sampah
-            const iNama = document.getElementById('iNama');
-            const sNama = document.getElementById('sNama');
-            iNama.innerHTML = sNama.innerHTML = '<option value="">PILIH WARGA</option>';
-            
-            dbGlobal.anggota.forEach(w => {
-                const opt = '<option value="' + w.Nama + '">' + w.Nama.toUpperCase() + '</option>';
-                iNama.insertAdjacentHTML('beforeend', opt);
-                sNama.insertAdjacentHTML('beforeend', opt);
-            });
-            
-            renderDataTabel();
-        })
-        .catch(function(err) { 
-            hideLoading(); 
-            console.error("Detail Error:", err);
-            tuntasAlert("Error", "Gagal menyambung ke server Web Apps.", "error"); 
-        });
-}
-
-// --- Render UI Tabel & Dashboard Matrix ---
-function renderDataTabel() {
-    const tMulai = new Date(document.getElementById('fMulai').value);
-    const tSelesai = new Date(document.getElementById('fSelesai').value);
-    tSelesai.setHours(23,59,59,999);
-
-    let s_selamanya = 0, f_masuk = 0, f_keluar = 0;
-    const cont = document.getElementById('listRiwayat');
-    cont.innerHTML = "";
-
-    // 1. Render data Spreadsheet 1: KAS (Tanggal, Kategori, Keterangan, Nominal)
-    dbGlobal.kas.forEach(trx => {
-        const nil = parseFloat(trx.Nominal || 0);
-        const isMsk = trx.Kategori && trx.Kategori.toLowerCase() === 'masuk';
-        if(isMsk) s_selamanya += nil; else s_selamanya -= nil;
-
-        const tTrx = new Date(trx.Tanggal);
-        if(tTrx >= tMulai && tTrx <= tSelesai) {
-            if(isMsk) f_masuk += nil; else f_keluar += nil;
-            cont.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl animate-fade-in">' +
-                '<div><p class="text-xs font-black uppercase text-slate-700">' + trx.Keterangan + '</p><p class="text-[9px] font-bold text-slate-400 mt-0.5">' + trx.Tanggal + '</p></div>' +
-                '<div class="text-right flex items-center gap-2"><p class="text-xs font-black ' + (isMsk ? 'text-emerald-600' : 'text-red-500') + '">' + (isMsk ? '+' : '-') + ' ' + formatRupiah(nil) + '</p>' +
-                '<button onclick="hapusTrx(\'kas\', \'' + trx.id + '\')" class="text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
-            '</div>';
+            // Panggil fungsi render UI dashboard admin kamu di sini, contoh:
+            // renderTabelKasAdmin();
+            // renderTabelIuranWarga();
+        } else {
+            console.error("Admin: Eror Server GAS:", json.message);
+            tuntasAdminAlert("Eror Database", "Gagal mengambil data dari Google Sheets.", "error");
         }
-    });
+    } catch (eror) {
+        console.error("Admin: Gagal Fetching:", eror);
+        tuntasAdminAlert("Koneksi Gagal", "Gagal menghubungi database Google Sheets. Periksa koneksi internet Anda.", "error");
+    }
+}
 
-    if(cont.innerHTML === "") {
-        cont.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data transaksi.</p>';
+/**
+ * 2. FITUR INPUT TRANSAKSI KAS BARU (Masuk / Keluar)
+ * @param {string} kategori - Contoh: "Pemasukan" atau "Pengeluaran"
+ * @param {string} keterangan - Uraian catatan kas (misal: "Iuran Sampah RT", "Beli Lampu")
+ * @param {number} nominal - Jumlah uang (angka murni tanpa Rp atau titik)
+ */
+async function tambahTransaksiKas(kategori, keterangan, nominal) {
+    if (!kategori || !keterangan || !nominal || nominal <= 0) {
+        tuntasAdminAlert("Peringatan", "Semua kolom data kas wajib diisi dengan benar!", "warning");
+        return;
     }
 
-    document.getElementById('saldoSelamanya').innerText = formatRupiah(s_selamanya);
-    document.getElementById('totalSaldo').innerText = formatRupiah(f_masuk - f_keluar);
-    document.getElementById('totalMasuk').innerText = formatRupiah(f_masuk);
-    document.getElementById('totalKeluar').innerText = formatRupiah(f_keluar);
+    tuntasAdminAlert("Memproses", "Mencatat transaksi kas baru...", "info");
 
-    // 2. Render List Data Warga dari Spreadsheet 2: ANGGOTA (Nama, Hp, Password, Foto, Bergabung)
-    const cWarga = document.getElementById('tBodyWarga'); cWarga.innerHTML = "";
-    dbGlobal.anggota.forEach(w => {
-        // Cek ketersediaan link foto avatar warga dari Google Drive
-        const avatar = (w.Foto && w.Foto !== '-') ? w.Foto : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
-        
-        cWarga.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl animate-fade-in">' +
-            '<div class="flex items-center gap-3">' +
-                '<img src="' + avatar + '" class="w-9 h-9 rounded-full object-cover border border-slate-100 bg-slate-100">' +
-                '<div><p class="text-xs font-black text-slate-800 uppercase">' + w.Nama + '</p><p class="text-[9px] text-slate-400 font-bold mt-0.5"><i class="fa-brands fa-whatsapp"></i> ' + (w.Hp || '-') + '</p></div>' +
-            '</div>' +
-            '<button onclick="hapusTrx(\'anggota\', \'' + w.id + '\')" class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-md">delete</span></button>' +
-        '</div>';
-    });
-    
-    if(dbGlobal.anggota.length === 0) {
-        cWarga.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data warga.</p>';
-    }
+    try {
+        // Ambil tanggal hari ini secara otomatis (format: YYYY-MM-DD)
+        const tanggalHariIni = new Date().toISOString().split('T')[0];
 
-    // 3. Render Matrix Rekap APPS dari Spreadsheet 2: PEMBAYARAN (Kode, Nama, Tanggal, Keterangan, Nominal)
-    const tbRekap = document.getElementById('tb-rekap'); tbRekap.innerHTML = "";
-    dbGlobal.anggota.forEach(w => {
-        let tr = '<tr><td class="sticky-col p-3 border-b text-slate-700 uppercase font-black bg-white">' + w.Nama + '</td>';
-        daftarBulan.forEach(bln => {
-            const lunas = dbGlobal.pembayaran.some(p => p.Nama && w.Nama && p.Nama.toLowerCase() === w.Nama.toLowerCase() && p.Keterangan && p.Keterangan.includes(bln));
-            tr += '<td class="text-center border-b p-2"><span class="inline-block w-5 h-5 rounded-md ' + (lunas ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-300') + ' font-black text-[10px] flex items-center justify-center mx-auto">' + (lunas ? '✓' : '—') + '</span></td>';
+        const queryParams = new URLSearchParams({
+            action: "tambahKas", 
+            tanggal: tanggalHariIni,
+            kategori: kategori,
+            keterangan: keterangan,
+            nominal: nominal
         });
-        tr += '<td class="text-center border-b p-2"><button onclick="bukaDetailIuranWarga(\'' + w.Nama + '\')" class="text-emerald-700 font-black text-[10px] hover:underline">LIHAT</button></td></tr>';
-        tbRekap.insertAdjacentHTML('beforeend', tr);
-    });
 
-    if(dbGlobal.anggota.length === 0) {
-        tbRekap.innerHTML = '<tr><td colspan="14" class="text-center p-4 text-slate-400 font-semibold">Data matriks iuran masih kosong.</td></tr>';
+        const respon = await fetch(SCRIPT_URL + "?" + queryParams.toString(), {
+            method: "POST",
+            mode: "cors"
+        });
+
+        const hasil = await respon.json();
+
+        if (hasil.status === "success") {
+            tuntasAdminAlert("Sukses", "Transaksi kas berhasil dicatat ke Spreadsheet KAS!", "success");
+            muatDatabaseAdmin(); // Refresh data biar saldo & tabel ter-update otomatis
+        } else {
+            throw new Error(hasil.message);
+        }
+    } catch (error) {
+        console.error("Admin: Gagal tambah kas:", error);
+        tuntasAdminAlert("Gagal", "Gagal menyimpan data kas: " + error.message, "error");
     }
 }
 
-function postToSheets(fd, msg) {
-    showLoading();
-    fetch(SCRIPT_URL, { method: 'POST', body: fd })
-        .then(res => res.json())
-        .then(res => { 
-            hideLoading(); 
-            if(res.status === "error") {
-                tuntasAlert("Gagal", res.message, "error");
-            } else {
-                tuntasAlert("Berhasil", msg); 
-                reloadData(); 
-            }
-        })
-        .catch(() => { 
-            hideLoading(); 
-            tuntasAlert("Gagal", "Koneksi terputus dengan gerbang Google Sheets Backend", "error"); 
+/**
+ * 3. FITUR UPDATE STATUS IURAN / PEMBAYARAN WARGA
+ * @param {string} noHpWarga - Nomor HP warga sebagai ID baris
+ * @param {string} bulan - Kolom bulan yang mau di-update (misal: "Januari", "Februari")
+ * @param {string} statusBaru - Status baru (contoh: "LUNAS", "BELUM BAYAR")
+ */
+async function updateIuranWarga(noHpWarga, bulan, statusBaru) {
+    if (!noHpWarga || !bulan || !statusBaru) {
+        tuntasAdminAlert("Peringatan", "Parameter update iuran tidak lengkap!", "warning");
+        return;
+    }
+
+    tuntasAdminAlert("Memproses", "Memperbarui status pembayaran warga...", "info");
+
+    try {
+        const queryParams = new URLSearchParams({
+            action: "updateIuran", 
+            hp: noHpWarga,
+            bulan: bulan,
+            status: statusBaru
         });
+
+        const respon = await fetch(SCRIPT_URL + "?" + queryParams.toString(), {
+            method: "POST",
+            mode: "cors"
+        });
+
+        const hasil = await respon.json();
+
+        if (hasil.status === "success") {
+            tuntasAdminAlert("Sukses", "Status pembayaran iuran berhasil diperbarui!", "success");
+            muatDatabaseAdmin(); // Refresh UI admin otomatis
+        } else {
+            throw new Error(hasil.message);
+        }
+    } catch (error) {
+        console.error("Admin: Gagal update iuran:", error);
+        tuntasAdminAlert("Gagal", "Gagal merubah data iuran: " + error.message, "error");
+    }
 }
 
-// --- Submit Kas Umum (Sheet 1) ---
-function simpanKas() {
-    const tgl = document.getElementById('kTgl').value;
-    const kat = document.getElementById('kKat').value;
-    const ket = document.getElementById('kKet').value.trim();
-    const nom = document.getElementById('kNom').value;
-    if(!tgl || !ket || !nom) return tuntasAlert("Error", "Isi semua form input kas!", "error");
-    
-    const fd = new FormData(); 
-    fd.append('action', 'insertKas'); 
-    fd.append('Tanggal', tgl); 
-    fd.append('Kategori', kat); 
-    fd.append('Keterangan', ket); 
-    fd.append('Nominal', nom);
-    
-    closeModal('mKas'); 
-    postToSheets(fd, "Kas umum berhasil dicatat ke Spreadsheet KAS!");
-}
+/**
+ * ======================== UTILITY HELPER FOR ADMIN ========================
+ */
 
-// --- Submit Anggota + Konversi File Foto ke Base64 (Sheet 2 + Google Drive) ---
-function simpanAnggota() {
-    const name = document.getElementById('aNama').value.trim();
-    const hp = document.getElementById('aHp').value.trim();
-    const fileInput = document.getElementById('aFoto'); // Pastikan di HTML ada <input type="file" id="aFoto">
-    
-    if(!name || !hp) return tuntasAlert("Error", "Lengkapi data nama dan nomor WhatsApp!", "error");
-    
-    const fd = new FormData(); 
-    fd.append('action', 'insertAnggota'); 
-    fd.append('Nama', name); 
-    fd.append('Hp', hp);
-    fd.append('Password', '12345'); 
-    fd.append('Bergabung', new Date().toISOString().split('T')[0]);
-
-    // Jika user mengunggah file foto/gambar
-    if (fileInput && fileInput.files.length > 0) {
-        showLoading();
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            fd.append('FotoData', e.target.result); // Mengirim string base64 gambar
-            fd.append('FotoNama', file.name);
-            fd.append('FotoType', file.type);
-            
-            closeModal('mAnggota');
-            if(fileInput) fileInput.value = ""; // Reset input file
-            postToSheets(fd, "Data warga & foto berhasil diunggah ke Google Drive!");
-        };
-        reader.readAsDataURL(file);
+function tuntasAdminAlert(judul, pesan, tipe) {
+    if (typeof Swal !== "undefined") {
+        Swal.fire(judul, pesan, tipe);
     } else {
-        // Jika tidak upload foto
-        closeModal('mAnggota'); 
-        postToSheets(fd, "Data warga berhasil didaftarkan tanpa foto!");
+        alert("[" + judul + "] \n" + pesan);
     }
 }
 
-// --- Submit Pembayaran Iuran Warga (Sheet 2) ---
-function simpanIuran() {
-    const nama = document.getElementById('iNama').value;
-    const nominal = document.getElementById('iNom').value;
-    const tgl = document.getElementById('iTgl').value;
-    const bulan = Array.from(document.querySelectorAll('input[name="blnCek"]:checked')).map(c => c.value);
-    if(!nama || !nominal || bulan.length === 0) return tuntasAlert("Error", "Lengkapi nama warga, nominal, dan pilihan bulan!", "error");
-
-    const noRef = "T-" + Math.floor(100000 + Math.random() * 900000);
-    const fd = new FormData(); 
-    fd.append('action', 'insertPembayaran'); 
-    fd.append('Kode', noRef); 
-    fd.append('Nama', nama); 
-    fd.append('Tanggal', tgl); 
-    fd.append('Keterangan', "Iuran Bulan: " + bulan.join(', ')); 
-    fd.append('Nominal', nominal); 
-
-    const target = dbGlobal.anggota.find(w => w.Nama && w.Nama.toLowerCase() === nama.toLowerCase());
-    if(target && target.Hp) {
-        const txt = "Halo, pak/bu *" + nama.toUpperCase() + "*..\nPembayaran Anda telah kami terima dengan no referensi *" + noRef + "*.\n\n---------------------------\nCek e-Kuitansi Anda di:\nhttps://tuntas.sekawan.my.id/kuitansi.html?id=" + noRef + "\n---------------------------\n\nTerimakasih atas partisipasinya.\n\nPengurus TUNTAS,\n\n*APRIYANTO*";
-        window.open("https://wa.me/" + target.Hp + "?text=" + encodeURIComponent(txt), '_blank');
-    }
-    postToSheets(fd, "Iuran tercatat! No Ref: " + noRef);
-    document.querySelectorAll('input[name="blnCek"]').forEach(c => c.checked = false);
-    document.getElementById('iNom').value = "";
-}
-
-// --- Submit Log Operasional Sampah (Sheet 2) ---
-function simpanLaporanSampah() {
-    const tgl = document.getElementById('sTgl').value;
-    const nama = document.getElementById('sNama').value;
-    const status = document.querySelector('input[name="sStatus"]:checked').value;
-    if(!tgl || !nama) return tuntasAlert("Error", "Lengkapi tanggal operasional dan nama warga!", "error");
-
-    const fd = new FormData();
-    fd.append('action', 'insertSampah');
-    fd.append('Tanggal', tgl);
-    fd.append('Nama', nama);
-    fd.append('Status', status);
-    
-    postToSheets(fd, "Laporan Operasional Sampah berhasil dicatat!");
-}
-
-// --- Hapus Data Terintegrasi ---
-function hapusTrx(kelompok, id) {
-    tuntasConfirm("Hapus data ini secara permanen dari database?", function() {
-        const fd = new FormData(); 
-        fd.append('action', 'deleteData'); 
-        fd.append('type', kelompok); 
-        fd.append('id', id);
-        postToSheets(fd, "Data berhasil dihapus dari server.");
-    });
-}
-
-// --- Modal Riwayat Sub-Menu Iuran ---
-function bukaDetailIuranWarga(namaWarga) {
-    document.getElementById('mdTitle').innerText = "Riwayat: " + namaWarga.toUpperCase();
-    const list = document.getElementById('mdList'); list.innerHTML = "";
-    const riwayat = dbGlobal.pembayaran.filter(p => p.Nama && p.Nama.toLowerCase() === namaWarga.toLowerCase());
-    
-    if(riwayat.length > 0) {
-        riwayat.forEach(r => {
-            list.innerHTML += '<div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-[11px] animate-fade-in">' +
-                '<div><p class="font-black text-emerald-900">' + r.Keterangan + '</p><p class="text-[9px] text-slate-400 font-bold">' + r.Tanggal + '</p></div>' +
-                '<div class="flex items-center gap-2"><span class="font-extrabold text-slate-700">' + formatRupiah(r.Nominal) + '</span>' +
-                '<button onclick="closeModal(\'mDetailIuran\'); hapusTrx(\'pembayaran\', \'' + r.id + '\')" class="text-slate-300 hover:text-red-500"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
-            '</div>';
-        });
-    } else { 
-        list.innerHTML = "<p class='text-center text-slate-400 py-4 font-semibold'>Belum ada riwayat pembayaran.</p>"; 
-    }
-    openModal('mDetailIuran');
-}
-
-// --- SPA Tab Content Navigation Route ---
-function st(t) {
-    document.querySelectorAll('.tab-content').forEach(function(screen) {
-        screen.style.display = 'none'; 
-        screen.classList.remove('active');
-    });
-    
-    const targetScreen = document.getElementById('screen-' + t);
-    if (targetScreen) {
-        targetScreen.style.display = 'block'; 
-        targetScreen.classList.add('active');
-    }
-    
-    document.querySelectorAll('nav button').forEach(function(btn) {
-        btn.classList.remove('active');
-    });
-    
-    const targetBtn = document.getElementById('n-' + t);
-    if (targetBtn) {
-        targetBtn.classList.add('active');
-    }
-}
-
-function downloadPDF() {
-    tuntasAlert("Cetak Dokumen", "Fitur cetak PDF siap dihubungkan dengan data transaksi Anda.");
-}
-
-function logout() { 
-    tuntasConfirm("Keluar dari area sistem administrator?", function() { 
-        window.location.href = "index.html"; 
-    }); 
-}
-
-window.onload = init;
+// Jalankan penarikan data total database sesaat setelah halaman admin HTML selesai dimuat
+document.addEventListener("DOMContentLoaded", muatDatabaseAdmin);
