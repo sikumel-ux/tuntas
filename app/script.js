@@ -340,12 +340,12 @@ function prosesKonversiFoto(input) {
                 
                 if (json.status === "success") {
                     pasangFotoProfilUI(json.newFotoUrl);
-                    tuntasAlert("Berhasil", "Foto profil dari kamera berhasil diunggah ke Drive!");
+                    tuntasAlert("Berhasil", "Foto profil berhasil diunggah ke server!");
                 } else {
                     tuntasAlert("Gagal", "Gagal menyimpan foto ke Google Drive: " + json.message, "error");
                 }
             } catch(err) {
-                tuntasAlert("Error", "Masalah jaringan atau Apps Script mengalami limitasi waktu.", "error");
+                tuntasAlert("Error", "Masalah jaringan atau cript mengalami limitasi waktu.", "error");
             } finally {
                 hideLoading();
             }
@@ -383,8 +383,8 @@ async function simpanSandiBaruSheets() {
 
 // PEMICU REDIRECT WHATSAPP ADMIN
 function kirimKonfirmasiWA() {
-    const noAdmin = "62812114076"; 
-    const teksPesan = encodeURIComponent(`Halo Admin TUNTAS,\n\nSaya ingin konfirmasi bahwa saya telah melakukan pembayaran iuran warga via transfer bank.\n\nNama Warga: ${sessionWarga || '-'}\nNo. HP: ${sessionHpRaw || '-'}\n\nBerikut saya lampirkan bukti transfernya. Terima kasih.`);
+    const noAdmin = "6285163233482"; 
+    const teksPesan = encodeURIComponent(`Halo Admin TUNTAS,\n\nSaya ingin konfirmasi bahwa saya telah melakukan pembayaran via transfer bank.\n\nNama Warga: ${sessionWarga || '-'}\nNo. HP: ${sessionHpRaw || '-'}\n\nBerikut saya lampirkan bukti transfernya. Terima kasih.`);
     window.open(`https://wa.me/${noAdmin}?text=${teksPesan}`, '_blank');
 }
 
