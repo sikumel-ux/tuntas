@@ -23,10 +23,8 @@
 
     <section id="screen-login" class="flex-1 flex flex-col justify-center items-center px-5 py-12">
         <div class="w-full max-w-sm glass border border-white/60 shadow-xl rounded-[2.5rem] p-8 space-y-8 text-center">
-            <div class="space-y-3">
-                <div class="w-14 h-14 bg-emerald-900 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-900/20">
-                    <span class="material-symbols-rounded !text-2xl">delete_sweep</span>
-                </div>
+            <div class="space-y-2">
+                <img src="logo.png" alt="Logo TUNTAS" class="h-16 mx-auto object-contain">
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">TUNTAS RT 04</h1>
                     <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Turun Tangan Atasi Sampah</p>
@@ -62,10 +60,8 @@
         
         <header class="p-5 flex justify-between items-center bg-white border-b border-slate-100 shadow-2xs">
             <div class="flex items-center gap-3">
-                <div class="relative w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex items-center justify-center">
-                    <img id="miniAvatar" src="" class="w-full h-full object-cover hidden" alt="Avatar">
-                    <i id="miniAvatarIcon" class="fa-solid fa-user text-slate-400 text-sm"></i>
-                </div>
+                <img src="logo.png" alt="Logo TUNTAS" class="h-8 object-contain">
+                <div class="w-px h-6 bg-slate-200"></div>
                 <div>
                     <h3 id="topNamaWarga" class="text-xs font-black text-slate-900 leading-tight uppercase tracking-wide">WARGA</h3>
                     <p id="topHpWarga" class="text-[9px] font-bold text-slate-400 mt-0.5">+62</p>
@@ -345,22 +341,10 @@
         function jalankanRenderSemuaKomponen() {
             if (!window.sessionWarga) return;
 
-            // A. Identity Header Loader
             document.getElementById("topNamaWarga").innerText = window.sessionWarga.Nama.toUpperCase();
             document.getElementById("topHpWarga").innerText = `+${window.sessionWarga.Hp}`;
-            
-            const miniAvatar = document.getElementById("miniAvatar");
-            const miniAvatarIcon = document.getElementById("miniAvatarIcon");
-            if (window.sessionWarga.Foto && window.sessionWarga.Foto.trim() !== "") {
-                miniAvatar.src = window.sessionWarga.Foto;
-                miniAvatar.classList.remove("hidden");
-                miniAvatarIcon.classList.add("hidden");
-            } else {
-                miniAvatar.classList.add("hidden");
-                miniAvatarIcon.classList.remove("hidden");
-            }
 
-            // B. Mutasi Realtime Kas Utama (Sheet 1)
+            // Mutasi Realtime Kas Utama (Sheet 1)
             let totalMasuk = 0; let totalKeluar = 0;
             window.dbTuntas.kas.forEach(k => {
                 const nom = parseFloat(k.Nominal) || 0;
@@ -393,7 +377,7 @@
                 });
             }
 
-            // C. Hitung Tab Iuran Berdasarkan Nama Warga (Sheet 2)
+            // Hitung Tab Iuran Berdasarkan Nama Warga (Sheet 2)
             let totalKontribusiSaya = 0;
             const listIuranSaya = window.dbTuntas.pembayaran.filter(p => p.Nama.toLowerCase().trim() === window.sessionWarga.Nama.toLowerCase().trim());
             listIuranSaya.forEach(p => { totalKontribusiSaya += parseFloat(p.Nominal) || 0; });
@@ -413,10 +397,10 @@
                 containerIuranGrid.appendChild(box);
             });
 
-            // D. Kalender Sampah Bulanan (Sheet 2)
+            // Kalender Sampah Bulanan (Sheet 2)
             renderKalenderSampahWarga();
 
-            // E. Settings Profil Loader
+            // Settings Profil Loader
             document.getElementById("infoNamaUser").innerText = window.sessionWarga.Nama.toUpperCase();
             document.getElementById("infoHpUser").innerText = `+${window.sessionWarga.Hp}`;
             document.getElementById("infoBergabung").innerHTML = `<i class="fa-solid fa-calendar-check mr-1.5"></i> Warga Sejak: ${window.sessionWarga.Bergabung || '-'}`;
@@ -515,7 +499,7 @@
             } finally { showLoading(false); }
         }
 
-        function pemicuPilihFoto() { document.getElementById("fileFotoInput").click(); }
+        pemicuPilihFoto = () => document.getElementById("fileFotoInput").click();
 
         async function prosesKonversiFoto(input) {
             const file = input.files[0];
@@ -581,8 +565,8 @@
         function closeAlert() { document.getElementById("customAlert").classList.remove("active"); }
         function formatRupiah(angka) { return "Rp " + parseFloat(angka).toLocaleString("id-ID"); }
 
-        function openAlert(tipe, judul, pesan) {
-            document.getElementById("alertTitle").innerText = judul;
+        function openAlert(tipe, presidential, pesan) {
+            document.getElementById("alertTitle").innerText = presidential;
             document.getElementById("alertMsg").innerText = pesan;
             const icon = document.getElementById("alertIcon");
             if (tipe === "success") {
