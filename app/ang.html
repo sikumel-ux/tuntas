@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS RT 04 - Member Area</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .active-tab-btn { color: #064e3b !important; font-weight: 800; position: relative; }
+        .active-tab-btn::after { content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 16px; height: 3px; background-color: #064e3b; border-radius: 99px; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col pb-24">
+
+    <section id="screen-login" class="flex-1 flex flex-col justify-center items-center px-5 py-12">
+        <div class="w-full max-w-sm glass border border-white/60 shadow-xl rounded-[2.5rem] p-8 space-y-8 text-center">
+            <div class="space-y-2">
+                <img src="logo.png" alt="Logo TUNTAS" class="h-16 mx-auto object-contain">
+                <div>
+                    <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">TUNTAS RT 04</h1>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Turun Tangan Atasi Sampah</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-left">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 ml-1">Nomor Whatsapp</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">62</span>
+                        <input type="tel" id="lHp" placeholder="8123456xxx" class="w-full bg-slate-100/80 border border-slate-200/50 rounded-2xl pl-10 pr-4 py-3.5 text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-700 focus:bg-white transition-all shadow-inner">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 ml-1">Kata Sandi</label>
+                    <div class="relative">
+                        <input type="password" id="lPass" placeholder="••••••••" class="w-full bg-slate-100/80 border border-slate-200/50 rounded-2xl pl-4 pr-11 py-3.5 text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-700 focus:bg-white transition-all shadow-inner">
+                        <button onclick="togglePasswordWarga('lPass', 'eyeIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i id="eyeIcon" class="fa-solid fa-eye-slash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="prosesLoginWarga()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-4 rounded-2xl shadow-lg shadow-slate-900/10 active:scale-[0.98] transition-transform uppercase tracking-wider">
+                Masuk Member Area
+            </button>
+        </div>
+    </section>
+
+    <section id="screen-dashboard" class="w-full max-w-md mx-auto hidden flex-1 flex flex-col">
+        
+        <header class="p-5 flex justify-between items-center bg-white border-b border-slate-100 shadow-2xs">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Logo TUNTAS" class="h-8 object-contain">
+                <div class="w-px h-6 bg-slate-200"></div>
+                <div>
+                    <h3 id="topNamaWarga" class="text-xs font-black text-slate-900 leading-tight uppercase tracking-wide">WARGA</h3>
+                    <p id="topHpWarga" class="text-[9px] font-bold text-slate-400 mt-0.5">+62</p>
+                </div>
+            </div>
+            <button onclick="muatDataWargaDariServer()" class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 active:rotate-180 transition-transform duration-500">
+                <span class="material-symbols-rounded !text-base">sync</span>
+            </button>
+        </header>
+
+        <main id="tab-dashboard" class="tab-content p-5 space-y-5">
+            <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white rounded-[2.2rem] p-6 shadow-xl shadow-emerald-950/10 space-y-6">
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-emerald-300/80 uppercase tracking-widest">Sisa Saldo Kas Utama RT 04</p>
+                    <h1 id="dashSisaSaldoKas" class="text-3xl font-extrabold tracking-tight">Rp 0</h1>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-emerald-800/50">
+                    <div class="space-y-0.5">
+                        <p class="text-[9px] font-bold text-emerald-300/60 uppercase tracking-wider flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Total Masuk</p>
+                        <p id="dashPemasukanKas" class="text-xs font-extrabold">Rp 0</p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-[9px] font-bold text-emerald-300/60 uppercase tracking-wider flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Total Keluar</p>
+                        <p id="dashPengeluaranKas" class="text-xs font-extrabold">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Log Aliran Kas RT Terbaru</h4>
+                <div id="listMutasiKasDashboard" class="bg-white border border-slate-100 rounded-3xl p-4 max-h-60 overflow-y-auto space-y-0.5"></div>
+            </div>
+        </main>
+
+        <main id="tab-iuran" class="tab-content p-5 space-y-5 hidden">
+            <div class="bg-white border border-slate-100 rounded-[2.2rem] p-6 text-center shadow-xs space-y-2">
+                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-700 mx-auto">
+                    <span class="material-symbols-rounded">volunteer_activism</span>
+                </div>
+                <div class="space-y-0.5">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Kontribusi Iuran Anda</p>
+                    <h2 id="dataTotalKontribusi" class="text-xl font-extrabold text-slate-900 tracking-tight">Rp 0</h2>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Status Iuran Bulanan</h4>
+                <div id="statusBulanGrid" class="grid grid-cols-3 gap-2.5"></div>
+            </div>
+
+            <div class="bg-slate-900 text-slate-100 rounded-3xl p-5 shadow-xs space-y-4">
+                <div class="flex justify-between items-start">
+                    <div class="space-y-0.5">
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Bank Transfer Tujuan</p>
+                        <h4 class="text-xs font-black tracking-tight text-white uppercase">Bank BCA RT 04</h4>
+                    </div>
+                    <span class="text-[10px] font-black bg-white/10 px-2 py-0.5 rounded-md tracking-wider">KAS UTAMA</span>
+                </div>
+                <div class="flex justify-between items-center bg-white/5 rounded-2xl p-3.5 border border-white/5">
+                    <div>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase">Nomor Rekening</p>
+                        <p id="noRekText" class="text-sm font-black tracking-widest text-emerald-400 mt-0.5">8465291034</p>
+                    </div>
+                    <button onclick="salinNoRek()" class="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center text-xs active:scale-90 transition-transform"><i class="fa-regular fa-copy"></i></button>
+                </div>
+                <button onclick="kirimKonfirmasiWA()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors uppercase tracking-wider">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Kirim Bukti Transfer
+                </button>
+            </div>
+        </main>
+
+        <main id="tab-sampah" class="tab-content p-5 space-y-4 hidden">
+            <div class="bg-white border border-slate-100 rounded-[2.2rem] p-5 shadow-xs space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h3 id="judulKalenderSampah" class="text-xs font-black text-slate-800 uppercase tracking-wide">Status Sampah Bulan Ini</h3>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                </div>
+                <div id="gridAngkaKalender" class="grid grid-cols-7 gap-2"></div>
+                <div class="flex items-center gap-4 pt-3 border-t border-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-wider justify-center">
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-emerald-500"></span> Diambil</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-rose-500"></span> Terlewat</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-slate-100 border border-slate-200"></span> Kosong</div>
+                </div>
+            </div>
+        </main>
+
+        <main id="tab-setting" class="tab-content p-5 space-y-5 hidden">
+            <div class="bg-white border border-slate-100 rounded-[2.2rem] p-5 shadow-xs text-center space-y-3 relative overflow-hidden">
+                <div onclick="pemicuUploadFoto()" class="group relative w-20 h-20 mx-auto rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-emerald-700">
+                    <img id="avatarImage" src="" class="w-full h-full object-cover hidden">
+                    <span id="avatarIconDefault" class="material-symbols-rounded !text-3xl text-slate-300 group-hover:text-emerald-700">add_a_photo</span>
+                    <input type="file" id="fileFotoInput" accept="image/*" class="hidden" onchange="unggahFotoProfil(this)">
+                </div>
+                <div>
+                    <h3 id="infoNamaUser" class="text-xs font-black text-slate-800 uppercase tracking-wide">-</h3>
+                    <p id="infoHpUser" class="text-[9px] font-bold text-slate-400 mt-0.5">+62</p>
+                    <p id="infoBergabung" class="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full inline-block mt-2 uppercase tracking-wide"></p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-100 rounded-[2.2rem] p-5 shadow-xs space-y-4">
+                <div class="space-y-1">
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wide">Perbarui Kata Sandi</h4>
+                    <p class="text-[9px] font-bold text-slate-400 leading-tight">Amankan akun Anda dengan mengganti sandi berkala.</p>
+                </div>
+                <div class="space-y-1.5">
+                    <div class="relative">
+                        <input type="password" id="newPass" placeholder="Ketik Sandi Baru..." class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-4 pr-11 py-3 text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-700 focus:bg-white transition-all shadow-inner">
+                        <button onclick="togglePasswordWarga('newPass', 'eyeIconNew')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i id="eyeIconNew" class="fa-solid fa-eye-slash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="updateSandiWarga()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] py-3.5 rounded-2xl transition-all uppercase tracking-wider shadow-md shadow-slate-900/5">
+                    Simpan Sandi Baru
+                </button>
+            </div>
+
+            <button onclick="logoutWarga()" class="w-full bg-rose-50 border border-rose-100 text-rose-600 font-extrabold text-[11px] py-4 rounded-2xl transition-colors uppercase tracking-widest text-center">
+                <i class="fa-solid fa-power-off mr-1.5"></i> Keluar Dari Akun
+            </button>
+        </main>
+
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/90 backdrop-blur-xl border-t border-slate-100 px-4 py-3.5 flex justify-around items-center z-40 shadow-xl rounded-t-[2rem]">
+            <button onclick="gantiTab('tab-dashboard', this)" class="flex flex-col items-center gap-1 text-slate-400 active-tab-btn transition-all">
+                <span class="material-symbols-rounded !text-xl">grid_view</span>
+                <span class="text-[9px] font-bold uppercase tracking-tight">Home</span>
+            </button>
+            <button onclick="gantiTab('tab-iuran', this)" class="flex flex-col items-center gap-1 text-slate-400 transition-all">
+                <span class="material-symbols-rounded !text-xl">account_balance_wallet</span>
+                <span class="text-[9px] font-bold uppercase tracking-tight">Iuran</span>
+            </button>
+            <button onclick="gantiTab('tab-sampah', this)" class="flex flex-col items-center gap-1 text-slate-400 transition-all">
+                <span class="material-symbols-rounded !text-xl">calendar_month</span>
+                <span class="text-[9px] font-bold uppercase tracking-tight">Sampah</span>
+            </button>
+            <button onclick="gantiTab('tab-setting', this)" class="flex flex-col items-center gap-1 text-slate-400 transition-all">
+                <span class="material-symbols-rounded !text-xl">manage_accounts</span>
+                <span class="text-[9px] font-bold uppercase tracking-tight">Profil</span>
+            </button>
+        </nav>
+    </section>
+
+    <div id="loading" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex flex-col justify-center items-center z-50" style="display: none;">
+        <div class="p-5 bg-white rounded-3xl shadow-xl flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-4 border-slate-200 border-t-emerald-900 rounded-full animate-spin"></div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi...</p>
+        </div>
+    </div>
+
+    <div id="mDetailSampah" class="modal fixed inset-0 bg-slate-950/30 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-xs bg-white rounded-[2rem] shadow-xl p-5 border border-slate-100 text-center space-y-4">
+            <div id="popBoxIcon" class="w-12 h-12 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center mx-auto">
+                <span class="material-symbols-rounded">delete_history</span>
+            </div>
+            <div class="space-y-1">
+                <h4 id="popTglJudul" class="text-[11px] font-black text-slate-400 uppercase tracking-wide">PENGAMBILAN</h4>
+                <h2 id="popStatusTeks" class="text-base font-extrabold text-slate-800 tracking-tight">-</h2>
+                <p id="popJamWaktu" class="text-[10px] font-semibold text-slate-400">-</p>
+            </div>
+            <button onclick="closeModal('mDetailSampah')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[11px] py-3 rounded-xl transition-colors uppercase tracking-wider">Tutup Detail</button>
+        </div>
+    </div>
+
+    <div id="customAlert" class="modal fixed inset-0 bg-slate-950/30 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-xs bg-white rounded-[2rem] shadow-xl p-5 text-center space-y-4 border border-slate-50">
+            <div id="alertIcon" class="w-12 h-12 mx-auto rounded-full flex items-center justify-center"></div>
+            <div class="space-y-1">
+                <h3 id="alertTitle" class="text-xs font-black text-slate-900 uppercase tracking-wide">-</h3>
+                <p id="alertMsg" class="text-[10px] font-semibold text-slate-400 leading-relaxed px-2">-</p>
+            </div>
+            <button onclick="closeAlert()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] py-3 rounded-xl transition-transform uppercase tracking-wider active:scale-95">Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2O7sydQVyXZZhrsqAMhTABZkFYkL2x5L2x2exlc71Y6Qm-NPiUXYsSKzTsLVR_IJIRQ/exec";
+        
+        window.dbTuntas = { kas: [], pembayaran: [], anggota: [], sampah: [] };
+        window.sessionWarga = null;
+        const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const saved = localStorage.getItem("tuntasWargaSession");
+            if (saved) {
+                window.sessionWarga = JSON.parse(saved);
+                document.getElementById("screen-login").classList.add("hidden");
+                document.getElementById("screen-dashboard").classList.remove("hidden");
+                muatDataWargaDariServer();
+            }
+        });
+
+        async function prosesLoginWarga() {
+            const inputHp = document.getElementById("lHp").value.trim();
+            const inputPass = document.getElementById("lPass").value.trim();
+
+            if (!inputHp || !inputPass) {
+                openAlert("error", "Gagal Masuk", "Nomor Whatsapp dan Kata Sandi wajib diisi!");
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=readAllData`);
+                const hasil = await res.json();
+                
+                if (hasil.status === "success") {
+                    window.dbTuntas = hasil;
+
+                    let formatInput = inputHp.replace(/\D/g, "");
+                    if (formatInput.startsWith("0")) formatInput = "62" + formatInput.substring(1);
+                    if (formatInput.startsWith("8")) formatInput = "62" + formatInput;
+
+                    const warga = window.dbTuntas.anggota.find(w => {
+                        let numDb = (w.Hp || w.hp || "").toString().replace(/\D/g, "");
+                        if (numDb.startsWith("0")) numDb = "62" + numDb.substring(1);
+                        if (numDb.startsWith("8")) numDb = "62" + numDb;
+                        return numDb === formatInput;
+                    });
+
+                    if (!warga) {
+                        openAlert("error", "Akses Ditolak", "Nom
