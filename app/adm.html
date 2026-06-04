@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS RT 04 - Administrator Engine</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        nav button.active { color: #0f172a; border-bottom: 2px solid #0f172a; font-weight: 800; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .sticky-col { position: sticky; left: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col pb-24">
+
+    <header class="p-5 bg-white border-b border-slate-100 flex justify-between items-center sticky top-0 z-40 shadow-2xs">
+        <div class="flex items-center gap-3">
+            <img src="logo.png" alt="Logo TUNTAS" class="h-9 object-contain">
+            <div class="w-px h-6 bg-slate-200"></div>
+            <div>
+                <h1 class="text-xs font-black text-slate-900 uppercase tracking-wide">PENGURUS RT 04</h1>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">ADMIN ENGINE</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="reloadData()" class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 active:rotate-180 transition-transform duration-500">
+                <span class="material-symbols-rounded !text-base">sync</span>
+            </button>
+            <button onclick="logout()" class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+                <span class="material-symbols-rounded !text-base">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <nav class="bg-white border-b border-slate-100 px-4 flex justify-between items-center text-slate-400">
+        <button id="n-kas" onclick="st('kas')" class="active flex-1 text-center py-3.5 text-[10px] font-bold uppercase tracking-wider transition-all">Kas Utama</button>
+        <button id="n-iuran" onclick="st('iuran')" class="flex-1 text-center py-3.5 text-[10px] font-bold uppercase tracking-wider transition-all">Matriks Iuran</button>
+        <button id="n-sampah" onclick="st('sampah')" class="flex-1 text-center py-3.5 text-[10px] font-bold uppercase tracking-wider transition-all">Log Sampah</button>
+        <button id="n-warga" onclick="st('warga')" class="flex-1 text-center py-3.5 text-[10px] font-bold uppercase tracking-wider transition-all">Data Warga</button>
+    </nav>
+
+    <main id="screen-kas" class="tab-content active p-5 space-y-5">
+        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-3xs grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+                <label class="text-[8px] font-black uppercase tracking-wider text-slate-400">Mulai Tanggal</label>
+                <input type="date" id="fMulai" onchange="renderDataTabel()" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-[10px] font-black text-slate-700">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[8px] font-black uppercase tracking-wider text-slate-400">Selesai Tanggal</label>
+                <input type="date" id="fSelesai" onchange="renderDataTabel()" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-[10px] font-black text-slate-700">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="col-span-2 bg-gradient-to-br from-slate-950 to-slate-900 text-white rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="space-y-0.5">
+                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Saldo Abadi Kas Utama</p>
+                    <h2 id="saldoSelamanya" class="text-2xl font-black tracking-tight">Rp 0</h2>
+                </div>
+                <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
+                    <div>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase">Saldo Terfilter</p>
+                        <p id="totalSaldo" class="text-sm font-black text-emerald-400 mt-0.5">Rp 0</p>
+                    </div>
+                    <button onclick="downloadPDF()" class="bg-white/10 text-white font-black text-[9px] px-3 py-2 rounded-xl uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-rounded !text-xs">picture_as_pdf</span> Cetak</button>
+                </div>
+            </div>
+            <div class="bg-white border border-slate-100 p-4 rounded-2xl space-y-0.5 shadow-3xs">
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Total Masuk</p>
+                <p id="totalMasuk" class="text-xs font-black text-emerald-600">Rp 0</p>
+            </div>
+            <div class="bg-white border border-slate-100 p-4 rounded-2xl space-y-0.5 shadow-3xs">
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Total Keluar</p>
+                <p id="totalKeluar" class="text-xs font-black text-rose-500">Rp 0</p>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Riwayat Jurnal Transaksi</h3>
+                <button onclick="openModal('mKas')" class="text-emerald-700 font-black text-[10px] uppercase bg-emerald-50 px-2.5 py-1 rounded-md tracking-wider">+ Catat Kas</button>
+            </div>
+            <div id="listRiwayat" class="space-y-2 max-h-96 overflow-y-auto"></div>
+        </div>
+    </main>
+
+    <main id="screen-iuran" class="tab-content p-5 space-y-4">
+        <div class="flex justify-between items-center">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Matriks Kontribusi Warga 2026</h3>
+            <button onclick="openModal('mIuran')" class="text-emerald-700 font-black text-[10px] bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">+ Terima Iuran</button>
+        </div>
+        
+        <div class="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-3xs">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr id="th-rekap" class="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase"></tr>
+                    </thead>
+                    <tbody id="tb-rekap" class="text-[11px] font-medium divide-y divide-slate-50"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <main id="screen-sampah" class="tab-content p-5 space-y-4">
+        <div class="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs space-y-4">
+            <div class="space-y-1">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Input Log Pengangkutan Sampah</h3>
+                <p class="text-[9px] font-bold text-slate-400">Sinkronisasikan absensi pengambilan sampah harian warga.</p>
+            </div>
+            <div class="space-y-3 pt-2">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Tanggal Operasional</label>
+                    <input type="date" id="sTgl" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Nama Anggota Warga</label>
+                    <select id="sNama" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none uppercase"></select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Status Armada</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative block">
+                            <input type="radio" name="sStatus" value="Diambil" checked class="hidden peer">
+                            <div class="cursor-pointer border border-slate-100 bg-slate-50 peer-checked:bg-emerald-900 peer-checked:text-white rounded-xl py-3 text-center text-xs font-black uppercase tracking-wider transition-colors">DIAMBIL</div>
+                        </label>
+                        <label class="relative block">
+                            <input type="radio" name="sStatus" value="Terlewat" class="hidden peer">
+                            <div class="cursor-pointer border border-slate-100 bg-slate-50 peer-checked:bg-rose-900 peer-checked:text-white rounded-xl py-3 text-center text-xs font-black uppercase tracking-wider transition-colors">TERLEWAT</div>
+                        </label>
+                    </div>
+                </div>
+                <button onclick="simpanLaporanSampah()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-xl uppercase tracking-wider pt-4">Simpan Log Sampah</button>
+            </div>
+        </div>
+    </main>
+
+    <main id="screen-warga" class="tab-content p-5 space-y-4">
+        <div class="flex justify-between items-center px-1">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Database Anggota Terdaftar</h3>
+            <button onclick="openModal('mAnggota')" class="text-emerald-700 font-black text-[10px] bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">+ Tambah Warga</button>
+        </div>
+        <div id="tBodyWarga" class="space-y-2"></div>
+    </main>
+
+    <div id="mKas" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-xl p-6 border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Jurnal Kas Utama</h3>
+                <button onclick="closeModal('mKas')" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Tanggal</label>
+                    <input type="date" id="kTgl" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Kategori</label>
+                    <select id="kKat" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                        <option value="Masuk">MASUK (PEMASUKAN)</option>
+                        <option value="Keluar">KELUAR (PENGELUARAN)</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Keterangan Transaksi</label>
+                    <input type="text" id="kKet" placeholder="Contoh: Iuran warga, Beli Sapu..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Nominal (Rupiah)</label>
+                    <input type="number" id="kNom" placeholder="Nominal angka murni..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                </div>
+                <button onclick="simpanKas()" class="w-full bg-slate-900 text-white font-extrabold text-[11px] py-3.5 rounded-xl uppercase tracking-wider mt-2">Simpan Ke Kas</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mIuran" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-xl p-6 border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Penerimaan Iuran</h3>
+                <button onclick="closeModal('mIuran')" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Tanggal Entri</label>
+                    <input type="date" id="iTgl" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Pilih Anggota Warga</label>
+                    <select id="iNama" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 uppercase"></select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Pilih Bulan Tagihan</label>
+                    <div id="gridBulan" class="grid grid-cols-3 gap-2"></div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Nominal Disetor</label>
+                    <input type="number" id="iNom" placeholder="Masukkan jumlah nominal..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700">
+                </div>
+                <button onclick="simpanIuran()" class="w-full bg-slate-900 text-white font-extrabold text-[11px] py-3.5 rounded-xl uppercase tracking-wider mt-2">Simpan & Kirim WA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mAnggota" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-xl p-6 border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Registrasi Warga</h3>
+                <button onclick="closeModal('mAnggota')" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Nama Lengkap</label>
+                    <input type="text" id="aNama" placeholder="Ketik nama murni..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">No Whatsapp (Format: 628xx)</label>
+                    <input type="tel" id="aHp" placeholder="628123456xxx" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Foto Profil (Optional)</label>
+                    <input type="file" id="aFoto" accept="image/*" class="w-full text-xs font-bold text-slate-500 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                </div>
+                <button onclick="simpanAnggota()" class="w-full bg-slate-900 text-white font-extrabold text-[11px] py-3.5 rounded-xl uppercase tracking-wider mt-2">Daftarkan Warga</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mDetailIuran" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-xl p-6 border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="mdTitle" class="text-xs font-black text-slate-800 uppercase tracking-wide">Riwayat Iuran</h3>
+                <button onclick="closeModal('mDetailIuran')" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div id="mdList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="customAlert" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-xs bg-white rounded-[2rem] shadow-xl p-5 text-center space-y-4 border border-slate-50">
+            <div id="alertIcon" class="w-12 h-12 mx-auto rounded-full flex items-center justify-center"></div>
+            <div class="space-y-1">
+                <h3 id="alertTitle" class="text-xs font-black text-slate-900 uppercase tracking-wide">-</h3>
+                <p id="alertMsg" class="text-[10px] font-semibold text-slate-400 leading-relaxed px-2">-</p>
+            </div>
+            <button onclick="closeAlert()" class="w-full bg-slate-900 text-white font-extrabold text-[11px] py-3 rounded-xl uppercase tracking-wider">Mengerti</button>
+        </div>
+    </div>
+
+    <div id="customConfirm" class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-xs p-5 justify-center items-center z-50">
+        <div class="w-full max-w-xs bg-white rounded-[2rem] shadow-xl p-5 text-center space-y-4 border border-slate-50">
+            <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center bg-rose-50 text-rose-600">
+                <span class="material-symbols-rounded">help</span>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">Konfirmasi Aksi</h3>
+                <p id="confirmMsg" class="text-[10px] font-semibold text-slate-400 leading-relaxed px-2">-</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="closeConfirm()" class="w-full bg-slate-100 text-slate-700 font-extrabold text-[11px] py-3 rounded-xl uppercase tracking-wider">Batal</button>
+                <button id="confirmBtnOk" class="w-full bg-rose-600 text-white font-extrabold text-[11px] py-3 rounded-xl uppercase tracking-wider">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex flex-col justify-center items-center z-50" style="display: none;">
+        <div class="p-5 bg-white rounded-3xl shadow-xl flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-4 border-slate-200 border-t-emerald-900 rounded-full animate-spin"></div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi...</p>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2O7sydQVyXZZhrsqAMhTABZkFYkL2x5L2x2exlc71Y6Qm-NPiUXYsSKzTsLVR_IJIRQ/exec";
+        
+        const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [] };
+        let onConfirmSuccess = null;
+
+        function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function tuntasAlert(title, message, type = 'success') {
+            const icon = document.getElementById('alertIcon');
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = message;
+            icon.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center " + (type === 'error' ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600");
+            icon.innerHTML = '<span class="material-symbols-rounded">' + (type === 'error' ? 'warning' : 'check_circle') + '</span>';
+            openModal('customAlert');
+        }
+
+        function closeAlert() { closeModal('customAlert'); }
+
+        function tuntasConfirm(message, onYes) {
+            document.getElementById('confirmMsg').innerText = message;
+            onConfirmSuccess = onYes;
+            openModal('customConfirm');
+        }
+
+        function closeConfirm() { closeModal('customConfirm'); onConfirmSuccess = null; }
+
+        document.getElementById('confirmBtnOk').onclick = function() {
+            if (onConfirmSuccess) onConfirmSuccess();
+            closeConfirm();
+        };
+
+        function formatRupiah(num) { return "Rp " + parseFloat(num || 0).toLocaleString('id-ID'); }
+
+        function init() {
+            const now = new Date();
+            document.getElementById('fMulai').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('fSelesai').value = now.toISOString().split('T')[0];
+            document.getElementById('iTgl').value = now.toISOString().split('T')[0];
+            document.getElementById('kTgl').value = now.toISOString().split('T')[0];
+            document.getElementById('sTgl').value = now.toISOString().split('T')[0];
+            
+            const grid = document.getElementById('gridBulan');
+            const thr = document.getElementById('th-rekap');
+            grid.innerHTML = ''; 
+            thr.innerHTML = '<th class="sticky-col p-4 bg-white">Nama Warga</th>';
+            
+            daftarBulan.forEach(bln => {
+                grid.innerHTML += '<label class="relative block"><input type="checkbox" name="blnCek" value="' + bln + '" class="hidden peer"><div class="cursor-pointer text-[9px] font-black py-3 text-center border rounded-xl bg-white text-slate-300 peer-checked:bg-emerald-900 peer-checked:text-white uppercase transition-all">' + bln.substring(0,3) + '</div></label>';
+                thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">' + bln.substring(0,3) + '</th>';
+            });
+            thr.innerHTML += '<th class="text-center p-3 font-bold text-slate-400">AKSI</th>';
+            
+            reloadData();
+        }
+
+        function reloadData() {
+            showLoading();
+            fetch(SCRIPT_URL + "?action=readAllData")
+                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                    hideLoading();
+                    if (res.status === "error") {
+                        tuntasAlert("Gagal Server", res.message, "error");
+                        return;
+                    }
+                    
+                    dbGlobal.kas = res.kas || [];
+                    dbGlobal.pembayaran = res.pembayaran || [];
+                    dbGlobal.anggota = res.anggota || [];
+                    dbGlobal.sampah = res.sampah || [];
+                    
+                    const iNama = document.getElementById('iNama');
+                    const sNama = document.getElementById('sNama');
+                    iNama.innerHTML = sNama.innerHTML = '<option value="">PILIH WARGA</option>';
+                    
+                    dbGlobal.anggota.forEach(w => {
+                        const opt = '<option value="' + w.Nama + '">' + w.Nama.toUpperCase() + '</option>';
+                        iNama.insertAdjacentHTML('beforeend', opt);
+                        sNama.insertAdjacentHTML('beforeend', opt);
+                    });
+                    
+                    renderDataTabel();
+                })
+                .catch(function(err) { 
+                    hideLoading(); 
+                    console.error("Detail Error:", err);
+                    tuntasAlert("Error", "Gagal menyambung ke server Web Apps.", "error"); 
+                });
+        }
+
+        function renderDataTabel() {
+            const tMulai = new Date(document.getElementById('fMulai').value);
+            const tSelesai = new Date(document.getElementById('fSelesai').value);
+            tSelesai.setHours(23,59,59,999);
+
+            let s_selamanya = 0, f_masuk = 0, f_keluar = 0;
+            const cont = document.getElementById('listRiwayat');
+            cont.innerHTML = "";
+
+            dbGlobal.kas.forEach(trx => {
+                const nil = parseFloat(trx.Nominal || 0);
+                const isMsk = trx.Kategori && trx.Kategori.toLowerCase() === 'masuk';
+                if(isMsk) s_selamanya += nil; else s_selamanya -= nil;
+
+                const tTrx = new Date(trx.Tanggal);
+                if(tTrx >= tMulai && tTrx <= tSelesai) {
+                    if(isMsk) f_masuk += nil; else f_keluar += nil;
+                    cont.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl">' +
+                        '<div><p class="text-xs font-black uppercase text-slate-700">' + trx.Keterangan + '</p><p class="text-[9px] font-bold text-slate-400 mt-0.5">' + trx.Tanggal + '</p></div>' +
+                        '<div class="text-right flex items-center gap-2"><p class="text-xs font-black ' + (isMsk ? 'text-emerald-600' : 'text-rose-500') + '">' + (isMsk ? '+' : '-') + ' ' + formatRupiah(nil) + '</p>' +
+                        '<button onclick="hapusTrx(\'kas\', \'' + trx.id + '\')" class="text-slate-300 hover:text-rose-600"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
+                    '</div>';
+                }
+            });
+
+            if(cont.innerHTML === "") {
+                cont.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data transaksi.</p>';
+            }
+
+            document.getElementById('saldoSelamanya').innerText = formatRupiah(s_selamanya);
+            document.getElementById('totalSaldo').innerText = formatRupiah(f_masuk - f_keluar);
+            document.getElementById('totalMasuk').innerText = formatRupiah(f_masuk);
+            document.getElementById('totalKeluar').innerText = formatRupiah(f_keluar);
+
+            const cWarga = document.getElementById('tBodyWarga'); cWarga.innerHTML = "";
+            dbGlobal.anggota.forEach(w => {
+                const avatar = (w.Foto && w.Foto !== '-') ? w.Foto : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
+                
+                cWarga.innerHTML += '<div class="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<img src="' + avatar + '" class="w-9 h-9 rounded-full object-cover border border-slate-100 bg-slate-100">' +
+                        '<div><p class="text-xs font-black text-slate-800 uppercase">' + w.Nama + '</p><p class="text-[9px] text-slate-400 font-bold mt-0.5"><i class="fa-brands fa-whatsapp"></i> ' + (w.Hp || '-') + '</p></div>' +
+                    '</div>' +
+                    '<button onclick="hapusTrx(\'anggota\', \'' + w.id + '\')" class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-rose-600"><span class="material-symbols-rounded !text-md">delete</span></button>' +
+                '</div>';
+            });
+            
+            if(dbGlobal.anggota.length === 0) {
+                cWarga.innerHTML = '<p class="text-center text-[11px] text-slate-400 py-4 font-semibold">Belum ada data warga.</p>';
+            }
+
+            const tbRekap = document.getElementById('tb-rekap'); tbRekap.innerHTML = "";
+            dbGlobal.anggota.forEach(w => {
+                let tr = '<tr><td class="sticky-col p-3 border-b text-slate-700 uppercase font-black bg-white">' + w.Nama + '</td>';
+                daftarBulan.forEach(bln => {
+                    const lunas = dbGlobal.pembayaran.some(p => p.Nama && w.Nama && p.Nama.toLowerCase() === w.Nama.toLowerCase() && p.Keterangan && p.Keterangan.includes(bln));
+                    tr += '<td class="text-center border-b p-2"><span class="inline-block w-5 h-5 rounded-md ' + (lunas ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-300') + ' font-black text-[10px] flex items-center justify-center mx-auto">' + (lunas ? '✓' : '—') + '</span></td>';
+                });
+                tr += '<td class="text-center border-b p-2"><button onclick="bukaDetailIuranWarga(\'' + w.Nama + '\')" class="text-emerald-700 font-black text-[10px] hover:underline">LIHAT</button></td></tr>';
+                tbRekap.insertAdjacentHTML('beforeend', tr);
+            });
+
+            if(dbGlobal.anggota.length === 0) {
+                tbRekap.innerHTML = '<tr><td colspan="14" class="text-center p-4 text-slate-400 font-semibold">Data matriks iuran masih kosong.</td></tr>';
+            }
+        }
+
+        function postToSheets(fd, msg) {
+            showLoading();
+            fetch(SCRIPT_URL, { method: 'POST', body: fd })
+                .then(res => res.json())
+                .then(res => { 
+                    hideLoading(); 
+                    if(res.status === "error") {
+                        tuntasAlert("Gagal", res.message, "error");
+                    } else {
+                        tuntasAlert("Berhasil", msg); 
+                        reloadData(); 
+                    }
+                })
+                .catch(() => { 
+                    hideLoading(); 
+                    tuntasAlert("Gagal", "Koneksi backend Google Sheets terputus.", "error"); 
+                });
+        }
+
+        function simpanKas() {
+            const tgl = document.getElementById('kTgl').value;
+            const kat = document.getElementById('kKat').value;
+            const ket = document.getElementById('kKet').value.trim();
+            const nom = document.getElementById('kNom').value;
+            if(!tgl || !ket || !nom) return tuntasAlert("Error", "Isi semua form input kas!", "error");
+            
+            const fd = new FormData(); 
+            fd.append('action', 'insertKas'); 
+            fd.append('Tanggal', tgl); 
+            fd.append('Kategori', kat); 
+            fd.append('Keterangan', ket); 
+            fd.append('Nominal', nom);
+            
+            closeModal('mKas'); 
+            postToSheets(fd, "Kas umum berhasil dicatat ke Spreadsheet KAS!");
+        }
+
+        function simpanAnggota() {
+            const name = document.getElementById('aNama').value.trim();
+            const hp = document.getElementById('aHp').value.trim();
+            const fileInput = document.getElementById('aFoto');
+            
+            if(!name || !hp) return tuntasAlert("Error", "Lengkapi data nama dan nomor WhatsApp!", "error");
+            
+            const fd = new FormData(); 
+            fd.append('action', 'insertAnggota'); 
+            fd.append('Nama', name); 
+            fd.append('Hp', hp);
+            fd.append('Password', '12345'); 
+            fd.append('Bergabung', new Date().toISOString().split('T')[0]);
+
+            if (fileInput && fileInput.files.length > 0) {
+                showLoading();
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    fd.append('FotoData', e.target.result); 
+                    fd.append('FotoNama', file.name);
+                    fd.append('FotoType', file.type);
+                    
+                    closeModal('mAnggota');
+                    fileInput.value = ""; 
+                    postToSheets(fd, "Data warga & foto berhasil didaftarkan!");
+                };
+                reader.readAsDataURL(file);
+            } else {
+                closeModal('mAnggota'); 
+                postToSheets(fd, "Data warga berhasil didaftarkan tanpa foto!");
+            }
+        }
+
+        function simpanIuran() {
+            const nama = document.getElementById('iNama').value;
+            const nominal = document.getElementById('iNom').value;
+            const tgl = document.getElementById('iTgl').value;
+            const bulan = Array.from(document.querySelectorAll('input[name="blnCek"]:checked')).map(c => c.value);
+            if(!nama || !nominal || bulan.length === 0) return tuntasAlert("Error", "Lengkapi nama warga, nominal, dan pilihan bulan!", "error");
+
+            const noRef = "T-" + Math.floor(100000 + Math.random() * 900000);
+            const fd = new FormData(); 
+            fd.append('action', 'insertPembayaran'); 
+            fd.append('Kode', noRef); 
+            fd.append('Nama', nama); 
+            fd.append('Tanggal', tgl); 
+            fd.append('Keterangan', "Iuran Bulan: " + bulan.join(', ')); 
+            fd.append('Nominal', nominal); 
+
+            const target = dbGlobal.anggota.find(w => w.Nama && w.Nama.toLowerCase() === nama.toLowerCase());
+            if(target && target.Hp) {
+                const txt = "Halo, pak/bu *" + nama.toUpperCase() + "*..\nPembayaran Anda telah kami terima dengan no referensi *" + noRef + "*.\n\nPengurus TUNTAS RT 04.";
+                window.open("https://wa.me/" + target.Hp + "?text=" + encodeURIComponent(txt), '_blank');
+            }
+            closeModal('mIuran');
+            postToSheets(fd, "Iuran tercatat! No Ref: " + noRef);
+            document.querySelectorAll('input[name="blnCek"]').forEach(c => c.checked = false);
+            document.getElementById('iNom').value = "";
+        }
+
+        function simpanLaporanSampah() {
+            const tgl = document.getElementById('sTgl').value;
+            const nama = document.getElementById('sNama').value;
+            const status = document.querySelector('input[name="sStatus"]:checked').value;
+            if(!tgl || !nama) return tuntasAlert("Error", "Lengkapi tanggal operasional dan nama warga!", "error");
+
+            const fd = new FormData();
+            fd.append('action', 'insertSampah');
+            fd.append('Tanggal', tgl);
+            fd.append('Nama', nama);
+            fd.append('Status', status);
+            
+            postToSheets(fd, "Laporan Operasional Sampah berhasil dicatat!");
+        }
+
+        function hapusTrx(kelompok, id) {
+            tuntasConfirm("Hapus data ini secara permanen dari database?", function() {
+                const fd = new FormData(); 
+                fd.append('action', 'deleteData'); 
+                fd.append('type', kelompok); 
+                fd.append('id', id);
+                postToSheets(fd, "Data berhasil dihapus dari server.");
+            });
+        }
+
+        function bukaDetailIuranWarga(namaWarga) {
+            document.getElementById('mdTitle').innerText = "Riwayat: " + namaWarga.toUpperCase();
+            const list = document.getElementById('mdList'); list.innerHTML = "";
+            const riwayat = dbGlobal.pembayaran.filter(p => p.Nama && p.Nama.toLowerCase() === namaWarga.toLowerCase());
+            
+            if(riwayat.length > 0) {
+                riwayat.forEach(r => {
+                    list.innerHTML += '<div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-[11px]">' +
+                        '<div><p class="font-black text-emerald-900">' + r.Keterangan + '</p><p class="text-[9px] text-slate-400 font-bold">' + r.Tanggal + '</p></div>' +
+                        '<div class="flex items-center gap-2"><span class="font-extrabold text-slate-700">' + formatRupiah(r.Nominal) + '</span>' +
+                        '<button onclick="closeModal(\'mDetailIuran\'); hapusTrx(\'pembayaran\', \'' + r.id + '\')" class="text-slate-300 hover:text-rose-600"><span class="material-symbols-rounded !text-sm">delete</span></button></div>' +
+                    '</div>';
+                });
+            } else { 
+                list.innerHTML = "<p class='text-center text-slate-400 py-4 font-semibold'>Belum ada riwayat pembayaran.</p>"; 
+            }
+            openModal('mDetailIuran');
+        }
+
+        function st(t) {
+            document.querySelectorAll('.tab-content').forEach(function(s) { s.classList.remove('active'); });
+            const targetScreen = document.getElementById('screen-' + t);
+            if (targetScreen) targetScreen.classList.add('active');
+            document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+            const targetBtn = document.getElementById('n-' + t);
+            if (targetBtn) targetBtn.classList.add('active');
+        }
+
+        function downloadPDF() { tuntasAlert("Cetak Dokumen", "Fitur export PDF laporan kas terintegrasi."); }
+        function logout() { tuntasConfirm("Keluar dari area administrator?", () => { location.reload(); }); }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
