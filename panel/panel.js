@@ -1,5 +1,5 @@
 // =========================================================================
-// TUNTAS CORE FRONTEND ENGINE V2.1 - CLIENT INTERFACE
+// TUNTAS CORE FRONTEND ENGINE V2.1 - CLIENT INTERFACE (wewe-script.js)
 // DUAL-SHEET LOGIC & GOOGLE DRIVE IMAGE STREAMING
 // =========================================================================
 
@@ -51,25 +51,6 @@ function formatTanggalIndo(tglStr) {
     }
 }
 
-function formatJamWib(waktuStr) {
-    if (!waktuStr || waktuStr === "--:--" || waktuStr === "-") return "Belum ada jam";
-    if (waktuStr.includes('T')) {
-        const d = new Date(waktuStr);
-        if (!isNaN(d.getTime())) {
-            const jam = String(d.getHours()).padStart(2, '0');
-            const mnt = String(d.getMinutes()).padStart(2, '0');
-            return `${jam}:${mnt} WIB`;
-        }
-    }
-    const porsi = waktuStr.split(':');
-    if (porsi.length >= 2) {
-        const jam = porsi[0].trim().padStart(2, '0');
-        const mnt = porsi[1].trim().padStart(2, '0');
-        return `${jam}:${mnt} WIB`;
-    }
-    return `${waktuStr} WIB`;
-}
-
 function formatRupiah(n) { 
     return "Rp " + parseFloat(n || 0).toLocaleString("id-ID"); 
 }
@@ -115,7 +96,7 @@ async function prosesLoginWarga() {
                         Nama: (cekAdmin.Username || "ADMIN RT 04").toUpperCase(),
                         Hp: "ADMIN AREA",
                         Password: passAdminDb,
-                        Foto: "", // Admin default tanpa foto
+                        Foto: "", 
                         Bergabung: "Sistem Admin",
                         IsAdmin: true
                     };
@@ -128,7 +109,7 @@ async function prosesLoginWarga() {
                 }
             }
 
-            // 2. JIKA BUKAN ADMIN, PROSES LOGIN SEBAGAI WARGA BIASA (Normalisasi No HP)
+            // 2. JIKA BUKAN ADMIN, PROSES LOGIN SEBAGAI WARGA BIASA
             let formatInputHp = inputUserHp.replace(/\D/g, "");
             if (formatInputHp.startsWith("0")) formatInputHp = "62" + formatInputHp.substring(1);
             if (formatInputHp.startsWith("8")) formatInputHp = "62" + formatInputHp;
@@ -196,8 +177,8 @@ async function muatDataWargaDariServer() {
             window.dbTuntas.sampah = dataMurni.sampah || [];
             window.dbTuntas.admin = dataMurni.admin || [];
 
-            // Sinkronkan data session jika login sebagai warga biasa (cek update foto/password)
-            if (!window.sessionWarga.IsAdmin) {
+            // Sinkronkan data session jika login sebagai warga biasa
+            if (window.sessionWarga && !window.sessionWarga.IsAdmin) {
                 const syncUser = window.dbTuntas.anggota.find(w => 
                     (w.Nama || w.nama || "").toLowerCase().trim() === window.sessionWarga.Nama.toLowerCase().trim()
                 );
@@ -212,7 +193,7 @@ async function muatDataWargaDariServer() {
         }
     } catch (e) {
         console.error("Gagal sinkronisasi berkala:", e);
-    } finaly {
+    } finally { 
         showLoading(false);
     }
 }
@@ -246,7 +227,7 @@ function renderSemuaHalamanWarga() {
     document.getElementById("infoHpUser").innerText = window.sessionWarga.Hp;
     document.getElementById("infoGabungUser").innerText = window.sessionWarga.Bergabung || '-';
 
-    // 1. Render Summary Keuangan Keseluruhan (Dari Sheet 1 - Tab KAS)
+    // 1. Summary Keuangan (Dari Sheet 1 - Tab KAS)
     let masuk = 0; let keluar = 0;
     (window.dbTuntas.kas || []).forEach(k => {
         const n = parseFloat(k.Nominal || k.nominal || 0);
@@ -261,7 +242,7 @@ function renderSemuaHalamanWarga() {
     }
     renderHistoriKasSebulan();
 
-    // 2. Render Histori Iuran Mandiri Warga (Dari Sheet 2 - Tab PEMBAYARAN)
+    // 2. Histori Iuran Mandiri Warga (Dari Sheet 2 - Tab PEMBAYARAN)
     const iuranSaya = (window.dbTuntas.pembayaran || []).filter(p => 
         (p.Nama || p.nama || "").toLowerCase().trim() === window.sessionWarga.Nama.toLowerCase().trim()
     );
@@ -300,12 +281,12 @@ function renderSemuaHalamanWarga() {
         });
     }
 
-    // 3. Render Kalender Operasional Sampah (Dari Sheet 2 - Tab SAMPAH)
+    // 3. Kalender Operasional Sampah (Dari Sheet 2 - Tab SAMPAH)
     const tgl = new Date();
     document.getElementById('judulKalenderSampah').innerText = `Kalender Sampah (${labelBln[tgl.getMonth()]} ${tgl.getFullYear()})`;
     renderKalenderSampah();
 
-    // 4. Render Avatar Profil Warga (Link dari Google Drive Cloud Storage via Backend)
+    // 4. Render Avatar Profil Warga
     const img = document.getElementById("avatarImage");
     const defIcon = document.getElementById("avatarIconDefault");
     if (window.sessionWarga.Foto && window.sessionWarga.Foto !== "-" && window.sessionWarga.Foto.trim() !== "") {
@@ -434,7 +415,7 @@ function bukaPopUpDetailSampah(hari, status) {
 // ==========================================
 
 async function updateSandiWarga() {
-    if (window.sessionWarga.IsAdmin) {
+    if (window.sessionWarga && window.sessionWarga.IsAdmin) {
         tuntasAlert("Akses Terbatas", "Akun Pengurus Utama (Admin) hanya bisa diubah langsung dari spreadsheet, Bro.");
         return;
     }
@@ -452,18 +433,19 @@ async function updateSandiWarga() {
         }
     } catch(e) {
         tuntasAlert("Gagal", "Sistem gagal memproses pembaruan kata sandi.");
-    } finally { showLoading(false); }
+    } finally { 
+        showLoading(false); 
+    }
 }
 
 function pemicuUploadFoto() { 
-    if (window.sessionWarga.IsAdmin) {
+    if (window.sessionWarga && window.sessionWarga.IsAdmin) {
         tuntasAlert("Akses Terbatas", "Akun Admin global tidak memerlukan foto profil avatar.");
         return;
     }
     document.getElementById("fileFotoInput").click(); 
 }
 
-// UPLOAD BASE64 TEXT PLAIN STREAMING KE DRIVE ENGINE APPS SCRIPT
 async function unggahFotoProfil(input) {
     const file = input.files[0];
     if (!file) return;
@@ -504,7 +486,7 @@ async function unggahFotoProfil(input) {
             }
         } catch (e) {
             console.error("Detail Error Upload:", e);
-            tuntasAlert("Gagal Unggah", "Sistem gagal menyimpan foto ke Drive Folder. Pastikan pengaturan folder Drive Anyone with link.");
+            tuntasAlert("Gagal Unggah", "Sistem gagal menyimpan foto ke Drive Folder.");
         } finally {
             showLoading(false);
             input.value = "";
