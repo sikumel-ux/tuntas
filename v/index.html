@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUNTAS Warga - Portal Personal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24 }
+        .active-tab-btn { color: #064e3b !important; background-color: #f8fafc; font-weight: 900; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased font-sans">
+
+    <div id="loading" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center" style="display: none;">
+        <div class="bg-white p-5 rounded-2xl shadow-xl flex flex-col items-center gap-2">
+            <div class="w-8 h-8 border-4 border-emerald-950 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi Data...</p>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto bg-white min-h-screen relative shadow-xl shadow-slate-300 pb-24">
+
+        <div id="screen-login" class="p-6 pt-20 space-y-6">
+            <div class="text-center space-y-1">
+                <div class="w-14 h-14 bg-emerald-950 text-white rounded-2xl flex items-center justify-center font-black text-xl mx-auto">T</div>
+                <h1 class="text-base font-black text-slate-800 uppercase tracking-tight pt-2">PORTAL WARGA TUNTAS</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Dongkelan RT 04</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3.5">
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase block mb-1">No Handphone WhatsApp</label>
+                    <input type="text" id="lHp" placeholder="Contoh: 08137723xxx" class="w-full text-xs font-bold p-3 border rounded-xl bg-white">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase block mb-1">Kata Sandi Akun</label>
+                    <input type="password" id="lPass" placeholder="Standard: 12345" class="w-full text-xs font-bold p-3 border rounded-xl bg-white">
+                </div>
+                <button onclick="prosesLoginWarga()" class="w-full bg-emerald-950 text-white font-black text-xs py-3.5 rounded-xl uppercase tracking-wider">
+                    Masuk ke Portal Warga
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-dashboard" class="hidden">
+            <header class="bg-emerald-950 text-white p-4 pt-5 rounded-b-[2rem] space-y-4 shadow-sm">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div id="wrapperAvatar" class="w-10 h-10 rounded-full bg-emerald-800 border flex items-center justify-center overflow-hidden">
+                            <span id="avatarDef" class="material-symbols-rounded text-white">person</span>
+                            <img id="avatarImg" src="" class="w-full h-full object-cover hidden">
+                        </div>
+                        <div>
+                            <h2 id="topNamaWarga" class="text-xs font-black tracking-wide uppercase">Nama Warga</h2>
+                            <p id="topHpWarga" class="text-[9px] font-bold text-emerald-300/80 mt-0.5">08x</p>
+                        </div>
+                    </div>
+                    <button onclick="logoutWarga()" class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center"><span class="material-symbols-rounded !text-sm">power_settings_new</span></button>
+                </div>
+            </header>
+
+            <div id="tab-beranda" class="tab-content-warga p-4 space-y-4">
+                <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-2">
+                    <p class="text-[8px] font-black uppercase text-slate-400">Total Setoran Iuran Anda</p>
+                    <h3 id="dataTotalKontribusi" class="text-base font-black text-emerald-400">Rp 0</h3>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Histori Pembayaran Iuran Anda</h4>
+                    <div id="listRiwayatPribadi" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <div id="tab-data" class="tab-content-warga hidden p-4 space-y-4">
+                <div class="bg-white p-4 border border-slate-100 rounded-2xl shadow-xs space-y-3">
+                    <h3 class="text-xs font-black uppercase text-slate-800">Log Pengangkutan Sampah Rumah Anda</h3>
+                    <div id="listSampahPribadi" class="space-y-2 max-h-72 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <div id="tab-profil" class="tab-content-warga hidden p-4 space-y-4">
+                <div class="bg-white p-4 border rounded-2xl text-center space-y-4">
+                    <div>
+                        <input type="file" id="fileFotoInput" accept="image/*" onchange="prosesKonversiFoto(this)" class="hidden">
+                        <button onclick="document.getElementById('fileFotoInput').click()" class="mx-auto block">
+                            <span class="text-[10px] font-black text-emerald-800 uppercase underline block">Ganti Foto Profil</span>
+                        </button>
+                    </div>
+                    <div class="text-left bg-slate-50 p-3 rounded-xl border text-xs space-y-1.5">
+                        <p><span class="text-slate-400 font-bold">NAMA:</span> <span id="infoNamaUser" class="font-black"></span></p>
+                        <p><span class="text-slate-400 font-bold">WHATSAPP:</span> <span id="infoHpUser" class="font-black"></span></p>
+                    </div>
+                    <div class="text-left border-t pt-3 space-y-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase block">Ganti Kata Sandi Keamanan</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="newPass" placeholder="Ketik sandi baru..." class="w-full text-xs font-bold border rounded-xl p-2 bg-slate-50">
+                            <button onclick="updateSandiWarga()" class="bg-emerald-950 text-white font-black text-[10px] px-3 rounded-xl uppercase">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/90 backdrop-blur-md border-t p-2 grid grid-cols-3 gap-1 z-40 shadow-lg">
+                <button onclick="switchTab('tab-beranda', this)" class="flex flex-col items-center justify-center p-2 rounded-xl text-slate-400 active-tab-btn"><span class="material-symbols-rounded">wallet</span><span class="text-[8px] uppercase mt-0.5">Iuran</span></button>
+                <button onclick="switchTab('tab-data', this)" class="flex flex-col items-center justify-center p-2 rounded-xl text-slate-400"><span class="material-symbols-rounded">local_shipping</span><span class="text-[8px] uppercase mt-0.5">Log Sampah</span></button>
+                <button onclick="switchTab('tab-profil', this)" class="flex flex-col items-center justify-center p-2 rounded-xl text-slate-400"><span class="material-symbols-rounded">manage_accounts</span><span class="text-[8px] uppercase mt-0.5">Akun</span></button>
+            </nav>
+        </div>
+
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHI6Gf_GG2ssP45vPx1VRHriMsGmeyEVZXNuj8Z0p70kUFhYNkexlG3l0_LCCvCyA/exec";
+        let sessionHp = "";
+
+        window.onload = function() {
+            const savedHp = localStorage.getItem('warga_hp');
+            if(savedHp) {
+                sessionHp = savedHp;
+                bukaDashboardWarga();
+            }
+        };
+
+        function showLoading(v) { document.getElementById('loading').style.display = v ? 'flex' : 'none'; }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content-warga').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab-btn'));
+            btn.classList.add('active-tab-btn');
+        }
+
+        async function prosesLoginWarga() {
+            const hp = document.getElementById('lHp').value;
+            const pass = document.getElementById('lPass').value;
+            if(!hp || !pass) return alert("Lengkapi data!");
+
+            showLoading(true);
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "loginWarga", hp: hp, password: pass })
+                });
+                const json = await res.json();
+                if(json.status === "success") {
+                    sessionHp = json.message.hp;
+                    localStorage.setItem('warga_hp', sessionHp);
+                    bukaDashboardWarga();
+                } else { alert(json.message); }
+            } catch(e) { alert("Login Error"); }
+            showLoading(false);
+        }
+
+        async function bukaDashboardWarga() {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-dashboard').classList.remove('hidden');
+            showLoading(true);
+
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=readWargaData&hp=${sessionHp}`);
+                const json = await res.json();
+                if(json.status === "success") {
+                    renderDataWarga(json.data);
+                } else { alert(json.message); logoutWarga(); }
+            } catch(e) { alert("Gagal sinkronisasi dashboard"); }
+            showLoading(false);
+        }
+
+        function renderDataWarga(data) {
+            // Profil Rendering
+            document.getElementById('topNamaWarga').innerText = data.profil.Nama;
+            document.getElementById('topHpWarga').innerText = data.profil.Hp;
+            document.getElementById('infoNamaUser').innerText = data.profil.Nama;
+            document.getElementById('infoHpUser').innerText = data.profil.Hp;
+
+            if(data.profil.Foto && data.profil.Foto !== "-") {
+                document.getElementById('avatarDef').classList.add('hidden');
+                const img = document.getElementById('avatarImg');
+                img.src = data.profil.Foto;
+                img.classList.remove('hidden');
+            }
+
+            // Hitung Total Iuran Pribadi
+            let sumIuran = 0;
+            let htmlIuran = '';
+            data.pembayaranPribadi.forEach(p => {
+                sumIuran += Number(p.Nominal || 0);
+                htmlIuran += `
+                    <div class="bg-white p-3 border border-slate-100 rounded-xl flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-black">${p.Keterangan}</p>
+                            <p class="text-[9px] text-slate-400">${p.Tanggal.split('T')[0]}</p>
+                        </div>
+                        <span class="font-black text-emerald-700">Rp ${Number(p.Nominal).toLocaleString('id-ID')}</span>
+                    </div>`;
+            });
+            document.getElementById('dataTotalKontribusi').innerText = "Rp " + sumIuran.toLocaleString('id-ID');
+            document.getElementById('listRiwayatPribadi').innerHTML = htmlIuran || '<p class="text-center text-[10px] text-slate-400">Belum ada riwayat</p>';
+
+            // Render Log Sampah Pribadi
+            let htmlSampah = '';
+            data.sampahPribadi.forEach(s => {
+                htmlSampah += `
+                    <div class="p-3 border rounded-xl flex justify-between items-center text-xs bg-slate-50">
+                        <span class="font-bold text-slate-500">${s.Tanggal.split('T')[0]}</span>
+                        <span class="px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase ${s.Status === 'Diambil' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${s.Status}</span>
+                    </div>`;
+            });
+            document.getElementById('listSampahPribadi').innerHTML = htmlSampah || '<p class="text-center text-[10px] text-slate-400">Belum ada jadwal log</p>';
+        }
+
+        function prosesKonversiFoto(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const rawBase64 = e.target.result;
+                    const bagianData = rawBase64.split(',');
+                    const base64Murni = bagianData[1];
+                    const format = file.name.split('.').pop().toLowerCase();
+
+                    showLoading(true);
+                    try {
+                        const res = await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: "updateFotoWarga",
+                                hp: sessionHp,
+                                fotoBase64: base64Murni,
+                                fotoFormat: format
+                            })
+                        });
+                        const json = await res.json();
+                        alert(json.message);
+                        bukaDashboardWarga();
+                    } catch(err) { alert("Gagal unggah foto"); }
+                    showLoading(false);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function updateSandiWarga() {
+            const pass = document.getElementById('newPass').value;
+            if(!pass) return alert("Sandi tidak boleh kosong");
+            showLoading(true);
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "updatePasswordWarga", hp: sessionHp, newPassword: pass })
+                });
+                const json = await res.json();
+                alert(json.message);
+                document.getElementById('newPass').value = "";
+            } catch(e) { alert("Gagal ganti sandi"); }
+            showLoading(false);
+        }
+
+        function logoutWarga() {
+            localStorage.removeItem('warga_hp');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
