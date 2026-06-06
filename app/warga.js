@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // KONEKSI UTAMA API GOOGLE APPS SCRIPT
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2O7sydQVyXZZhrsqAMhTABZkFYkL2x5L2x2exlc71Y6Qm-NPiUXYsSKzTsLVR_IJIRQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHI6Gf_GG2ssP45vPx1VRHriMsGmeyEVZXNuj8Z0p70kUFhYNkexlG3l0_LCCvCyA/exec";
 
 // STATE DATABASE LOCAL APLIKASI
 window.dbTuntas = { kas: [], pembayaran: [], anggota: [], sampah: [] };
