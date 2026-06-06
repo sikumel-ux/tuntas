@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // URL REST API Google Apps Script Integration Engine
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9JsUb0saYvFnH8vpCn2JZu_AzdrXXXmQIcGfMW0dsTvPndFQC_CtKyLhMx_6Kjd_IEg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9ALrM505D3nJwNHbuJvNQchL-dXFKllRuCCUIgLvbIn8kDgWVjg6LGsYcFOaxa0yD/exec";
 
 const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 let dbGlobal = { kas: [], pembayaran: [], anggota: [], sampah: [] };
