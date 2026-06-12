@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Portal Warga</title>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-emerald-100 pb-24">
+
+<div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+    <i id="notifIcon" class="fa-solid text-base"></i>
+    <span id="notifText" class="flex-1"></span>
+</div>
+
+<div id="screen-login" class="max-w-md mx-auto p-6 min-h-screen flex flex-col justify-center">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-black text-emerald-900 leading-tight">Tuntas. Warga</h1>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Portal Informasi Warga RT 04</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Nomor HP / WhatsApp</label>
+            <input type="tel" id="login_hp" placeholder="Contoh: 08123456789" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-mono font-bold focus:outline-none">
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Password</label>
+            <input type="password" id="login_password" placeholder="Masukkan password" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none">
+            <p class="text-[9px] text-slate-400 mt-1 ml-1">*Pengguna baru? Password awal adalah No. HP Anda sendiri.</p>
+        </div>
+        <button type="button" onclick="prosesLogin()" class="w-full bg-emerald-950 text-white p-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all active:scale-95">Masuk Ke Portal</button>
+    </div>
+</div>
+
+<div id="mainWargaApp" class="max-w-md mx-auto p-5 relative hidden">
+    
+    <header class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2.5">
+            <div>
+                <h1 class="text-xl font-black text-emerald-900 leading-tight">Halo, <span id="namaWargaHeader">Warga</span>.</h1>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Warga Resmi RT 04</p>
+            </div>
+        </div>
+        <button type="button" onclick="prosesLogout()" class="w-9 h-9 flex items-center justify-center bg-rose-50 text-rose-600 border border-rose-100 rounded-xl shadow-sm active:scale-90">
+            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+        </button>
+    </header>
+
+    <div id="sub-home" class="tab-content active space-y-5">
+        <div class="p-6 bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-[2.2rem] text-white shadow-xl relative overflow-hidden">
+            <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest">Total Saldo Terkonsolidasi RT 04</p>
+            <h2 id="txtSaldo" class="text-3xl font-black mt-1">Rp 0</h2>
+            <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
+                 <span class="text-[9px] font-black uppercase text-emerald-300 tracking-wider flex items-center gap-1">Status Informasi Data Live <i class="fa-solid fa-bolt text-[8px]"></i></span>
+            </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-b pb-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400 text-xs"></i>
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider">Histori Kas Umum RT 04</h3>
+            </div>
+            <div id="listTransaksiWarga" class="space-y-2">
+                <div class="text-center p-4 text-xs text-slate-400">Memuat info kas...</div>
+            </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-b pb-1.5">
+                <i class="fa-solid fa-dumpster text-slate-400 text-xs"></i>
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider">Riwayat Iuran Sampah Bulanan Saya</h3>
+            </div>
+            <div id="listIuranSampahWarga" class="space-y-2">
+                <div class="text-center p-4 text-xs text-slate-400">Memuat data iuran...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sub-profil" class="tab-content space-y-4">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-black text-emerald-900 uppercase text-center text-xs tracking-wider border-b pb-2">Pengaturan Akun & Password</h3>
+            
+            <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Password Baru</label>
+                <input type="password" id="pass_baru" placeholder="Masukkan password baru" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none">
+            </div>
+            <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Konfirmasi Password Baru</label>
+                <input type="password" id="pass_konfirmasi" placeholder="Ulangi password baru" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none">
+            </div>
+            <button type="button" onclick="prosesGantiPassword()" class="w-full bg-emerald-900 text-white p-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all active:scale-95">Perbarui Password Saya</button>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-slate-100 flex justify-around items-center px-1 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] max-w-md mx-auto">
+        <button type="button" onclick="gantiTabWarga('home')" id="n-home" class="flex flex-col items-center gap-0.5 text-emerald-900 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">home</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Informasi RT</span>
+        </button>
+        <button type="button" onclick="gantiTabWarga('profil')" id="n-profil" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">account_circle</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Profil</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+    // URL Database Firebase Realtime (Gunakan Node yang Sama)
+    const urlKas    = "https://tuntas04-default-rtdb.firebaseio.com/kas_umum.json";
+    const urlIuran  = "https://tuntas04-default-rtdb.firebaseio.com/iuran_warga.json";
+    const urlWarga  = "https://tuntas04-default-rtdb.firebaseio.com/warga_rt04.json";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Cek Sesi Login di Browser
+        if(localStorage.getItem('warga_logged_in') === 'true') {
+            tampilkanAplikasiUtama();
+        }
+    });
+
+    // --------------------------------------------------------
+    // SISTEM LOGIN & LOGOUT MANAJEMEN WARGA
+    // --------------------------------------------------------
+    function prosesLogin() {
+        const hp = document.getElementById('login_hp').value.trim();
+        const password = document.getElementById('login_password').value;
+
+        if(!hp || !password) { showNotif('Lengkapi No HP & Password!', 'gagal'); return; }
+
+        fetch(urlWarga)
+        .then(res => res.json())
+        .then(data => {
+            let matchedKey = null;
+            let matchedUser = null;
+
+            for(let key in data) {
+                if(data[key].hp === hp) {
+                    matchedKey = key;
+                    matchedUser = data[key];
+                    break;
+                }
+            }
+
+            // Validasi Kecocokan Password (Default / Hasil Update)
+            if(matchedUser && matchedUser.password === password) {
+                localStorage.setItem('warga_logged_in', 'true');
+                localStorage.setItem('warga_key', matchedKey);
+                localStorage.setItem('warga_nama', matchedUser.nama);
+                localStorage.setItem('warga_hp', matchedUser.hp);
+                
+                showNotif('Login Berhasil!', 'sukses');
+                setTimeout(() => { tampilkanAplikasiUtama(); }, 1000);
+            } else {
+                showNotif('No HP atau Password salah!', 'gagal');
+            }
+        })
+        .catch(() => showNotif('Gagal mengambil data autentikasi', 'gagal'));
+    }
+
+    function prosesLogout() {
+        localStorage.clear();
+        window.location.reload();
+    }
+
+    function tampilkanAplikasiUtama() {
+        document.getElementById('screen-login').classList.add('hidden');
+        document.getElementById('mainWargaApp').classList.remove('hidden');
+        document.getElementById('namaWargaHeader').innerText = localStorage.getItem('warga_nama');
+        
+        loadDataKasUntukWarga();
+        loadIuranSampahWarga();
+    }
+
+    // --------------------------------------------------------
+    // MEMBACA DATA KAS UMUM RT (TRANSPARANSI)
+    // --------------------------------------------------------
+    function loadDataKasUntukWarga() {
+        fetch(urlKas)
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('listTransaksiWarga');
+            if (!data) {
+                container.innerHTML = `<div class="text-center p-4 text-xs text-slate-400">Belum ada mutasi kas RT.</div>`;
+                return;
+            }
+
+            let saldo = 0, html = '';
+            const keys = Object.keys(data).reverse(); // Terbaru di atas
+            
+            keys.forEach(key => {
+                const tx = data[key];
+                const nom = parseInt(tx.nominal) || 0;
+                const jenis = (tx.jenis || 'masuk').toLowerCase();
+                const colorTxt = (jenis === 'keluar') ? 'text-rose-600' : 'text-emerald-600';
+                const sign = (jenis === 'keluar') ? '-' : '+';
+
+                if (jenis === 'keluar') saldo -= nom;
+                else saldo += nom;
+
+                html += `
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm text-xs">
+                    <div>
+                        <h4 class="font-bold text-slate-800 uppercase">${escapeHtml(tx.keterangan)}</h4>
+                        <p class="text-[9px] text-slate-400 font-bold">${tx.tanggal.split(' ')[0]}</p>
+                    </div>
+                    <span class="font-black ${colorTxt}">
+                        ${sign} Rp ${nom.toLocaleString('id-ID')}
+                    </span>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('txtSaldo').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
+        });
+    }
+
+    // --------------------------------------------------------
+    // MEMBACA TRANSAKSI IURAN SAMPAH BULANAN SAYA
+    // --------------------------------------------------------
+    function loadIuranSampahWarga() {
+        const namaSaya = localStorage.getItem('warga_nama');
+        fetch(urlIuran)
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('listIuranSampahWarga');
+            if(!data) {
+                container.innerHTML = `<div class="text-center p-4 text-xs text-slate-400">Belum ada riwayat pembayaran sampah.</div>`;
+                return;
+            }
+
+            let htmlLog = '';
+            const keys = Object.keys(data).reverse();
+            let adaData = false;
+
+            keys.forEach(key => {
+                const item = data[key];
+                // Filter hanya yang namanya sesuai dengan nama warga yang sedang login
+                if(item.nama_warga === namaSaya) {
+                    adaData = true;
+                    htmlLog += `
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center text-xs shadow-sm">
+                        <div>
+                            <p class="font-extrabold text-slate-700">IURAN SAMPAH BULANAN</p>
+                            <p class="text-[9px] text-slate-400 font-bold">Periode Bulan: <span class="text-emerald-700 font-black uppercase">${item.bulan}</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-emerald-600">Rp ${item.nominal.toLocaleString('id-ID')}</p>
+                            <p class="text-[8px] font-medium text-slate-400">${item.tanggal.split(' ')[0]}</p>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            if(!adaData) {
+                container.innerHTML = `<div class="bg-white p-4 rounded-2xl text-center border border-slate-100 text-slate-400 text-xs">Anda belum tercatat membayar iuran sampah.</div>`;
+            } else {
+                container.innerHTML = htmlLog;
+            }
+        });
+    }
+
+    // --------------------------------------------------------
+    // PROSES GANTI PASSWORD MANDIRI
+    // --------------------------------------------------------
+    function prosesGantiPassword() {
+        const keyWarga = localStorage.getItem('warga_key');
+        const passBaru = document.getElementById('pass_baru').value;
+        const passKonf = document.getElementById('pass_konfirmasi').value;
+
+        if(!passBaru || !passKonf) { showNotif('Semua form wajib diisi!', 'gagal'); return; }
+        if(passBaru !== passKonf) { showNotif('Konfirmasi password tidak cocok!', 'gagal'); return; }
+
+        const urlSpesifik = `https://tuntas04-default-rtdb.firebaseio.com/warga_rt04/${keyWarga}.json`;
+
+        fetch(urlSpesifik, {
+            method: 'PATCH',
+            body: JSON.stringify({ password: passBaru }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            showNotif('Password sukses diubah, silakan login ulang!', 'sukses');
+            setTimeout(() => { prosesLogout(); }, 2000);
+        })
+        .catch(() => showNotif('Gagal memperbarui password', 'gagal'));
+    }
+
+    // --------------------------------------------------------
+    // UTILITIES SPA & UI ENGINE
+    // --------------------------------------------------------
+    function gantiTabWarga(tabId) {
+        const subTabs = document.getElementsByClassName('tab-content');
+        for (let i = 0; i < subTabs.length; i++) { subTabs[i].style.display = 'none'; }
+        document.getElementById('sub-' + tabId).style.display = 'block';
+
+        const navButtons = document.querySelectorAll('nav button');
+        navButtons.forEach(btn => { btn.classList.replace('text-emerald-900', 'text-slate-400'); });
+        document.getElementById('n-' + tabId).classList.replace('text-slate-400', 'text-emerald-900');
+    }
+
+    function showNotif(msg, type) {
+        const alertBox = document.getElementById('notificationAlert');
+        const icon = document.getElementById('notifIcon');
+        const text = document.getElementById('notifText');
+
+        text.innerText = msg;
+        alertBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800');
+        icon.classList.remove('fa-circle-check', 'text-emerald-600', 'fa-circle-xmark', 'text-rose-600');
+
+        if(type === 'sukses') {
+            alertBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            icon.classList.add('fa-circle-check', 'text-emerald-600');
+        } else {
+            alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+            icon.classList.add('fa-circle-xmark', 'text-rose-600');
+        }
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 3500);
+    }
+
+    function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : ''; }
+</script>
+</body>
+  </html>
+  
