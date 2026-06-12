@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#064E3B">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Admin Dashboard</title>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .custom-modal { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; background-color: rgba(15, 23, 42, 0.6) !important; backdrop-filter: blur(4px) !important; display: none; align-items: center !important; justify-content: center !important; padding: 20px !important; z-index: 9999 !important; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-emerald-100 pb-24">
+
+<div id="screen-login-admin" class="fixed inset-0 bg-slate-900 z-[999999] flex flex-col justify-between p-6">
+    <div class="h-4"></div>
+
+    <div class="w-full flex flex-col items-center">
+        <div class="text-center mb-6">
+            <img src="logo.png" alt="Logo TUNTAS" class="w-16 h-16 mx-auto object-contain mb-3 drop-shadow-md brightness-110">
+            <h1 class="text-3xl font-black text-emerald-400 leading-tight">Tuntas. Admin</h1>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">Sistem Input Kas & Iuran RT 04</p>
+        </div>
+
+        <div class="max-w-md w-full bg-white p-6 rounded-[2rem] shadow-2xl shadow-black/40 space-y-4">
+            <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Username / No HP Admin</label>
+                <input type="text" id="admin_user" placeholder="Masukkan username admin" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none">
+            </div>
+            <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Password Admin</label>
+                <div class="relative w-full mt-1">
+                    <input type="password" id="admin_pass" placeholder="Masukkan password" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-3 pr-10 py-2.5 text-xs font-bold focus:outline-none">
+                    <button type="button" onclick="togglePasswordVisibility('admin_pass', 'eye-icon-admin')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 active:text-emerald-950">
+                        <i id="eye-icon-admin" class="fa-solid fa-eye text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="button" onclick="loginAdminEngine()" class="w-full bg-emerald-950 text-white p-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all active:scale-95">Masuk Dashboard</button>
+        </div>
+    </div>
+
+    <div class="text-center pt-8 pb-2">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">&copy; 2026 TUNTAS RT 04. Sisi Pengurus.</p>
+    </div>
+</div>
+
+<div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+    <i id="notifIcon" class="fa-solid text-base"></i>
+    <span id="notifText" class="flex-1"></span>
+    <button type="button" onclick="closeNotif()" class="opacity-50 hover:opacity-100"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<div id="mainApp" class="max-w-md mx-auto p-5 relative">
+    
+    <header class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2.5">
+            <img src="logo.png" alt="Logo Tuntas" class="w-10 h-10 object-contain rounded-xl">
+            <div>
+                <h1 class="text-xl font-black text-emerald-900 leading-tight">Tuntas.</h1>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bendahara / Pengurus RT 04</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="openModal('mAnggota')" class="w-9 h-9 flex items-center justify-center bg-white border border-slate-100 text-slate-600 rounded-xl shadow-sm transition-all active:scale-90">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+            </button>
+            <button type="button" onclick="logoutAdmin()" class="w-9 h-9 flex items-center justify-center bg-rose-50 border border-rose-100 text-rose-600 rounded-xl shadow-sm transition-all active:scale-90">
+                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <div id="screen-home" class="tab-content active space-y-5">
+        <div class="p-6 bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-[2.2rem] text-white shadow-xl relative overflow-hidden">
+            <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest">Total Saldo Terkonsolidasi</p>
+            <h2 id="txtSaldo" class="text-3xl font-black mt-1">Rp 0</h2>
+            <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
+                 <div>
+                     <p class="text-[9px] font-bold opacity-50 uppercase tracking-wider">Status Sinkronisasi</p>
+                     <p class="text-sm font-extrabold text-amber-300">Firebase Realtime</p>
+                 </div>
+                 <span class="text-[9px] font-black uppercase text-emerald-300 tracking-wider flex items-center gap-1">Live <i class="fa-solid fa-bolt text-[8px]"></i></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-down"></i></div>
+                <div>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">Total In</p>
+                    <p id="txtTotalMasuk" class="text-sm font-black text-slate-800">Rp 0</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up"></i></div>
+                <div>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">Total Out</p>
+                    <p id="txtTotalKeluar" class="text-sm font-black text-slate-800">Rp 0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="openModal('mKas')" class="bg-white border-2 border-emerald-900 text-emerald-900 p-3.5 rounded-2xl font-black text-[10px] uppercase shadow-sm transition-all active:scale-95">Catat Kas</button>
+            <button type="button" onclick="st('bayar')" class="bg-emerald-950 text-white p-3.5 rounded-2xl font-black text-[10px] uppercase shadow-sm transition-all active:scale-95">Input Iuran</button>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-b pb-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400 text-xs"></i>
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider">Histori Mutasi Kas</h3>
+            </div>
+            <div id="listTransaksi" class="space-y-2">
+                <div class="text-center p-4 text-xs text-slate-400">Memuat data transaksi...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-bayar" class="tab-content space-y-4">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-black text-emerald-900 uppercase text-center text-xs tracking-wider border-b pb-2">Input Pembayaran Iuran</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Tanggal Bayar</label>
+                    <input type="date" id="iTglAdmin" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Nama Warga</label>
+                    <select id="iuran_nama" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                        <option value="">-- Memuat Daftar Warga... --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Bulan Iuran</label>
+                    <select id="iuran_bulan" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                        <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option><option value="April">April</option>
+                        <option value="Mei">Mei</option><option value="Juni" selected>Juni</option><option value="Juli">Juli</option><option value="Agustus">Agustus</option>
+                        <option value="September">September</option><option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Nominal (Rp)</label>
+                    <input type="number" id="iuran_nominal" value="20000" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-black text-emerald-800 focus:outline-none">
+                </div>
+                <button type="button" onclick="simpanIuran()" class="w-full bg-emerald-900 text-white p-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all active:scale-95">Simpan Iuran Ke Firebase</button>
+            </div>
+        </div>
+        
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-b pb-1.5">
+                <i class="fa-solid fa-receipt text-slate-400 text-xs"></i>
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider">Log Setoran Iuran</h3>
+            </div>
+            <div id="listLogIuran" class="space-y-2">
+                <div class="text-center p-4 text-xs text-slate-400">Memuat log iuran...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-kuitansi" class="tab-content space-y-4">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center py-12">
+            <span class="material-symbols-rounded text-4xl text-slate-300 block mb-2">receipt_long</span>
+            <h3 class="font-black text-slate-700 uppercase text-xs tracking-wider">Kuitansi Digital</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Fitur penarikan nomor & cetak bukti bayar instan via SPA.</p>
+        </div>
+    </div>
+
+    <div id="screen-berita" class="tab-content space-y-4">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center py-12">
+            <span class="material-symbols-rounded text-4xl text-slate-300 block mb-2">newspaper</span>
+            <h3 class="font-black text-slate-700 uppercase text-xs tracking-wider">Berita Warga RT 04</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Kelola papan informasi digital warga di sini.</p>
+        </div>
+    </div>
+
+    <div id="screen-laporan" class="tab-content space-y-4">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center py-12">
+            <span class="material-symbols-rounded text-4xl text-slate-300 block mb-2">monitoring</span>
+            <h3 class="font-black text-slate-700 uppercase text-xs tracking-wider">Laporan Grafik Kas</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Grafik otomatis kalkulasi pemasukan & pengeluaran.</p>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-slate-100 flex justify-around items-center px-1 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] max-w-md mx-auto">
+        <button type="button" onclick="st('home')" id="n-home" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">home</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Home</span>
+        </button>
+        <button type="button" onclick="st('bayar')" id="n-bayar" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">payments</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Bayar</span>
+        </button>
+        <button type="button" onclick="st('kuitansi')" id="n-kuitansi" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">receipt_long</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Kuitansi</span>
+        </button>
+        <button type="button" onclick="st('berita')" id="n-berita" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">newspaper</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Berita</span>
+        </button>
+        <button type="button" onclick="st('laporan')" id="n-laporan" class="flex flex-col items-center gap-0.5 text-slate-400 w-full transition-all">
+            <span class="material-symbols-rounded !text-lg">monitoring</span>
+            <span class="text-[8px] font-bold uppercase tracking-tight">Laporan</span>
+        </button>
+    </nav>
+</div>
+
+<div id="mKas" class="custom-modal" onclick="if(event.target==this)closeModal('mKas')">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-black uppercase text-emerald-900 text-xs tracking-wider">Catat Kas Umum</h3>
+            <button type="button" onclick="closeModal('mKas')" class="text-slate-400 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">Tanggal Transaksi</label>
+            <input type="date" id="kas_tanggal" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs font-bold text-slate-700 focus:outline-none" required>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">Jenis Transaksi</label>
+            <select id="kas_jenis" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs font-bold text-slate-700 focus:outline-none">
+                <option value="masuk">Kas Masuk (In)</option>
+                <option value="keluar">Kas Keluar (Out)</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">Keterangan / Deskripsi</label>
+            <input type="text" id="kas_keterangan" placeholder="Contoh: Beli Token Lampu Pos" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs focus:outline-none" required>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">Nominal Rupiah</label>
+            <input type="number" id="kas_nominal" placeholder="Rp" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs font-bold focus:outline-none" required>
+        </div>
+        <button type="button" onclick="simpanKas()" class="w-full bg-emerald-900 text-white p-3 rounded-xl text-xs font-black uppercase tracking-wide transition-all active:scale-95">Kirim Data Kas</button>
+    </div>
+</div>
+
+<div id="mAnggota" class="custom-modal" onclick="if(event.target==this)closeModal('mAnggota')">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-xl">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-black uppercase text-emerald-900 text-xs tracking-wider">Tambah Data Warga</h3>
+            <button type="button" onclick="closeModal('mAnggota')" class="text-slate-400 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">Nama Lengkap Warga</label>
+            <input type="text" id="warga_nama" placeholder="Contoh: ANDI WIJAYA" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs font-bold uppercase focus:outline-none" required>
+        </div>
+        <div>
+            <label class="text-[9px] font-bold text-slate-400 uppercase">No. WhatsApp / HP</label>
+            <input type="tel" id="warga_hp" placeholder="08xxxxxxxxxx" class="w-full mt-1 bg-slate-50 border rounded-xl p-2.5 text-xs font-mono font-bold focus:outline-none" required>
+        </div>
+        <button type="button" onclick="simpanWarga()" class="w-full bg-emerald-900 text-white p-3.5 rounded-xl text-xs font-black uppercase tracking-wide transition-all active:scale-95">Simpan Warga Baru</button>
+    </div>
+</div>
+
+<script>
+    // URL Realtime Database Region Asia (TUNTAS Project)
+    const urlKas    = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app/kas_umum.json";
+    const urlIuran  = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app/iuran_warga.json";
+    const urlWarga  = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app/warga.json";
+    const urlAdmin  = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app/admin.json";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Proteksi Halaman Admin
+        if (localStorage.getItem('admin_logged_in') === 'true') {
+            document.getElementById('screen-login-admin').classList.add('hidden');
+            
+            const hariIni = new Date().toISOString().split('T')[0];
+            if(document.getElementById('iTglAdmin')) document.getElementById('iTglAdmin').value = hariIni;
+            if(document.getElementById('kas_tanggal')) document.getElementById('kas_tanggal').value = hariIni;
+            
+            st('home');
+            loadDataFirebase();
+            loadDropdownWarga();
+        }
+    });
+
+    // ENGINE LOGIN ADMIN
+    function loginAdminEngine() {
+        const userInput = document.getElementById('admin_user').value.trim();
+        const passInput = document.getElementById('admin_pass').value;
+
+        if (!userInput || !passInput) { alert('Username dan Password wajib diisi!'); retu
