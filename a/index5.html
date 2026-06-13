@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Admin Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .modal { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 2.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #f1f5f9; transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #064e3b; font-weight: 800; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+        <span>Menghubungkan Database...</span>
+    </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+    <i id="notifIcon" class="fa-solid text-base"></i>
+    <span id="notifText" class="flex-1"></span>
+</div>
+
+<!-- HEADER TERPADU DENGAN TOMBOL MODUL -->
+<header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
+        <div>
+            <h1 class="text-sm font-extrabold text-emerald-950 tracking-tight leading-none">TUNTAS</h1>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Turun Tangan Atasi Sampah</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-1.5">
+        <!-- Tombol Modul Masuk Ke Header Sesuai Request -->
+        <button onclick="switchTab('scr-modul')" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all" title="Buka Modul">
+            <i class="fa-solid fa-cubes text-xs"></i>
+        </button>
+        <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
+            <i class="fa-solid fa-rotate text-xs"></i>
+        </button>
+        <button onclick="logoutAdmin()" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 active:scale-95 transition-all">
+            <i class="fa-solid fa-power-off text-xs"></i>
+        </button>
+    </div>
+</header>
+
+<!-- POP-UP / MODAL INFORMASI LOGIN AUTOMATIC (SIMULASI) -->
+<div id="mInfoLoginPopup" class="modal">
+    <div class="modal-content space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+            <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informasi Penting</span>
+            <button onclick="closeModal('mInfoLoginPopup')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-1">
+            <h4 id="popupInfoJudul" class="text-xs font-black text-slate-800 uppercase">MEMUAT INFORMASI...</h4>
+            <p id="popupInfoIsi" class="text-xs text-slate-600 leading-relaxed font-semibold italic">Belum ada maklumat berkala dari pengurus.</p>
+        </div>
+        <button onclick="closeModal('mInfoLoginPopup')" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Selesai Membaca</button>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 1: KAS (UTAMA / DASHBOARD)          -->
+<!-- ========================================== -->
+<div id="scr-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
+    <!-- Card Utama Hijau Gradasi Modern -->
+    <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-emerald-800/40">
+        <div>
+            <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo Keseluruhan RT 04</p>
+            <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">0</h2>
+        </div>
+        
+        <!-- Baris Card Kecil yang Dinamis Mengikuti Jalur Filter -->
+        <div class="grid grid-cols-3 gap-1.5 pt-3 border-t border-emerald-800/60">
+            <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Saldo Filter</p>
+                <h3 id="totalSaldo" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+            </div>
+            <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Pemasukan</p>
+                <h3 id="textMasuk" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+            </div>
+            <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Pengeluaran</p>
+                <h3 id="textKeluar" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Rentang Tanggal -->
+    <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
+        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal</p>
+        <div class="grid grid-cols-2 gap-2">
+            <input type="date" id="filterMulai" class="modern-in !p-2 text-center" onchange="muatSistemKas()">
+            <input type="date" id="filterSelesai" class="modern-in !p-2 text-center" onchange="muatSistemKas()">
+        </div>
+    </div>
+
+    <!-- 3 Tombol Aksi Pembukuan -->
+    <div class="grid grid-cols-3 gap-2">
+        <button onclick="openModal('mInputKas')" class="bg-emerald-900 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-wallet text-xs"></i> Input Kas</button>
+        <button onclick="openModal('mInputIuran')" class="bg-teal-800 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-receipt text-xs"></i> Input Iuran</button>
+        <button onclick="unduhLaporanPDF()" class="bg-slate-800 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-file-pdf text-xs"></i> Unduh PDF</button>
+    </div>
+
+    <div id="boxKuitansiLink" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2 hidden">
+        <p class="text-[10px] font-black text-emerald-800 uppercase tracking-wider">Kuitansi Digital Siap!</p>
+        <p id="textKodeKuitansi" class="text-xs font-mono font-bold text-slate-700 break-all"></p>
+        <div class="flex gap-2 pt-1">
+            <button id="btnSalinKuitansi" class="bg-white border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex-1">Salin Link</button>
+            <button id="btnKirimWA" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1"><i class="fa-brands fa-whatsapp"></i> Kirim WA</button>
+        </div>
+    </div>
+
+    <!-- Histori Transaksi -->
+    <div class="space-y-2">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Transaksi</h3>
+        <div id="listMutasiKasMasyarakat" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[260px] shadow-sm">
+            <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat histori...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 2: TAMBAH WARGA (MASUK NAV UTAMA)   -->
+<!-- ========================================== -->
+<div id="scr-warga" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Daftarkan Anggota Warga Baru</h2>
+        <form id="formWarga" onsubmit="simpanWarga(event)" class="space-y-2">
+            <input type="text" id="addNama" placeholder="Nama Lengkap Warga" class="modern-in text-xs" required>
+            <input type="tel" id="addHp" placeholder="No WhatsApp" class="modern-in text-xs" required>
+            <input type="text" id="addPass" placeholder="Password Login Warga" class="modern-in text-xs" required>
+            <input type="text" id="addBulan" placeholder="Bulan Bergabung (Contoh: Juni 2026)" class="modern-in text-xs" required>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider">Simpan Akun Warga</button>
+        </form>
+    </div>
+    <div id="listWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm text-xs max-h-[300px] overflow-y-auto"></div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 3: OPERASIONAL TRUCK SAMPAH         -->
+<!-- ========================================== -->
+<div id="scr-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Laporan Sampah Operasional</h2>
+        <form id="formSampah" onsubmit="simpanSampah(event)" class="space-y-3">
+            <input type="date" id="smphTgl" class="modern-in" required>
+            <select id="smphWarga" class="modern-in" required><option value="">-- PILIH NAMA WARGA --</option></select>
+            <select id="smphStatus" class="modern-in" required>
+                <option value="diambil">DIAMBIL</option>
+                <option value="diantar">DIANTAR</option>
+                <option value="kosong">KOSONG</option>
+            </select>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide">Simpan Log Sampah</button>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 4: BUKU ARSIP RIWAYAT TOTAL         -->
+<!-- ========================================== -->
+<div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
+    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Buku Riwayat Arsip Iuran</h2>
+    <div id="listRiwayatIuranWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm">
+        <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat data riwayat...</div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 5: TAB MODUL (PINDAH KE KIRI ATAS)  -->
+<!-- ========================================== -->
+<div id="scr-modul" class="tab-content p-4 space-y-6 animate-fade-in">
+    <!-- SUB MODUL 1: PROFILE & PASSWORD -->
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <div class="flex items-center gap-4 border-b pb-4">
+            <div class="relative w-16 h-16 flex-shrink-0">
+                <img id="profFoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-600 shadow-sm">
+                <button onclick="gantiFotoProfile()" class="absolute bottom-0 right-0 bg-emerald-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i class="fa-solid fa-camera"></i></button>
+            </div>
+            <div>
+                <h3 id="profNama" class="text-xs font-black text-slate-800 uppercase">ADMIN TUNTAS RT 04</h3>
+                <p class="text-[9px] font-mono text-slate-400 mt-0.5">Sistem Pengaturan Foto & Kredensial</p>
+            </div>
+        </div>
+        <form id="formPass" onsubmit="ubahPasswordAdmin(event)" class="space-y-2">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider px-1">Ganti Password Akun Admin</p>
+            <div class="flex gap-2">
+                <input type="text" id="newPass" placeholder="Password Baru" class="modern-in !p-2.5 text-xs" required>
+                <button type="submit" class="bg-slate-800 text-white px-4 rounded-xl text-[10px] font-black uppercase">Update</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- SUB MODUL 2: INFORMASI BERKALA (DENGAN REKONDISI POP-UP LOGIN) -->
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Maklumat / Info Pop-Up</h3>
+        <form id="formInformasiPopup" onsubmit="simpanInfoPopup(event)" class="space-y-2">
+            <input type="text" id="popJudul" placeholder="Judul Pengumuman Pop-up" class="modern-in !p-3 text-xs" required>
+            <textarea id="popIsi" rows="2" placeholder="Isi pesan mendesak yang langsung muncul pasca warga login..." class="modern-in !p-3 text-xs h-auto" required></textarea>
+            <button type="submit" class="w-full bg-amber-700 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Perbarui Info Pop-Up</button>
+        </form>
+    </div>
+
+    <!-- SUB MODUL 3: BERITA (MINI BLOG UNTUK UMUM) -->
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Berita & Publikasi (Mini Blog)</h3>
+        <form id="formBerita" onsubmit="simpanBerita(event)" class="space-y-2">
+            <input type="text" id="newsJudul" placeholder="Judul Berita Umum" class="modern-in !p-3 text-xs" required>
+            <textarea id="newsIsi" rows="2" placeholder="Tulis rilis berita seputar gerakan lingkungan..." class="modern-in !p-3 text-xs h-auto" required></textarea>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Terbitkan Rilis Blog</button>
+        </form>
+        <div id="listBeritaAdmin" class="bg-slate-50 rounded-xl divide-y divide-slate-200 p-2 space-y-2 max-h-[150px] overflow-y-auto"></div>
+    </div>
+
+    <!-- SUB MODUL 4: KOTAK SARAN & ASPIRASI -->
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
+        <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kotak Tampung Aspirasi & Saran</h3>
+        <div id="listSaranWargaAdmin" class="divide-y divide-slate-100 max-h-[160px] overflow-y-auto"></div>
+    </div>
+</div>
+
+<!-- MODAL BOX: INPUT KAS MUTASI UMUM -->
+<div id="mInputKas" class="modal" onclick="if(event.target==this)closeModal('mInputKas')">
+    <div class="modal-content space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-extrabold uppercase text-emerald-900 text-xs">Catat Buku Kas Umum</h3>
+            <button onclick="closeModal('mInputKas')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="formKasUmum" onsubmit="simpanKasUmum(event)" class="space-y-3">
+            <select id="kasJenis" class="modern-in"><option value="masuk">Pemasukan Kas</option><option value="keluar">Pengeluaran Kas</option></select>
+            <input type="number" id="kasNominal" placeholder="Nominal" class="modern-in" required>
+            <input type="text" id="kasKet" placeholder="Keterangan Mutasi" class="modern-in" required>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Mutasi</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL BOX: INPUT IURAN DIGITAL -->
+<div id="mInputIuran" class="modal" onclick="if(event.target==this)closeModal('mInputIuran')">
+    <div class="modal-content space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-extrabold uppercase text-emerald-900 text-xs">Penerbitan Iuran Sampah</h3>
+            <button onclick="closeModal('mInputIuran')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="formIuran" onsubmit="simpanIuran(event)" class="space-y-3">
+            <input type="date" id="iuranTgl" class="modern-in" required>
+            <select id="iuranWarga" class="modern-in" required><option value="">-- PILIH NAMA WARGA --</option></select>
+            <input type="text" id="iuranBulan" placeholder="Untuk Bulan (Contoh: Juni 2026)" class="modern-in" required>
+            <input type="number" id="iuranNominal" placeholder="Nominal (Rupiah)" class="modern-in" required>
+            <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-xs font-black uppercase">Proses Kuitansi</button>
+        </form>
+    </div>
+</div>
+
+<!-- FIXED 5-TAB BOTTOM NAVBAR TERBARU (DENGAN SLOT TAMBAH WARGA) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
+    <button onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
+    <button onclick="switchTab('scr-warga')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-plus text-base mb-0.5"></i>+WARGA</button>
+    <button onclick="openModal('mInputIuran')" class="flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-circle-plus text-base mb-0.5 text-teal-700"></i>+IURAN</button>
+    <button onclick="switchTab('scr-sampah')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-truck-garbage text-base mb-0.5"></i>SMPH</button>
+    <button onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>HISTORI</button>
+</nav>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+    let DATA_KAS_TERFILTER = []; 
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const hariIni = new Date();
+        const y = hariIni.getFullYear();
+        const m = String(hariIni.getMonth() + 1).padStart(2, '0');
+        document.getElementById('filterMulai').value = `${y}-${m}-01`;
+        document.getElementById('filterSelesai').value = hariIni.toISOString().split('T')[0];
+        document.getElementById('iuranTgl').value = hariIni.toISOString().split('T')[0];
+        document.getElementById('smphTgl').value = hariIni.toISOString().split('T')[0];
+
+        sinkronUlangData().then(() => {
+            // Jalankan Simulasi Pop-up Informasi Setelah Berhasil Login/Koneksi Berhasil Terbuka
+            jalankanPopupInfoOtomatis();
+        });
+    });
+
+    async function sinkronUlangData() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        await Promise.all([muatSistemKas(), muatSistemWarga(), muatRiwayatIuran(), muatBeritaAdmin(), muatSaranAdmin()]);
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
+            event.currentTarget.classList.add('active');
+        }
+    }
+
+    // ENGINE KAS: MENGHITUNG SALDO TOTAL KESELURUHAN VS SALDO TERFILTER
+    async function muatSistemKas() {
+        const res = await fetch(`${DB_URL}/kas_rt04.json`);
+        const data = await res.json();
+        const list = document.getElementById('listMutasiKasMasyarakat');
+        list.innerHTML = "";
+
+        let start = new Date(document.getElementById('filterMulai').value);
+        let end = new Date(document.getElementById('filterSelesai').value);
+        end.setHours(23,59,59,999);
+
+        let saldoKeseluruhan = 0; 
+        let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
+        DATA_KAS_TERFILTER = [];
+
+        if(!data) {
+            list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Buku Kas Kosong.</div>`;
+            updateTampilanCardKas(0, 0, 0, 0); return;
+        }
+
+        Object.keys(data).forEach(key => {
+            const v = data[key];
+            const nom = parseInt(v.nominal) || 0;
+            const tglItem = new Date(v.tanggal);
+
+            // 1. Hitung Saldo Keseluruhan Tanpa Batas Filter
+            if(v.jenis === 'masuk') {
+                saldoKeseluruhan += nom;
+            } else {
+                saldoKeseluruhan -= nom;
+            }
+
+            // 2. Hitung Nilai yang Mengikuti Filter Rentang Tanggal
+            if(tglItem >= start && tglItem <= end) {
+                if(v.jenis === 'masuk') {
+                    mskTerapit += nom;
+                } else {
+                    klrTerapit += nom;
+                }
+                sldTerapit = mskTerapit - klrTerapit;
+
+                DATA_KAS_TERFILTER.push({ tanggal: v.tanggal, keterangan: v.keterangan, jenis: v.jenis, nominal: nom });
+
+                // Format Histori Sesuai Request: Tanpa Rp, Tanpa +/-, Warna Tegas
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 flex justify-between items-center bg-white">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                            <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
+                                ${nom.toLocaleString('id-ID')}
+                            </span>
+                            <button onclick="hapusKas('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+
+        updateTampilanCardKas(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+    }
+
+    function updateTampilanCardKas(sk, sf, m, k) {
+        document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
+        document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+        document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+        document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+    }
+
+    function simpanKasUmum(e) {
+        e.preventDefault();
+        const body = { jenis: document.getElementById('kasJenis').value, nominal: parseInt(document.getElementById('kasNominal').value)||0, keterangan: document.getElementById('kasKet').value.trim().toUpperCase(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { closeModal('mInputKas'); document.getElementById('formKasUmum').reset(); showNotif('Kas Berhasil Dicatat', 'sukses'); muatSistemKas(); });
+    }
+
+    function hapusKas(key) {
+        if(!confirm('Hapus transaksi ini?')) return;
+        fetch(`${DB_URL}/kas_rt04/${key}.json`, { method: 'DELETE' }).then(() => { muatSistemKas(); });
+    }
+
+    // INPUT IURAN: FORMAT KETERANGAN OTOMATIS (NAMA - BULAN)
+    function simpanIuran(e) {
+        e.preventDefault();
+        const token = `T-${Math.floor(100000 + Math.random() * 900000)}`;
+        const drop = document.getElementById('iuranWarga');
+        const nWarga = drop.options[drop.selectedIndex].text;
+        const bPeriode = document.getElementById('iuranBulan').value.trim().toUpperCase();
+
+        // Format Mutasi Histori: Cukup Nama - Bulan Saja (Contoh: BUDI SANTOSO - JUNI 2026)
+        const formatKeteranganIuran = `${nWarga} - ${bPeriode}`;
+
+        const body = { tanggal: document.getElementById('iuranTgl').value, warga_key: drop.value, nama_warga: nWarga, bulan: bPeriode, nominal: parseInt(document.getElementById('iuranNominal').value)||0, token_kuitansi: token };
+
+        fetch(`${DB_URL}/iuran_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => {
+            const kasKredit = { jenis: 'masuk', nominal: body.nominal, keterangan: formatKeteranganIuran, tanggal: body.tanggal };
+            fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasKredit) }).then(() => {
+                muatSistemKas(); muatRiwayatIuran();
+            });
+
+            const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/${token}`;
+            document.getElementById('textKodeKuitansi').innerText = `TOKEN: ${token}\nURL: ${linkKuitansi}`;
+            document.getElementById('boxKuitansiLink').classList.remove('hidden');
+
+            document.getElementById('btnSalinKuitansi').onclick = () => { navigator.clipboard.writeText(linkKuitansi); showNotif('Link disalin!', 'sukses'); };
+            document.getElementById('btnKirimWA').onclick = () => { window.open(`https://api.whatsapp.com/send?text=Terima+kasih+Bapak%2FIbu+${encodeURIComponent(nWarga)},+pembayaran+iuran+TUNTAS+sudah+diterima.+Kuitansi+digital:+${encodeURIComponent(linkKuitansi)}`, '_blank'); };
+            
+            closeModal('mInputIuran');
+            document.getElementById('formIuran').reset(); 
+            showNotif('Iuran Sukses Dicatat', 'sukses');
+        });
+    }
+
+    // MODUL SUB: INFORMASI POP-UP LOGIN ENGINE
+    function simpanInfoPopup(e) {
+        e.preventDefault();
+        const body = { judul: document.getElementById('popJudul').value.trim().toUpperCase(), isi: document.getElementById('popIsi').value.trim(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/informasi_popup.json`, { method: 'SET', body: JSON.stringify(body) }).then(() => {
+            showNotif('Info Pop-Up Diperbarui', 'sukses');
+            jalankanPopupInfoOtomatis();
+        });
+    }
+
+    async function jalankanPopupInfoOtomatis() {
+        const res = await fetch(`${DB_URL}/informasi_popup.json`);
+        const data = await res.json();
+        if(data && data.judul) {
+            document.getElementById('popupInfoJudul').innerText = data.judul;
+            document.getElementById('popupInfoIsi').innerText = data.isi;
+            openModal('mInfoLoginPopup'); // Munculkan pop-up otomatis
+        }
+    }
+
+    // MODUL SUB: BERITA (MINI BLOG UMUM) ENGINE
+    function simpanBerita(e) {
+        e.preventDefault();
+        const body = { judul: document.getElementById('newsJudul').value.trim().toUpperCase(), isi: document.getElementById('newsIsi').value.trim(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/pengumuman.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formBerita').reset(); showNotif('Rilis Blog Disiarkan', 'sukses'); muatBeritaAdmin(); });
+    }
+
+    async function muatBeritaAdmin() {
+        const res = await fetch(`${DB_URL}/pengumuman.json`);
+        const data = await res.json();
+        const list = document.getElementById('listBeritaAdmin');
+        list.innerHTML = "";
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-2 bg-white rounded-lg border border-slate-100">
+                    <div class="flex justify-between items-center"><h5 class="text-[11px] font-black text-slate-800">${data[key].judul}</h5><button onclick="hapusBerita('${key}')" class="text-slate-300 hover:text-rose-500 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-tight">${data[key].isi}</p>
+                </div>
+            `);
+        });
+    }
+
+    function hapusBerita(key) {
+        if(!confirm('Hapus rilis blog ini?')) return;
+        fetch(`${DB_URL}/pengumuman/${key}.json`, { method: 'DELETE' }).then(() => { muatBeritaAdmin(); });
+    }
+
+    // MODUL SUB: SARAN ENGINE
+    async function muatSaranAdmin() {
+        const res = await fetch(`${DB_URL}/saran_warga.json`);
+        const data = await res.json();
+        const list = document.getElementById('listSaranWargaAdmin');
+        list.innerHTML = "";
+        if(!data) { list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada saran masuk.</div>`; return; }
+        Object.keys(data).forEach(key => {
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-2.5 my-1 bg-slate-50 rounded-xl border border-slate-100">
+                    <div class="flex justify-between items-center text-[9px] font-black"><span class="text-emerald-800 uppercase">${data[key].nama_warga}</span><span class="text-slate-400">${data[key].tanggal}</span></div>
+                    <p class="text-[11px] text-slate-600 italic mt-0.5">"${data[key].isi_saran}"</p>
+                </div>
+            `);
+        });
+    }
+
+    // MANAGEMENT DATA WARGA
+    async function muatSistemWarga() {
+        const res = await fetch(`${DB_URL}/warga_rt04.json`);
+        const data = await res.json();
+        const list = document.getElementById('listWarga');
+        const d1 = document.getElementById('iuranWarga');
+        const d2 = document.getElementById('smphWarga');
+
+        list.innerHTML = ""; d1.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>'; d2.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>';
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            const w = data[key];
+            d1.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+            d2.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+            list.insertAdjacentHTML('beforeend', `
+                <div class="p-3 flex justify-between items-center bg-white my-1 rounded-xl border border-slate-100">
+                    <div>
+                        <p class="font-extrabold text-slate-700 uppercase tracking-wide">${w.nama}</p>
+                        <p class="text-[9px] text-slate-400 font-mono">WA: ${w.username} | Reg: ${w.bulan_bergabung}</p>
+                    </div>
+                    <button onclick="hapusWarga('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-user-xmark text-xs"></i></button>
+                </div>
+            `);
+        });
+    }
+
+    function simpanWarga(e) {
+        e.preventDefault();
+        const body = { nama: document.getElementById('addNama').value.trim().toUpperCase(), username: document.getElementById('addHp').value.trim(), password: document.getElementById('addPass').value.trim(), bulan_bergabung: document.getElementById('addBulan').value.trim(), foto: "default.png" };
+        fetch(`${DB_URL}/warga_rt04.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formWarga').reset(); showNotif('Warga Berhasil Didaftarkan', 'sukses'); muatSistemWarga(); });
+    }
+
+    function hapusWarga(key) {
+        if(!confirm('Hapus warga dari database?')) return;
+        fetch(`${DB_URL}/warga_rt04/${key}.json`, { method: 'DELETE' }).then(() => { muatSistemWarga(); });
+    }
+
+    // LOGIC AMBIL / ANTAR SAMPAH
+    function simpanSampah(e) {
+        e.preventDefault();
+        const drop = document.getElementById('smphWarga');
+        const body = { tanggal: document.getElementById('smphTgl').value, warga_key: drop.value, nama_warga: drop.options[drop.selectedIndex].text, status: document.getElementById('smphStatus').value, jam_diambil: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB" };
+        fetch(`${DB_URL}/laporan_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formSampah').reset(); showNotif('Log Sampah Tersimpan', 'sukses'); });
+    }
+
+    // BUKU BESAR RIWAYAT ARSIP IURAN TOTAL
+    async function muatRiwayatIuran() {
+        const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+        const data = await res.json();
+        const list = document.getElementById('listRiwayatIuranWarga');
+        list.innerHTML = "";
+        if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Kosong.</div>`; return; }
+        Object.keys(data).forEach(key => {
+            const i = data[key];
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-4 flex justify-between items-center bg-white">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-700 uppercase">${i.nama_warga}</h4>
+                        <p class="text-[9px] text-slate-400 font-bold mt-0.5">${i.bulan} | Token: ${i.token_kuitansi}</p>
+                    </div>
+                    <span class="text-xs font-black text-slate-800">${i.nominal.toLocaleString('id-ID')}</span>
+                </div>
+            `);
+        });
+    }
+
+    // DOWNLOAD PDF SESUAI JALUR FILTER TANGGAL
+    function unduhLaporanPDF() {
+        if(DATA_KAS_TERFILTER.length === 0) { alert("Tidak ada data transaksi pada rentang tanggal ini."); return; }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFont("Helvetica", "bold");
+        doc.text("LAPORAN OPERASIONAL KAS TUNTAS RT 04", 14, 15);
+        doc.setFontSize(9); doc.setFont("Helvetica", "normal");
+        doc.text(`Periode: ${document.getElementById('filterMulai').value} s/d ${document.getElementById('filterSelesai').value}`, 14, 21);
+
+        const rows = [];
+        DATA_KAS_TERFILTER.forEach((item, idx) => {
+            rows.push([idx + 1, item.tanggal, item.keterangan, item.jenis.toUpperCase(), item.nominal.toLocaleString('id-ID')]);
+        });
+        doc.autoTable({ startY: 26, head: [['No', 'Tanggal', 'Keterangan', 'Jenis', 'Nominal']], body: rows, headStyles: { fillColor: [6, 78, 59] } });
+        doc.save(`Kas_Tuntas_RT04_${document.getElementById('filterMulai').value}.pdf`);
+    }
+
+    function ubahPasswordAdmin(e) {
+        e.preventDefault();
+        fetch(`${DB_URL}/admin_account/password.json`, { method: 'PUT', body: JSON.stringify(document.getElementById('newPass').value.trim()) }).then(() => { document.getElementById('formPass').reset(); showNotif('Password Admin Diperbarui', 'sukses'); });
+    }
+
+    function gantiFotoProfile() { const url = prompt("Masukkan URL Link Foto Profil:"); if(url) document.getElementById('profFoto').src = url; }
+    function logoutAdmin() { localStorage.clear(); window.location.href = '../index.html'; }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
