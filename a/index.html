@@ -25,39 +25,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-emerald-100 pb-24">
 
-<div id="screen-login-admin" class="fixed inset-0 bg-slate-900 z-[999999] flex flex-col justify-between p-6">
-    <div class="h-4"></div>
-
-    <div class="w-full flex flex-col items-center">
-        <div class="text-center mb-6">
-            <img src="../logo.png" alt="Logo TUNTAS" class="w-16 h-16 mx-auto object-contain mb-3 drop-shadow-md brightness-110" onerror="this.src='logo.png'">
-            <h1 class="text-3xl font-black text-emerald-400 leading-tight">Tuntas. Admin</h1>
-            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">Sistem Input Kas & Iuran RT 04</p>
-        </div>
-
-        <div class="max-w-md w-full bg-white p-6 rounded-[2rem] shadow-2xl shadow-black/40 space-y-4">
-            <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Username Admin</label>
-                <input type="text" id="admin_user" placeholder="Masukkan username admin" class="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none">
-            </div>
-            <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Password Admin</label>
-                <div class="relative w-full mt-1">
-                    <input type="password" id="admin_pass" placeholder="Masukkan password" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-3 pr-10 py-2.5 text-xs font-bold focus:outline-none">
-                    <button type="button" onclick="togglePasswordVisibility('admin_pass', 'eye-icon-admin')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 active:text-emerald-950">
-                        <i id="eye-icon-admin" class="fa-solid fa-eye text-xs"></i>
-                    </button>
-                </div>
-            </div>
-            <button type="button" onclick="loginAdminEngine()" class="w-full bg-emerald-950 text-white p-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all active:scale-95">Masuk Dashboard</button>
-        </div>
-    </div>
-
-    <div class="text-center pt-8 pb-2">
-        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">&copy; 2026 TUNTAS RT 04. Sisi Pengurus.</p>
-    </div>
-</div>
-
 <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
     <i id="notifIcon" class="fa-solid text-base"></i>
     <span id="notifText" class="flex-1"></span>
@@ -68,18 +35,15 @@
     
     <header class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-2.5">
-            <img src="../logo.png" alt="Logo Tuntas" class="w-10 h-10 object-contain rounded-xl" onerror="this.src='logo.png'">
+            <img src="../logo.png" alt="Logo Tuntas" class="w-10 h-10 object-contain rounded-xl" onerror="this.style.display='none'">
             <div>
                 <h1 class="text-xl font-black text-emerald-900 leading-tight">Tuntas.</h1>
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bendahara / Pengurus RT 04</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div>
             <button type="button" onclick="openModal('mAnggota')" class="w-9 h-9 flex items-center justify-center bg-white border border-slate-100 text-slate-600 rounded-xl shadow-sm transition-all active:scale-90">
                 <i class="fa-solid fa-user-plus text-xs"></i>
-            </button>
-            <button type="button" onclick="logoutAdmin()" class="w-9 h-9 flex items-center justify-center bg-rose-50 border border-rose-100 text-rose-600 rounded-xl shadow-sm transition-all active:scale-90">
-                <i class="fa-solid fa-right-from-bracket text-xs"></i>
             </button>
         </div>
     </header>
@@ -267,30 +231,292 @@
 </div>
 
 <script>
-    // SINKRONISASI URL: Menggunakan warga.json agar terhubung langsung dengan modul login warga
+    // URL REST API Node-Node Firebase Realtime Database
     const urlKas    = "https://tuntas04-default-rtdb.firebaseio.com/kas_umum.json";
     const urlIuran  = "https://tuntas04-default-rtdb.firebaseio.com/iuran_warga.json";
-    const urlWarga  = "https://tuntas04-default-rtdb.firebaseio.com/warga.json";
-    const urlAdmin  = "https://tuntas04-default-rtdb.firebaseio.com/admin.json";
+    const urlWarga  = "https://tuntas04-default-rtdb.firebaseio.com/warga_rt04.json";
 
     window.addEventListener('DOMContentLoaded', () => {
-        // Cek Session Status Login Admin
-        if (localStorage.getItem('admin_logged_in') === 'true') {
-            document.getElementById('screen-login-admin').classList.add('hidden');
-            
-            const hariIni = new Date().toISOString().split('T')[0];
-            if(document.getElementById('iTglAdmin')) document.getElementById('iTglAdmin').value = hariIni;
-            if(document.getElementById('kas_tanggal')) document.getElementById('kas_tanggal').value = hariIni;
-            
-            st('home'); 
-            loadDataFirebase(); 
-            loadDropdownWarga(); 
-        }
+        // Set otomatis input tanggal ke hari ini
+        const hariIni = new Date().toISOString().split('T')[0];
+        if(document.getElementById('iTglAdmin')) document.getElementById('iTglAdmin').value = hariIni;
+        if(document.getElementById('kas_tanggal')) document.getElementById('kas_tanggal').value = hariIni;
+        
+        st('home'); // Set default screen ke Home
+        loadDataFirebase(); // Tarik mutasi kas umum
+        loadDropdownWarga(); // Tarik daftar warga & log setoran iuran
     });
 
-    // ENGINE LOGIKA LOGIN ADMIN
-    function loginAdminEngine() {
-        const userInput = document.getElementById('admin_user').value.trim();
-        const passInput = document.getElementById('admin_pass').value;
+    // --------------------------------------------------------
+    // CORE 1: MANAJEMEN MUTASI KAS UMUM
+    // --------------------------------------------------------
+    function loadDataFirebase() {
+        fetch(urlKas)
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('listTransaksi');
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = `<div class="bg-white p-4 rounded-2xl text-center border border-slate-100 text-slate-400 text-xs"><i class="fa-solid fa-folder-open block text-base mb-1 text-slate-300"></i>Belum ada transaksi di Firebase.</div>`;
+                updateSummary(0, 0, 0);
+                return;
+            }
 
-        if (!userInput || !passInput) { alert('Username dan Passwo
+            let saldo = 0, masuk = 0, keluar = 0, html = '';
+            const keys = Object.keys(data).reverse(); // Urutkan data terbaru paling atas
+            
+            keys.forEach(key => {
+                const tx = data[key];
+                const nom = parseInt(tx.nominal) || 0;
+                const jenis = (tx.jenis || 'masuk').toLowerCase();
+                const colorTxt = (jenis === 'keluar') ? 'text-rose-600' : 'text-emerald-600';
+                const sign = (jenis === 'keluar') ? '-' : '+';
+
+                if (jenis === 'keluar') {
+                    keluar += nom;
+                    saldo -= nom;
+                } else {
+                    masuk += nom;
+                    saldo += nom;
+                }
+
+                html += `
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="space-y-0.5 pr-2 flex-1">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase">${escapeHtml(tx.keterangan)}</h4>
+                        <p class="text-[9px] text-slate-400 font-bold">${tx.tanggal}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-black ${colorTxt} whitespace-nowrap">
+                            ${sign} Rp ${nom.toLocaleString('id-ID')}
+                        </span>
+                        <button type="button" onclick="hapusKas('${key}')" class="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center transition-all active:scale-90">
+                            <i class="fa-regular fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+            updateSummary(saldo, masuk, keluar);
+        })
+        .catch(() => showNotif('Gagal memuat mutasi kas', 'gagal'));
+    }
+
+    function updateSummary(saldo, masuk, keluar) {
+        document.getElementById('txtSaldo').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
+        document.getElementById('txtTotalMasuk').innerText = 'Rp ' + masuk.toLocaleString('id-ID');
+        document.getElementById('txtTotalKeluar').innerText = 'Rp ' + keluar.toLocaleString('id-ID');
+    }
+
+    function simpanKas() {
+        const tanggal = document.getElementById('kas_tanggal').value + ' ' + new Date().toTimeString().split(' ')[0];
+        const jenis = document.getElementById('kas_jenis').value;
+        const keterangan = document.getElementById('kas_keterangan').value;
+        const nominal = parseInt(document.getElementById('kas_nominal').value);
+
+        if(!keterangan || !nominal) { alert('Harap isi semua kolom kas!'); return; }
+
+        const payload = { tanggal, jenis, keterangan, nominal };
+
+        fetch(urlKas, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            closeModal('mKas');
+            showNotif('Sukses mencatat kas!', 'sukses');
+            document.getElementById('kas_keterangan').value = '';
+            document.getElementById('kas_nominal').value = '';
+            loadDataFirebase();
+        })
+        .catch(() => showNotif('Gagal koneksi Firebase', 'gagal'));
+    }
+
+    function hapusKas(key) {
+        if (!confirm('Yakin ingin menghapus transaksi ini dari Firebase?')) return;
+        fetch(urlKas.replace('.json', `/${key}.json`), { method: 'DELETE' })
+        .then(() => {
+            showNotif('Transaksi kas terhapus!', 'sukses');
+            loadDataFirebase();
+        })
+        .catch(() => showNotif('Gagal menghapus kas', 'gagal'));
+    }
+
+    // --------------------------------------------------------
+    // CORE 2: MANAJEMEN WARGA & DROPDOWN IURAN
+    // --------------------------------------------------------
+    function loadDropdownWarga() {
+        fetch(urlWarga)
+        .then(res => res.json())
+        .then(data => {
+            const selectWarga = document.getElementById('iuran_nama');
+            if(!data || Object.keys(data).length === 0) {
+                selectWarga.innerHTML = '<option value="">-- Belum Ada Data Warga --</option>';
+                return;
+            }
+            
+            let htmlOptions = '<option value="">-- Pilih Warga RT 04 --</option>';
+            Object.keys(data).forEach(key => {
+                if(data[key] && data[key].nama) {
+                    htmlOptions += `<option value="${escapeHtml(data[key].nama)}">${escapeHtml(data[key].nama)}</option>`;
+                }
+            });
+            selectWarga.innerHTML = htmlOptions;
+        });
+
+        loadLogIuran();
+    }
+
+    function simpanWarga() {
+        const nama = document.getElementById('warga_nama').value.toUpperCase().trim();
+        const hp = document.getElementById('warga_hp').value.trim();
+
+        if(!nama || !hp) { alert('Nama dan No HP wajib diisi!'); return; }
+
+        fetch(urlWarga, {
+            method: 'POST',
+            body: JSON.stringify({ nama, hp }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            closeModal('mAnggota');
+            showNotif('Warga baru berhasil didaftarkan!', 'sukses');
+            document.getElementById('warga_nama').value = '';
+            document.getElementById('warga_hp').value = '';
+            loadDropdownWarga();
+        })
+        .catch(() => showNotif('Gagal menyimpan warga', 'gagal'));
+    }
+
+    // --------------------------------------------------------
+    // CORE 3: MANAJEMEN SETORAN IURAN WARGA
+    // --------------------------------------------------------
+    function simpanIuran() {
+        const tanggal = document.getElementById('iTglAdmin').value + ' ' + new Date().toTimeString().split(' ')[0];
+        const nama_warga = document.getElementById('iuran_nama').value;
+        const bulan = document.getElementById('iuran_bulan').value;
+        const nominal = parseInt(document.getElementById('iuran_nominal').value);
+
+        if(!nama_warga || !nominal) { alert('Harap tentukan nama warga dan jumlah nominal!'); return; }
+
+        const payloadIuran = { tanggal, nama_warga, bulan, nominal };
+
+        fetch(urlIuran, {
+            method: 'POST',
+            body: JSON.stringify(payloadIuran),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            const payloadKasTembusan = {
+                tanggal: tanggal,
+                jenis: 'masuk',
+                keterangan: `IURAN ${bulan.toUpperCase()} - ${nama_warga.toUpperCase()}`,
+                nominal: nominal
+            };
+            return fetch(urlKas, {
+                method: 'POST',
+                body: JSON.stringify(payloadKasTembusan),
+                headers: { 'Content-Type': 'application/json' }
+            });
+        })
+        .then(() => {
+            showNotif('Iuran berhasil dicatat & masuk kas!', 'sukses');
+            document.getElementById('iuran_nama').value = '';
+            loadDataFirebase();
+            loadLogIuran();
+            st('home');
+        })
+        .catch(() => showNotif('Gagal memproses iuran', 'gagal'));
+    }
+
+    function loadLogIuran() {
+        fetch(urlIuran)
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('listLogIuran');
+            if(!data || Object.keys(data).length === 0) {
+                container.innerHTML = `<div class="bg-white p-4 rounded-2xl text-center border border-slate-100 text-slate-400 text-xs">Belum ada riwayat iuran masuk.</div>`;
+                return;
+            }
+
+            let htmlLog = '';
+            const keys = Object.keys(data).reverse();
+            keys.slice(0, 10).forEach(key => {
+                const item = data[key];
+                htmlLog += `
+                <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center text-xs shadow-sm">
+                    <div>
+                        <p class="font-extrabold text-slate-800 uppercase">${escapeHtml(item.nama_warga)}</p>
+                        <p class="text-[9px] text-slate-400 font-bold">Iuran Bulan: <span class="text-emerald-700 font-black">${item.bulan}</span></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-emerald-600">Rp ${item.nominal.toLocaleString('id-ID')}</p>
+                        <p class="text-[8px] font-medium text-slate-400">${item.tanggal.split(' ')[0]}</p>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = htmlLog;
+        });
+    }
+
+    // --------------------------------------------------------
+    // UTILITIES CONTROL ENGINE (SPA NAV & MODAL)
+    // --------------------------------------------------------
+    function st(screenId) {
+        // PERBAIKAN: Menyembunyikan semua elemen tab-content secara aman tanpa merusak inisialisasi awal
+        const contents = document.getElementsByClassName('tab-content');
+        for (let i = 0; i < contents.length; i++) { 
+            contents[i].classList.remove('active');
+            contents[i].style.display = 'none'; 
+        }
+        
+        // Membuka tab yang dituju berdasarkan ID yang benar
+        const targetScr = document.getElementById('screen-' + screenId);
+        if(targetScr) {
+            targetScr.classList.add('active');
+            targetScr.style.display = 'block';
+        }
+        
+        // Menata ulang warna aktif pada ikon navbar bawah
+        const buttons = document.querySelectorAll('nav button');
+        buttons.forEach(btn => {
+            btn.classList.remove('text-emerald-900');
+            btn.classList.add('text-slate-400');
+        });
+        const activeBtn = document.getElementById('n-' + screenId);
+        if(activeBtn) {
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('text-emerald-900');
+        }
+    }
+
+    function showNotif(msg, type) {
+        const alertBox = document.getElementById('notificationAlert');
+        const icon = document.getElementById('notifIcon');
+        const text = document.getElementById('notifText');
+
+        text.innerText = msg;
+        alertBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800');
+        icon.classList.remove('fa-circle-check', 'text-emerald-600', 'fa-circle-xmark', 'text-rose-600');
+
+        if(type === 'sukses') {
+            alertBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            icon.classList.add('fa-circle-check', 'text-emerald-600');
+        } else {
+            alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+            icon.classList.add('fa-circle-xmark', 'text-rose-600');
+        }
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 4000);
+    }
+
+    // PERBAIKAN: .add('hidden') diganti ke .classList.add('hidden') agar script tidak macet total
+    function closeNotif() { document.getElementById('notificationAlert').classList.add('hidden'); }
+    function openModal(id) { document.getElementById(id).style.setProperty('display', 'flex', 'important'); }
+    function closeModal(id) { document.getElementById(id).style.setProperty('display', 'none', 'important'); }
+    function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : ''; }
+</script>
+
+</body>
+</html>
