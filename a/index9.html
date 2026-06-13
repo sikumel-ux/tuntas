@@ -3,103 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin TUNTAS - Input Iuran</title>
+    <title>Panel Dashboard TUNTAS RT 04</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 999px; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 antialiased">
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        <!-- HEADER -->
-        <div class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-            <div>
-                <h1 class="text-2xl font-extrabold text-emerald-400 tracking-wider">TUNTAS.</h1>
-                <p class="text-xs text-slate-400">Manajemen Iuran Sampah RT 04 Dongkelan</p>
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- TOP HEADER & STATS BAR -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-extrabold text-emerald-400 tracking-wider flex items-center gap-2">
+                    TUNTAS<span class="text-white">.</span>
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Turun Tangan Atasi Sampah • RT 04 Dongkelan</p>
             </div>
-            <div class="text-right">
-                <span class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-500/20">Admin Panel Active</span>
+            <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-700/50 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Saldo Terkumpul</p>
+                    <h3 id="statTotalSaldo" class="text-xl font-extrabold text-emerald-400 mt-0.5">Rp 0</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-lg">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+            <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-700/50 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Transaksi Bulan Ini</p>
+                    <h3 id="statTransaksiBulan" class="text-xl font-extrabold text-blue-400 mt-0.5">0 Trasaksi</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- FORM INPUT (KIRI) -->
-            <div class="md:col-span-1 bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4 shadow-xl h-fit">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700 pb-2">Input Iuran Baru</h2>
+        <!-- MAIN LAYOUT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- COLUMN 1: FORM INPUT UTAMA (KIRI) -->
+            <div class="lg:col-span-1 bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-4 h-fit">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-700">
+                    <i class="fa-solid fa-square-plus text-emerald-400"></i>
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Input Pembayaran</h2>
+                </div>
                 <form id="formIuran" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Warga</label>
-                        <input type="text" id="namaWarga" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white uppercase">
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Nama Warga</label>
+                        <input type="text" id="namaWarga" required placeholder="CONTOH: SYAMSUDIN" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white font-semibold uppercase placeholder:text-slate-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nomor WhatsApp Warga</label>
-                        <input type="tel" id="noHp" placeholder="628xxxxxxxxxx" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white">
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">WhatsApp Warga</label>
+                        <input type="tel" id="noHp" placeholder="628xxxxxxxxxx" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white font-mono">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Bulan</label>
+                            <select id="bulanIuran" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white">
+                                <option value="Januari">Januari</option><option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option><option value="April">April</option>
+                                <option value="Mei">Mei</option><option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option><option value="Agustus">Agustus</option>
+                                <option value="September">September</option><option value="Oktober">Oktober</option>
+                                <option value="November">November</option><option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Nominal (Rp)</label>
+                            <input type="number" id="nominal" value="50000" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white font-bold text-emerald-400">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Bulan Iuran</label>
-                        <select id="bulanIuran" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white">
-                            <option value="Januari">Januari</option>
-                            <option value="Februari">Februari</option>
-                            <option value="Maret">Maret</option>
-                            <option value="April">April</option>
-                            <option value="Mei">Mei</option>
-                            <option value="Juni">Juni</option>
-                            <option value="Juli">Juli</option>
-                            <option value="Agustus">Agustus</option>
-                            <option value="September">September</option>
-                            <option value="Oktober">Oktober</option>
-                            <option value="November">November</option>
-                            <option value="Desember">Desember</option>
-                        </select>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Tanggal Transaksi</label>
+                        <input type="date" id="tanggalBayar" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white font-mono">
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nominal (Rp)</label>
-                        <input type="number" id="nominal" value="50000" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white font-bold text-emerald-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tanggal Bayar</label>
-                        <input type="date" id="tanggalBayar" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-white">
-                    </div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition duration-200 shadow-lg text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Simpan & Buat Kuitansi
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg text-xs flex items-center justify-center gap-2 uppercase tracking-wider">
+                        <i class="fa-solid fa-paper-plane"></i> Kirim & Cetak Kuitansi
                     </button>
                 </form>
             </div>
 
-            <!-- TABEL LOG RIWAYAT (KANAN) -->
-            <div class="md:col-span-2 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col justify-between">
-                <div class="space-y-4">
-                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700 pb-2">Riwayat Pembayaran Terbaru</h2>
+            <!-- COLUMN 2: TABEL LOG & REKAP BULANAN (KANAN) -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <!-- ATAS: REKAP MATRIX IURAN WARGA (GRID BULANAN) -->
+                <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-700">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-table-cells text-blue-400"></i>
+                            <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Matrix Pembayaran Tahunan</h2>
+                        </div>
+                        <!-- Fitur Pencarian Warga Live -->
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+                            <input type="text" id="cariWarga" onkeyup="filterTabelWarga()" placeholder="Cari nama warga..." class="bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 w-full sm:w-48 text-white">
+                        </div>
+                    </div>
+                    
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                        <table class="w-full text-center text-[11px] border-collapse">
                             <thead>
-                                <tr class="border-b border-slate-700 text-slate-400">
-                                    <th class="py-2">Warga</th>
-                                    <th class="py-2">Bulan</th>
-                                    <th class="py-2">Nominal</th>
-                                    <th class="py-2">Token</th>
-                                    <th class="py-2 text-right">Aksi</th>
+                                <tr class="bg-slate-900/80 text-slate-400 font-bold border border-slate-700">
+                                    <th class="p-2.5 text-left min-w-[120px] border border-slate-700">Nama Warga</th>
+                                    <th class="p-1 border border-slate-700">Jan</th><th class="p-1 border border-slate-700">Feb</th>
+                                    <th class="p-1 border border-slate-700">Mar</th><th class="p-1 border border-slate-700">Apr</th>
+                                    <th class="p-1 border border-slate-700">Mei</th><th class="p-1 border border-slate-700">Jun</th>
+                                    <th class="p-1 border border-slate-700">Jul</th><th class="p-1 border border-slate-700">Agu</th>
+                                    <th class="p-1 border border-slate-700">Sep</th><th class="p-1 border border-slate-700">Okt</th>
+                                    <th class="p-1 border border-slate-700">Nov</th><th class="p-1 border border-slate-700">Des</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelRiwayat" class="divide-y divide-slate-700/50">
-                                <!-- Data di-load otomatis via JS -->
+                            <tbody id="bodyMatrixWarga" class="divide-y divide-slate-700/60">
+                                <!-- Diproduksi otomatis secara dinamis melalui Firebase Database -->
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+                <!-- BAWAH: TABEL RIWAYAT TRANSAKSI TERAKHIR -->
+                <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-slate-700">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+                        <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Log Kronologi Transaksi Terakhir</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-700 text-slate-400 font-bold">
+                                    <th class="py-2.5">Warga</th>
+                                    <th class="py-2.5">Bulan Tagihan</th>
+                                    <th class="py-2.5">Nominal Bayar</th>
+                                    <th class="py-2.5">Token ID</th>
+                                    <th class="py-2.5 text-right">Aksi Dokumen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelRiwayat" class="divide-y divide-slate-800/80">
+                                <!-- Log transksional terbaru -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT OPERASIONAL -->
+    <!-- SCRIPT LOGIKA DASHBOARD -->
     <script>
         const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const DAFTAR_BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
         document.getElementById('tanggalBayar').valueAsDate = new Date();
 
+        // AKSI SUBMIT FORM INPUT BARU
         document.getElementById('formIuran').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -127,67 +191,147 @@
                 });
 
                 if(res.ok) {
-                    alert(`Data Berhasil Disimpan!\nToken Kuitansi: ${token}`);
+                    alert(`SUKSES!\nToken Kuitansi Baru: ${token}`);
                     document.getElementById('namaWarga').value = "";
                     
-                    // FORMAT LINK AMAN UNTUK GITHUB PAGES (?id=TOKEN)
+                    // FORMAT LINK AMAN ANTI-404 UNTUK GITHUB PAGES (?id=TOKEN)
                     const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${token}`;
                     
-                    // Format Pesan WhatsApp Terkirim Otomatis
+                    // Template Pesan Kirim Otomatis ke WhatsApp Warga
                     const pesanWA = `Halo Bapak/Ibu *${nama}*, Terima kasih telah melakukan pembayaran iuran sampah TUNTAS RT 04 untuk bulan *${bulan.toUpperCase()}* sebesar *Rp ${parseInt(nominal).toLocaleString('id-ID')}*.\n\nBerikut adalah bukti kuitansi pembayaran resmi Anda yang dapat diakses melalui tautan di bawah ini:\n\n${linkKuitansi}\n\n_Pesan ini dibuat otomatis oleh Tuntas Management._`;
                     
                     window.open(`https://api.whatsapp.com/send?phone=${hp}&text=${encodeURIComponent(pesanWA)}`, '_blank');
                     
-                    muatRiwayat();
+                    segarkanSemuaData();
                 }
             } catch (err) {
                 console.error(err);
-                alert("Gagal menyimpan ke database.");
+                alert("Gagal koneksi ke database server Firebase.");
             }
         });
 
-        async function muatRiwayat() {
+        // FUNGSI MEMUAT & MERENSTRUKTURISASI DATA DARI FIREBASE
+        async function segarkanSemuaData() {
             try {
                 const res = await fetch(`${DB_URL}/iuran_sampah.json`);
                 const data = await res.json();
-                const tbody = document.getElementById('tabelRiwayat');
-                tbody.innerHTML = "";
+                
+                const tBodyRiwayat = document.getElementById('tabelRiwayat');
+                const tBodyMatrix = document.getElementById('bodyMatrixWarga');
+                
+                tBodyRiwayat.innerHTML = "";
+                tBodyMatrix.innerHTML = "";
 
-                if(data) {
-                    // Diurutkan dari yang paling baru diinput
-                    Object.keys(data).reverse().slice(0, 10).forEach(key => {
-                        const item = data[key];
-                        const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${item.token_kuitansi}`;
-                        
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-800/50 transition";
-                        tr.innerHTML = `
-                            <td class="py-3 font-bold text-white">${item.nama_warga}</td>
-                            <td class="py-3 text-slate-300">${item.bulan}</td>
-                            <td class="py-3 text-emerald-400 font-semibold">Rp ${parseInt(item.nominal).toLocaleString('id-ID')}</td>
-                            <td class="py-3 font-mono text-slate-400">${item.token_kuitansi}</td>
-                            <td class="py-3 text-right space-x-2">
-                                <button onclick="salinLink('${linkKuitansi}')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-[10px] font-bold transition"><i class="fa-regular fa-copy"></i> Link</button>
-                                <a href="${linkKuitansi}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 px-2 py-1 rounded text-[10px] font-bold transition inline-block"><i class="fa-solid fa-eye"></i> Cek</a>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500">Belum ada riwayat transaksi</td></tr>`;
+                if (!data) {
+                    tBodyRiwayat.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500">Belum ada transaksi terekam</td></tr>`;
+                    tBodyMatrix.innerHTML = `<tr><td colspan="13" class="py-4 text-center text-slate-500">Belum ada rekap warga</td></tr>`;
+                    return;
                 }
+
+                let totalKas = 0;
+                let transaksiBulanIniCount = 0;
+                const currentMonthName = DAFTAR_BULAN[new Date().getMonth()];
+
+                // Wadah Penampung Pemetaan Warga Unik (Untuk Kebutuhan Matrix Kolom Bulanan)
+                const petaWarga = {};
+
+                // Proses pemetaan urutan log & matrix
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    const nominalAngka = parseInt(item.nominal) || 0;
+                    totalKas += nominalAngka;
+
+                    // Hitung jumlah transaksi bulan berjalan saat ini
+                    if(item.bulan === currentMonthName) {
+                        transaksiBulanIniCount++;
+                    }
+
+                    // Strukturkan data warga unik ke objek petaWarga
+                    const namaKey = item.nama_warga.toUpperCase().trim();
+                    if (!petaWarga[namaKey]) {
+                        petaWarga[namaKey] = {};
+                    }
+                    petaWarga[namaKey][item.bulan] = true;
+                });
+
+                // UPDATE WIDGET INFORMASI STATISTIK
+                document.getElementById('statTotalSaldo').innerText = `Rp ${totalKas.toLocaleString('id-ID')}`;
+                document.getElementById('statTransaksiBulan').innerText = `${transaksiBulanIniCount} Transaksi`;
+
+                // 1. RENDER LOG TABEL DATA TERBARU (DIURUTKAN DARI YANG PALING BARU)
+                Object.keys(data).reverse().slice(0, 8).forEach(key => {
+                    const item = data[key];
+                    const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${item.token_kuitansi}`;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/60 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 font-bold text-white uppercase">${item.nama_warga}</td>
+                        <td class="py-3 text-slate-300 font-medium">${item.bulan}</td>
+                        <td class="py-3 text-emerald-400 font-extrabold">Rp ${parseInt(item.nominal).toLocaleString('id-ID')}</td>
+                        <td class="py-3 font-mono text-slate-500 font-bold">${item.token_kuitansi}</td>
+                        <td class="py-3 text-right space-x-1">
+                            <button onclick="salinLink('${linkKuitansi}')" class="bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded-lg text-[10px] font-bold transition"><i class="fa-regular fa-copy"></i> Copy</button>
+                            <a href="${linkKuitansi}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 px-2.5 py-1 rounded-lg text-[10px] font-bold transition inline-block"><i class="fa-solid fa-square-arrow-up-right"></i> Buka</a>
+                        </td>
+                    `;
+                    tBodyRiwayat.appendChild(tr);
+                });
+
+                // 2. RENDER MATRIX TAHUNAN GRID WARGA
+                Object.keys(petaWarga).sort().forEach(wargaName => {
+                    const trMatrix = document.createElement('tr');
+                    trMatrix.className = "hover:bg-slate-800/40 border-b border-slate-700/50 row-warga-item";
+                    
+                    let kolomBulanHtml = "";
+                    DAFTAR_BULAN.forEach(bln => {
+                        if (petaWarga[wargaName][bln]) {
+                            // Centang Hijau Jika Sudah Bayar
+                            kolomBulanHtml += `<td class="p-2 border border-slate-700/60 text-emerald-400 font-bold text-sm"><i class="fa-solid fa-circle-check"></i></td>`;
+                        } else {
+                            // Strip Merah Jika Belum Bayar
+                            kolomBulanHtml += `<td class="p-2 border border-slate-700/60 text-slate-600 font-bold text-xs">-</td>`;
+                        }
+                    });
+
+                    trMatrix.innerHTML = `
+                        <td class="p-2.5 text-left font-bold text-slate-200 border border-slate-700 col-nama-warga uppercase">${wargaName}</td>
+                        ${kolomBulanHtml}
+                    `;
+                    tBodyMatrix.appendChild(trMatrix);
+                });
+
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        // LIVE FILTER PENCARIAN NAMA WARGA PADA MATRIX GRID
+        function filterTabelWarga() {
+            const input = document.getElementById("cariWarga").value.toUpperCase();
+            const rows = document.getElementsByClassName("row-warga-item");
+
+            for (let i = 0; i < rows.length; i++) {
+                const namaKolom = rows[i].getElementsByClassName("col-nama-warga")[0];
+                if (namaKolom) {
+                    const teksNama = namaKolom.textContent || namaKolom.innerText;
+                    if (teksNama.toUpperCase().indexOf(input) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
             }
         }
 
         function salinLink(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert("Link kuitansi berhasil disalin ke clipboard!");
+                alert("Link bukti kuitansi sukses disalin ke memori HP!");
             });
         }
 
-        window.onload = muatRiwayat;
+        // Muat data saat halaman dibuka pertama kali
+        window.onload = segarkanSemuaData;
     </script>
 </body>
 </html>
