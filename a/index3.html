@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Admin Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .modal { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 2.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #f1f5f9; transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        #listMutasiKasMasyarakat::-webkit-scrollbar { width: 4px; }
+        #listMutasiKasMasyarakat::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #064e3b; font-weight: 800; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+        <span>Menghubungkan Database...</span>
+    </div>
+</div>
+
+<div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+    <i id="notifIcon" class="fa-solid text-base"></i>
+    <span id="notifText" class="flex-1"></span>
+</div>
+
+<header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
+        <div>
+            <h1 class="text-sm font-extrabold text-emerald-950 tracking-tight leading-none">TUNTAS</h1>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Turun Tangan Atasi Sampah</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
+            <i class="fa-solid fa-rotate text-xs"></i>
+        </button>
+        <button onclick="logoutAdmin()" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 active:scale-95 transition-all">
+            <i class="fa-solid fa-power-off text-xs"></i>
+        </button>
+    </div>
+</header>
+
+<div id="scr-kas" class="tab-content active p-4 space-y-4 anonymity-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-xl space-y-4">
+        <div>
+            <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Total Kas RT 04</p>
+            <h2 id="totalSaldo" class="text-3xl font-extrabold text-emerald-950 mt-0.5">Rp 0</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+            <div>
+                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wide">Total Pemasukan</p>
+                <h3 id="textMasuk" class="text-xs font-extrabold text-emerald-600">Rp 0</h3>
+            </div>
+            <div>
+                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wide">Total Pengeluaran</p>
+                <h3 id="textKeluar" class="text-xs font-extrabold text-rose-600">Rp 0</h3>
+            </div>
+        </div>
+        <div class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right bg-slate-50 p-1.5 rounded-lg">
+            Saldo Bulan Ini
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
+        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal</p>
+        <div class="grid grid-cols-2 gap-2">
+            <input type="date" id="filterMulai" class="modern-in !p-2 text-center" onchange="muatSistemKas()">
+            <input type="date" id="filterSelesai" class="modern-in !p-2 text-center" onchange="muatSistemKas()">
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2">
+        <button onclick="openModal('mInputKas')" class="bg-emerald-900 text-white p-3.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center justify-center gap-1.5"><i class="fa-solid fa-wallet"></i> Input Kas</button>
+        <button onclick="openModal('mInputBayar')" class="bg-blue-900 text-white p-3.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center justify-center gap-1.5"><i class="fa-solid fa-receipt"></i> Input Pembayaran</button>
+    </div>
+
+    <div class="space-y-2">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Transaksi Bulan Ini</h3>
+        <div id="listMutasiKasMasyarakat" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[280px] shadow-sm">
+            <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat histori...</div>
+        </div>
+    </div>
+</div>
+
+<div id="scr-warga" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Tambah Warga Baru</h2>
+        <form id="formWarga" onsubmit="simpanWarga(event)" class="space-y-3">
+            <input type="text" id="addNama" placeholder="Nama Lengkap" class="modern-in" required>
+            <input type="tel" id="addHp" placeholder="No Hp (WhatsApp)" class="modern-in" required>
+            <input type="text" id="addPass" placeholder="Password Login" class="modern-in" required>
+            <input type="text" id="addBulan" placeholder="Bulan Bergabung (Contoh: Juni 2026)" class="modern-in" required>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide">Simpan Anggota Warga</button>
+        </form>
+    </div>
+    <div id="listWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm"></div>
+</div>
+
+<div id="scr-iuran" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Bayar Iuran</h2>
+        <form id="formIuran" onsubmit="simpanIuran(event)" class="space-y-3">
+            <input type="date" id="iuranTgl" class="modern-in" required>
+            <select id="iuranWarga" class="modern-in" required><option value="">-- PILIH NAMA WARGA --</option></select>
+            <input type="text" id="iuranBulan" placeholder="Untuk Bulan (Contoh: Juni 2026)" class="modern-in" required>
+            <input type="number" id="iuranNominal" placeholder="Nominal Iuran (Rp)" class="modern-in" required>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase">Terbitkan Iuran</button>
+        </form>
+    </div>
+
+    <div id="boxKuitansiLink" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2 hidden">
+        <p class="text-[10px] font-black text-emerald-800 uppercase tracking-wider">Kuitansi Digital Siap!</p>
+        <p id="textKodeKuitansi" class="text-xs font-mono font-bold text-slate-700 break-all"></p>
+        <div class="flex gap-2 pt-1">
+            <button id="btnSalinKuitansi" class="bg-white border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex-1">Salin Link</button>
+            <button id="btnKirimWA" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1"><i class="fa-brands fa-whatsapp"></i> Kirim WA</button>
+        </div>
+    </div>
+</div>
+
+<div id="scr-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Laporan Sampah</h2>
+        <form id="formSampah" onsubmit="simpanSampah(event)" class="space-y-3">
+            <input type="date" id="smphTgl" class="modern-in" required>
+            <select id="smphWarga" class="modern-in" required><option value="">-- PILIH NAMA WARGA --</option></select>
+            <select id="smphStatus" class="modern-in" required>
+                <option value="diambil">DIAMBIL</option>
+                <option value="diantar">DIANTAR</option>
+                <option value="kosong">KOSONG</option>
+            </select>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide">Simpan Log Sampah</button>
+        </form>
+    </div>
+</div>
+
+<div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
+    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Riwayat Pembayaran Sampah</h2>
+    <div id="listRiwayatIuranWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm">
+        <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat data riwayat...</div>
+    </div>
+</div>
+
+<div id="scr-berita" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Siarkan Berita & Pengumuman</h2>
+        <form id="formBerita" onsubmit="simpanBerita(event)" class="space-y-3">
+            <input type="text" id="newsJudul" placeholder="Judul Pengumuman" class="modern-in" required>
+            <textarea id="newsIsi" rows="3" placeholder="Isi berita lengkap..." class="modern-in h-auto" required></textarea>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-3.5 rounded-xl text-xs font-black uppercase">Publikasikan Berita</button>
+        </form>
+    </div>
+    <div id="listBeritaAdmin" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm"></div>
+</div>
+
+<div id="scr-saran" class="tab-content p-4 space-y-4 animate-fade-in">
+    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Kotak Saran & Aduan Warga</h2>
+    <div id="listSaranWargaAdmin" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm">
+        <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Tidak ada saran masuk.</div>
+    </div>
+</div>
+
+<div id="scr-profile" class="tab-content p-4 space-y-4 animate-fade-in">
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm text-center space-y-3">
+        <div class="relative w-20 h-20 mx-auto">
+            <img id="profFoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200" alt="Profile" class="w-20 h-20 rounded-full object-cover border-4 border-slate-50 shadow-md">
+            <button onclick="gantiFotoProfile()" class="absolute bottom-0 right-0 bg-emerald-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-camera"></i></button>
+        </div>
+        <div>
+            <h3 id="profNama" class="text-sm font-extrabold text-slate-800 uppercase">ADMIN TUNTAS</h3>
+            <p id="profHp" class="text-[10px] font-mono text-slate-400">08123456789</p>
+            <p id="profGabung" class="text-[9px] font-bold text-emerald-700 uppercase mt-0.5">Bergabung: Juni 2026</p>
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-100 p-5 rounded-[2rem] space-y-3">
+        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Ganti Password Admin</h4>
+        <form id="formPass" onsubmit="ubahPasswordAdmin(event)" class="space-y-2">
+            <input type="text" id="newPass" placeholder="Masukkan Password Baru" class="modern-in" required>
+            <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-xl text-[11px] font-black uppercase">Update Password</button>
+        </form>
+    </div>
+
+    <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-[2.5rem] shadow-xl text-white space-y-3">
+        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Informasi Rekening Bank BCA</p>
+        <div class="flex justify-between items-center bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
+            <div>
+                <h5 class="text-[10px] font-black tracking-wide text-emerald-400">BCA KAS TUNTAS RT 04</h5>
+                <p id="noRekening" class="text-sm font-mono font-bold">8610992831</p>
+            </div>
+            <button onclick="salinNoRek()" class="bg-slate-700 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase">Salin</button>
+        </div>
+        <button onclick="window.open('https://wa.me/628123456789?text=Konfirmasi+Pembayaran+TUNTAS', '_blank')" class="w-full bg-emerald-600 text-white py-3 rounded-xl text-xs font-black uppercase flex items-center justify-center gap-1.5"><i class="fa-brands fa-whatsapp"></i> Konfirmasi Pembayaran</button>
+        <p class="text-[9px] font-bold text-center text-slate-500 uppercase tracking-widest pt-1">Matur Nuwun / Terima Kasih</p>
+    </div>
+</div>
+
+<div id="mInputKas" class="modal" onclick="if(event.target==this)closeModal('mInputKas')">
+    <div class="modal-content space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-extrabold uppercase text-emerald-900 text-xs">Catat Buku Kas Umum</h3>
+            <button onclick="closeModal('mInputKas')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="formKasUmum" onsubmit="simpanKasUmum(event)" class="space-y-3">
+            <select id="kasJenis" class="modern-in"><option value="masuk">Pemasukan Kas</option><option value="keluar">Pengeluaran Kas</option></select>
+            <input type="number" id="kasNominal" placeholder="Nominal (Rp)" class="modern-in" required>
+            <input type="text" id="kasKet" placeholder="Keterangan Mutasi" class="modern-in" required>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Mutasi</button>
+        </form>
+    </div>
+</div>
+
+<div id="mInputBayar" class="modal" onclick="if(event.target==this)closeModal('mInputBayar')">
+    <div class="modal-content space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-extrabold uppercase text-blue-900 text-xs">Input Pembayaran Kas</h3>
+            <button onclick="closeModal('mInputBayar')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="formKasManual" onsubmit="simpanKasManual(event)" class="space-y-3">
+            <input type="number" id="manNominal" placeholder="Nominal Rupiah" class="modern-in" required>
+            <input type="text" id="manKet" placeholder="Keterangan / Sumber Dana" class="modern-in" required>
+            <button type="submit" class="w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Kas</button>
+        </form>
+    </div>
+</div>
+
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex overflow-x-auto justify-between gap-1 shadow-[0_-4px_14px_rgba(0,0,0,0.04)] z-50">
+    <button onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-wallet text-sm mb-0.5"></i>KAS</button>
+    <button onclick="switchTab('scr-warga')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-user-plus text-sm mb-0.5"></i>+WRG</button>
+    <button onclick="switchTab('scr-iuran')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-receipt text-sm mb-0.5"></i>IURAN</button>
+    <button onclick="switchTab('scr-sampah')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-truck-garbage text-sm mb-0.5"></i>SMPH</button>
+    <button onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-clock-rotate-left text-sm mb-0.5"></i>HISTORI</button>
+    <button onclick="switchTab('scr-berita')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-bullhorn text-sm mb-0.5"></i>BERITA</button>
+    <button onclick="switchTab('scr-saran')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-comment-dots text-sm mb-0.5"></i>SARAN</button>
+    <button onclick="switchTab('scr-profile')" class="nav-btn flex flex-col items-center min-w-[50px] flex-1 text-slate-400 text-[8px] font-bold"><i class="fa-solid fa-user text-sm mb-0.5"></i>PROF</button>
+</nav>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Rentang Filter Tanggal Default (Awal bulan s/d hari ini)
+        const hariIni = new Date();
+        const y = hariIni.getFullYear();
+        const m = String(hariIni.getMonth() + 1).padStart(2, '0');
+        document.getElementById('filterMulai').value = `${y}-${m}-01`;
+        document.getElementById('filterSelesai').value = hariIni.toISOString().split('T')[0];
+        document.getElementById('iuranTgl').value = hariIni.toISOString().split('T')[0];
+        document.getElementById('smphTgl').value = hariIni.toISOString().split('T')[0];
+
+        sinkronUlangData();
+    });
+
+    function sinkronUlangData() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        Promise.all([muatSistemKas(), muatSistemWarga(), muatRiwayatIuran(), muatBeritaAdmin(), muatSaranAdmin()])
+        .then(() => { document.getElementById('loadingOverlay').style.display = 'none'; })
+        .catch(() => { document.getElementById('loadingOverlay').style.display = 'none'; });
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // SCREEN 1: KAS LOGIC
+    async function muatSistemKas() {
+        const res = await fetch(`${DB_URL}/kas_rt04.json`);
+        const data = await res.json();
+        const list = document.getElementById('listMutasiKasMasyarakat');
+        list.innerHTML = "";
+
+        let start = new Date(document.getElementById('filterMulai').value);
+        let end = new Date(document.getElementById('filterSelesai').value);
+        end.setHours(23,59,59,999);
+
+        let sld = 0, msk = 0, klr = 0;
+        if(!data) {
+            list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Buku Kas Kosong.</div>`;
+            setCardKas(0, 0, 0); return;
+        }
+
+        Object.keys(data).forEach(key => {
+            const v = data[key];
+            const nom = parseInt(v.nominal) || 0;
+            const tglItem = new Date(v.tanggal);
+
+            if(v.jenis === 'masuk') msk += nom; else klr += nom;
+
+            if(tglItem >= start && tglItem <= end) {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 flex justify-between items-center bg-white">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                            <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
+                                ${v.jenis==='masuk'?'+':'-'} Rp ${nom.toLocaleString('id-ID')}
+                            </span>
+                            <button onclick="hapusKas('${key}')" class="text-slate-300 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+        setCardKas((msk - klr), msk, klr);
+    }
+
+    function setCardKas(s, m, k) {
+        document.getElementById('totalSaldo').innerText = `Rp ${s.toLocaleString('id-ID')}`;
+        document.getElementById('textMasuk').innerText = `Rp ${m.toLocaleString('id-ID')}`;
+        document.getElementById('textKeluar').innerText = `Rp ${k.toLocaleString('id-ID')}`;
+    }
+
+    function simpanKasUmum(e) {
+        e.preventDefault();
+        const body = { jenis: document.getElementById('kasJenis').value, nominal: parseInt(document.getElementById('kasNominal').value)||0, keterangan: document.getElementById('kasKet').value.trim().toUpperCase(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { closeModal('mInputKas'); document.getElementById('formKasUmum').reset(); showNotif('Kas Berhasil Dicatat', 'sukses'); muatSistemKas(); });
+    }
+
+    function simpanKasManual(e) {
+        e.preventDefault();
+        const body = { jenis: 'masuk', nominal: parseInt(document.getElementById('manNominal').value)||0, keterangan: document.getElementById('manKet').value.trim().toUpperCase(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { closeModal('mInputBayar'); document.getElementById('formKasManual').reset(); showNotif('Kas Manual Disimpan', 'sukses'); muatSistemKas(); });
+    }
+
+    function hapusKas(key) {
+        if(!confirm('Hapus transaksi ini permanen?')) return;
+        fetch(`${DB_URL}/kas_rt04/${key}.json`, { method: 'DELETE' }).then(() => { muatSistemKas(); });
+    }
+
+    // SCREEN 2: WARGA LOGIC
+    async function muatSistemWarga() {
+        const res = await fetch(`${DB_URL}/warga_rt04.json`);
+        const data = await res.json();
+        const list = document.getElementById('listWarga');
+        const d1 = document.getElementById('iuranWarga');
+        const d2 = document.getElementById('smphWarga');
+
+        list.innerHTML = "";
+        d1.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>';
+        d2.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>';
+
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            const w = data[key];
+            d1.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+            d2.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+            list.insertAdjacentHTML('beforeend', `
+                <div class="p-4 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-700 uppercase">${w.nama}</h4>
+                        <p class="text-[9px] font-mono text-slate-400">WA: ${w.username} | Gabung: ${w.bulan_bergabung}</p>
+                    </div>
+                    <button onclick="hapusWarga('${key}')" class="text-slate-300 hover:text-rose-600"><i class="fa-solid fa-user-xmark text-xs"></i></button>
+                </div>
+            `);
+        });
+    }
+
+    function simpanWarga(e) {
+        e.preventDefault();
+        const body = { nama: document.getElementById('addNama').value.trim().toUpperCase(), username: document.getElementById('addHp').value.trim(), password: document.getElementById('addPass').value.trim(), bulan_bergabung: document.getElementById('addBulan').value.trim(), foto: "default.png" };
+        fetch(`${DB_URL}/warga_rt04.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formWarga').reset(); showNotif('Warga Baru Terdaftar', 'sukses'); muatSistemWarga(); });
+    }
+
+    function hapusWarga(key) {
+        if(!confirm('Hapus warga dari database?')) return;
+        fetch(`${DB_URL}/warga_rt04/${key}.json`, { method: 'DELETE' }).then(() => { muatSistemWarga(); });
+    }
+
+    // SCREEN 3: IURAN & LINK KUITANSI
+    function simpanIuran(e) {
+        e.preventDefault();
+        const token = `t-${Math.floor(100000 + Math.random() * 900000)}`;
+        const drop = document.getElementById('iuranWarga');
+        const nWarga = drop.options[drop.selectedIndex].text;
+
+        const body = { tanggal: document.getElementById('iuranTgl').value, warga_key: drop.value, nama_warga: nWarga, bulan: document.getElementById('iuranBulan').value.trim(), nominal: parseInt(document.getElementById('iuranNominal').value)||0, token_kuitansi: token.toUpperCase() };
+
+        fetch(`${DB_URL}/iuran_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => {
+            const kasKredit = { jenis: 'masuk', nominal: body.nominal, keterangan: `IURAN SAMPAH ${body.bulan}: ${nWarga}`, tanggal: body.tanggal };
+            fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasKredit) });
+
+            CURRENT_KUITANSI_LINK = `https://sikumel-ux.github.io/Tuntas/kuitansi/${token}`;
+            document.getElementById('textKodeKuitansi').innerText = `KUITANSI: ${token.toUpperCase()}\nURL: ${CURRENT_KUITANSI_LINK}`;
+            document.getElementById('boxKuitansiLink').classList.remove('hidden');
+
+            document.getElementById('btnSalinKuitansi').onclick = () => { navigator.clipboard.writeText(CURRENT_KUITANSI_LINK); showNotif('Link disalin!', 'sukses'); };
+            document.getElementById('btnKirimWA').onclick = () => { window.open(`https://api.whatsapp.com/send?text=Terima+kasih+Bapak%2FIbu+${encodeURIComponent(nWarga)},+pembayaran+iuran+TUNTAS+sudah+diterima.+Kuitansi+digital:+${encodeURIComponent(CURRENT_KUITANSI_LINK)}`, '_blank'); };
+            
+            document.getElementById('formIuran').reset(); showNotif('Iuran Berhasil Diarsip', 'sukses');
+            muatSistemKas(); muatRiwayatIuran();
+        });
+    }
+
+    // SCREEN 4: LAPORAN OPERASIONAL SAMPAH
+    function simpanSampah(e) {
+        e.preventDefault();
+        const drop = document.getElementById('smphWarga');
+        const body = { tanggal: document.getElementById('smphTgl').value, warga_key: drop.value, nama_warga: drop.options[drop.selectedIndex].text, status: document.getElementById('smphStatus').value, jam_diambil: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB" };
+        fetch(`${DB_URL}/laporan_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formSampah').reset(); showNotif('Log Sampah Tersimpan', 'sukses'); });
+    }
+
+    // SCREEN 5: RIWAYAT BUKU IURAN SAMPAH TOTAL
+    async function muatRiwayatIuran() {
+        const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+        const data = await res.json();
+        const list = document.getElementById('listRiwayatIuranWarga');
+        list.innerHTML = "";
+
+        if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Kosong.</div>`; return; }
+        Object.keys(data).forEach(key => {
+            const i = data[key];
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-4 flex justify-between items-center bg-white">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-700 uppercase">${i.nama_warga}</h4>
+                        <p class="text-[9px] font-bold text-emerald-700 mt-0.5">PERIODE: ${i.bulan} | REK: ${i.token_kuitansi}</p>
+                    </div>
+                    <span class="text-xs font-black text-slate-700">Rp ${i.nominal.toLocaleString('id-ID')}</span>
+                </div>
+            `);
+        });
+    }
+
+    // SCREEN 6: BERITA / PENGUMUMAN ENGINE
+    function simpanBerita(e) {
+        e.preventDefault();
+        const body = { judul: document.getElementById('newsJudul').value.trim().toUpperCase(), isi: document.getElementById('newsIsi').value.trim(), tanggal: new Date().toISOString().split('T')[0] };
+        fetch(`${DB_URL}/pengumuman.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { document.getElementById('formBerita').reset(); showNotif('Berita Berhasil Disiarkan', 'sukses'); muatBeritaAdmin(); });
+    }
+
+    async function muatBeritaAdmin() {
+        const res = await fetch(`${DB_URL}/pengumuman.json`);
+        const data = await res.json();
+        const list = document.getElementById('listBeritaAdmin');
+        list.innerHTML = "";
+
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-4 space-y-1">
+                    <div class="flex justify-between items-center"><h4 class="text-xs font-black text-slate-800">${data[key].judul}</h4><button onclick="hapusBerita('${key}')" class="text-slate-300 hover:text-rose-500 text-[11px]"><i class="fa-solid fa-trash-can"></i></button></div>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">${data[key].isi}</p>
+                    <p class="text-[9px] font-mono text-slate-400 pt-1">${data[key].tanggal}</p>
+                </div>
+            `);
+        });
+    }
+
+    function hapusBerita(key) {
+        if(!confirm('Hapus berita pengumuman ini?')) return;
+        fetch(`${DB_URL}/pengumuman/${key}.json`, { method: 'DELETE' }).then(() => { muatBeritaAdmin(); });
+    }
+
+    // SCREEN 7: SARAN WALIKOTA ENGINE
+    async function muatSaranAdmin() {
+        const res = await fetch(`${DB_URL}/saran_warga.json`);
+        const data = await res.json();
+        const list = document.getElementById('listSaranWargaAdmin');
+        list.innerHTML = "";
+
+        if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada saran dari warga.</div>`; return; }
+        Object.keys(data).forEach(key => {
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-4 space-y-1 bg-white">
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-emerald-800 uppercase bg-emerald-50 px-2 py-0.5 rounded">${data[key].nama_warga}</span><span class="text-[9px] font-mono text-slate-400">${data[key].tanggal}</span></div>
+                    <p class="text-xs text-slate-600 font-semibold italic">"${data[key].isi_saran}"</p>
+                </div>
+            `);
+        });
+    }
+
+    // SCREEN 8: SETTINGS & PASSWORD ADMIN
+    function ubahPasswordAdmin(e) {
+        e.preventDefault();
+        fetch(`${DB_URL}/admin_account/password.json`, { method: 'PUT', body: JSON.stringify(document.getElementById('newPass').value.trim()) }).then(() => { document.getElementById('formPass').reset(); showNotif('Password Diperbarui', 'sukses'); });
+    }
+
+    function gantiFotoProfile() { const url = prompt("Masukkan URL Foto Profil:"); if(url) document.getElementById('profFoto').src = url; }
+    function salinNoRek() { navigator.clipboard.writeText(document.getElementById('noRekening').innerText); showNotif('No Rekening Disalin', 'sukses'); }
+    function logoutAdmin() { localStorage.clear(); window.location.href = '../index.html'; }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
