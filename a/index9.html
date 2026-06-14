@@ -30,7 +30,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
 
-<!-- LOADING OVERLAY -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="flex flex-col items-center gap-2">
         <i class="fa-solid fa-spinner animate-spin text-xl"></i>
@@ -38,13 +37,11 @@
     </div>
 </div>
 
-<!-- TOAST NOTIFICATION -->
 <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
     <i id="notifIcon" class="fa-solid text-base"></i>
     <span id="notifText" class="flex-1"></span>
 </div>
 
-<!-- HEADER TERPADU DENGAN TOMBOL MODUL -->
 <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
     <div class="flex items-center gap-3">
         <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
@@ -54,7 +51,7 @@
         </div>
     </div>
     <div class="flex items-center gap-1.5">
-        <button onclick="switchTab('scr-modul')" id="btn-top-modul" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all animate-btn" title="Buka Modul">
+        <button onclick="switchTab('scr-modul')" id="btn-top-modul" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all" title="Buka Modul">
             <i class="fa-solid fa-cubes text-xs"></i>
         </button>
         <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
@@ -66,7 +63,6 @@
     </div>
 </header>
 
-<!-- POP-UP / MODAL INFORMASI LOGIN AUTOMATIC -->
 <div id="mInfoLoginPopup" class="modal">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -81,18 +77,13 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- SCREEN 1: KAS (UTAMA / DASHBOARD)          -->
-<!-- ========================================== -->
 <div id="scr-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
-    <!-- Card Utama Hijau Gradasi Modern -->
     <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-emerald-800/40">
         <div>
             <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo Keseluruhan RT 04</p>
             <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">0</h2>
         </div>
         
-        <!-- Baris Card Kecil yang Dinamis Mengikuti Jalur Filter -->
         <div class="grid grid-cols-3 gap-1.5 pt-3 border-t border-emerald-800/60">
             <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
                 <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Saldo Filter</p>
@@ -109,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Filter Rentang Tanggal -->
     <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
         <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal</p>
         <div class="grid grid-cols-2 gap-2">
@@ -118,7 +108,6 @@
         </div>
     </div>
 
-    <!-- 3 Tombol Aksi Pembukuan -->
     <div class="grid grid-cols-3 gap-2">
         <button onclick="openModal('mInputKas')" class="bg-emerald-900 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-wallet text-xs"></i> Input Kas</button>
         <button onclick="openModal('mInputIuran')" class="bg-teal-800 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-receipt text-xs"></i> Input Iuran</button>
@@ -134,7 +123,6 @@
         </div>
     </div>
 
-    <!-- Histori Transaksi -->
     <div class="space-y-2">
         <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Transaksi</h3>
         <div id="listMutasiKasMasyarakat" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[260px] shadow-sm">
@@ -143,9 +131,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- SCREEN 2: TAMBAH WARGA                     -->
-<!-- ========================================== -->
 <div id="scr-warga" class="tab-content p-4 space-y-4 animate-fade-in">
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Daftarkan Anggota Warga Baru</h2>
@@ -160,9 +145,6 @@
     <div id="listWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm text-xs max-h-[300px] overflow-y-auto"></div>
 </div>
 
-<!-- ========================================== -->
-<!-- SCREEN 3: OPERASIONAL TRUCK SAMPAH         -->
-<!-- ========================================== -->
 <div id="scr-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Laporan Sampah Operasional</h2>
@@ -179,9 +161,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- SCREEN 4: BUKU ARSIP RIWAYAT TOTAL         -->
-<!-- ========================================== -->
 <div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
     <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Buku Riwayat Arsip Iuran</h2>
     <div id="listRiwayatIuranWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm">
@@ -189,11 +168,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- SCREEN 5: TAB MODUL                        -->
-<!-- ========================================== -->
 <div id="scr-modul" class="tab-content p-4 space-y-6 animate-fade-in">
-    <!-- SUB MODUL 1: PROFILE & DIRECT UPLOAD FOTO -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <div class="flex items-center gap-4 border-b pb-4">
             <div class="relative w-16 h-16 flex-shrink-0">
@@ -215,7 +190,6 @@
         </form>
     </div>
 
-    <!-- SUB MODUL 2: INFORMASI BERKALA (POP-UP) -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Maklumat / Info Pop-Up</h3>
         <form id="formInformasiPopup" onsubmit="simpanInfoPopup(event)" class="space-y-2">
@@ -225,7 +199,6 @@
         </form>
     </div>
 
-    <!-- SUB MODUL 3: BERITA (MINI BLOG UNTUK UMUM) -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Berita & Publikasi (Mini Blog)</h3>
         <form id="formBerita" onsubmit="simpanBerita(event)" class="space-y-2">
@@ -236,14 +209,12 @@
         <div id="listBeritaAdmin" class="bg-slate-50 rounded-xl divide-y divide-slate-200 p-2 space-y-2 max-h-[150px] overflow-y-auto"></div>
     </div>
 
-    <!-- SUB MODUL 4: KOTAK SARAN & ASPIRASI -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kotak Tampung Aspirasi & Saran</h3>
         <div id="listSaranWargaAdmin" class="divide-y divide-slate-100 max-h-[160px] overflow-y-auto"></div>
     </div>
 </div>
 
-<!-- MODAL BOX: INPUT KAS MUTASI UMUM -->
 <div id="mInputKas" class="modal" onclick="if(event.target==this)closeModal('mInputKas')">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -259,7 +230,6 @@
     </div>
 </div>
 
-<!-- MODAL BOX: INPUT IURAN DIGITAL -->
 <div id="mInputIuran" class="modal" onclick="if(event.target==this)closeModal('mInputIuran')">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -276,13 +246,12 @@
     </div>
 </div>
 
-<!-- FIXED 5-TAB BOTTOM NAVBAR -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
-    <button onclick="switchTab('scr-kas')" id="nav-btn-kas" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
-    <button onclick="switchTab('scr-warga')" id="nav-btn-warga" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-plus text-base mb-0.5"></i>+WARGA</button>
+    <button id="nav-btn-kas" onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
+    <button id="nav-btn-warga" onclick="switchTab('scr-warga')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-plus text-base mb-0.5"></i>+WARGA</button>
     <button onclick="openModal('mInputIuran')" class="flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-circle-plus text-base mb-0.5 text-teal-700"></i>+IURAN</button>
-    <button onclick="switchTab('scr-sampah')" id="nav-btn-sampah" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-truck-garbage text-base mb-0.5"></i>SMPH</button>
-    <button onclick="switchTab('scr-riwayat')" id="nav-btn-riwayat" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>HISTORI</button>
+    <button id="nav-btn-sampah" onclick="switchTab('scr-sampah')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-truck-garbage text-base mb-0.5"></i>SMPH</button>
+    <button id="nav-btn-riwayat" onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>HISTORI</button>
 </nav>
 
 <script>
@@ -310,34 +279,24 @@
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
-    // MEMPERBAIKI FUNGSI SWITCH TAB AGAR BERFUNGSI DENGAN BAIK DI MOBILE & DESKTOP
     function switchTab(id) {
-        // Sembunyikan semua screen konten
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        // Nonaktifkan semua class active pada tombol navigasi bawah
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-        // Nonaktifkan tombol modul atas agar tidak bentrok status visualnya
         document.getElementById('btn-top-modul').classList.remove('bg-emerald-950', 'text-white');
         document.getElementById('btn-top-modul').classList.add('bg-emerald-50', 'text-emerald-800');
 
-        // Tampilkan screen yang dipilih
         document.getElementById(id).classList.add('active');
 
-        // Deteksi tombol navigasi bawah mana yang harus diaktifkan berdasarkan screen id
         if (id === 'scr-kas') document.getElementById('nav-btn-kas').classList.add('active');
         else if (id === 'scr-warga') document.getElementById('nav-btn-warga').classList.add('active');
         else if (id === 'scr-sampah') document.getElementById('nav-btn-sampah').classList.add('active');
         else if (id === 'scr-riwayat') document.getElementById('nav-btn-riwayat').classList.add('active');
         else if (id === 'scr-modul') {
-            // Jika modul diakses via header, ubah tombol atas jadi state aktif
             document.getElementById('btn-top-modul').classList.remove('bg-emerald-50', 'text-emerald-800');
             document.getElementById('btn-top-modul').classList.add('bg-emerald-950', 'text-white');
         }
     }
 
-    // ==========================================
-    // LOGIC: DIRECT IMAGE UPLOAD BASE64 SYSTEM
-    // ==========================================
     async function muatFotoProfilAdmin() {
         try {
             const res = await fetch(`${DB_URL}/admin_account/foto_profil.json`);
@@ -353,15 +312,12 @@
     function prosesUploadFoto(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            
             if (file.size > 1500000) {
                 alert("Ukuran foto terlalu besar, bro! Maksimal 1.5 MB saja.");
                 return;
             }
-
             document.getElementById('loadingOverlay').style.display = 'flex';
             const reader = new FileReader();
-            
             reader.onload = async function(e) {
                 const stringBase64 = e.target.result;
                 try {
@@ -373,7 +329,7 @@
                     showNotif('Foto Profil Berhasil Diperbarui!', 'sukses');
                 } catch (err) {
                     showNotif('Gagal mengunggah gambar', 'gagal');
-                } finally {
+                } military {
                     document.getElementById('loadingOverlay').style.display = 'none';
                 }
             };
@@ -381,7 +337,6 @@
         }
     }
 
-    // ENGINE KAS: SALDO KESELURUHAN VS FILTERED SALDO
     async function muatSistemKas() {
         const res = await fetch(`${DB_URL}/kas_rt04.json`);
         const data = await res.json();
@@ -466,7 +421,8 @@
             const kasKredit = { jenis: 'masuk', nominal: body.nominal, keterangan: formatKeteranganIuran, tanggal: body.tanggal };
             fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasKredit) }).then(() => { muatSistemKas(); muatRiwayatIuran(); });
 
-            const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/${token}`;
+            // FORMAT LINK REVISI SESUAI REQUEST (?id=)
+            const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${token}`;
             document.getElementById('textKodeKuitansi').innerText = `TOKEN: ${token}\nURL: ${linkKuitansi}`;
             document.getElementById('boxKuitansiLink').classList.remove('hidden');
 
