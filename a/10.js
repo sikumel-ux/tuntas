@@ -1,3 +1,7 @@
+/**
+ * TUNTAS - Admin Panel Management Logic (FIXED LOGIN STRING FORMAT)
+ */
+
 const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -19,7 +23,7 @@ function initEventListeners() {
     document.getElementById('btnBukaModalKas').addEventListener('click', () => openModal('modalInputKas'));
     document.getElementById('btnBukaModalWarga').addEventListener('click', () => openModal('modalTambahWarga'));
     
-    // Tombol Toggle Password (Hide/Show)
+    // Toggle View Password
     document.getElementById('btnTogglePass').addEventListener('click', togglePasswordView);
 
     document.getElementById('filterMulai').addEventListener('change', muatBukuKasAdmin);
@@ -46,36 +50,26 @@ function cekSessionAdmin() {
     }
 }
 
-// FUNGSI UTAMA: Login Admin Fixed (Support Multi-Format Node Database)
+// FIX UTAMA: Mengambil data string langsung dari masing-masing node Firebase
 async function prosesLoginAdmin(e) {
     e.preventDefault();
     document.getElementById('loadingOverlay').style.display = 'flex';
     
-    const hp = document.getElementById('loginUsername').value.trim();
-    const pass = document.getElementById('loginPassword').value.trim();
+    const inputHp = document.getElementById('loginUsername').value.trim();
+    const inputPass = document.getElementById('loginPassword').value.trim();
 
     try {
-        const res = await fetch(`${DB_URL}/admin_account.json`);
-        const accountData = await res.json();
-        
-        let loginSukses = false;
+        // Tembak langsung ke endpoint string masing-masing variabel
+        const [resHp, resPass] = await Promise.all([
+            fetch(`${DB_URL}/admin_account/username.json`),
+            fetch(`${DB_URL}/admin_account/password.json`)
+        ]);
 
-        if (accountData) {
-            // Kasus 1: Jika data di Firebase berbentuk objek ber-ID dinamis (contoh: /admin_account/-Oxxx/username)
-            if (typeof accountData === 'object' && !accountData.username) {
-                Object.keys(accountData).forEach(key => {
-                    if (accountData[key].username === hp && accountData[key].password === pass) {
-                        loginSukses = true;
-                    }
-                });
-            } 
-            // Kasus 2: Jika data langsung baris tunggal (contoh: /admin_account/username)
-            else if (accountData.username === hp && accountData.password === pass) {
-                loginSukses = true;
-            }
-        }
+        const dbHp = await resHp.json();
+        const dbPass = await resPass.json();
 
-        if (loginSukses) {
+        // Validasi kecocokan string polosan
+        if (dbHp && dbPass && inputHp === dbHp.toString().trim() && inputPass === dbPass.toString().trim()) {
             localStorage.setItem('admin_logged_in', 'true');
             document.getElementById('scr-login-admin').style.display = 'none';
             showNotif('Login Admin Berhasil!', 'sukses');
@@ -84,13 +78,13 @@ async function prosesLoginAdmin(e) {
             showNotif('No HP atau Password Admin Salah!', 'gagal');
         }
     } catch (err) {
+        console.error("Login Error:", err);
         showNotif('Gagal terhubung ke database', 'gagal');
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
 
-// LOGIKA BARU: Hide/Show Password Toggle Switcher
 function togglePasswordView() {
     const passInput = document.getElementById('loginPassword');
     const eyeIcon = document.getElementById('eyeIcon');
