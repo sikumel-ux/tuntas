@@ -1,8 +1,3 @@
-/**
- * TUNTAS - Admin Panel Management Logic
- * Proteksi Keamanan Error Catching Supaya Tidak Stuck Loading
- */
-
 const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -11,7 +6,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function initEventListeners() {
-    // Form Submission Handler
     document.getElementById('formLoginAdmin').addEventListener('submit', prosesLoginAdmin);
     document.getElementById('formTransaksiKas').addEventListener('submit', simpanTransaksiKas);
     document.getElementById('formWargaBaru').addEventListener('submit', simpanWargaBaru);
@@ -20,17 +14,17 @@ function initEventListeners() {
     document.getElementById('formBeritaAdmin').addEventListener('submit', simpanBerita);
     document.getElementById('formPopupAdmin').addEventListener('submit', simpanPopupMaklumat);
 
-    // Button Action Trigger
     document.getElementById('btnRefresh').addEventListener('click', sinkronUlangAdmin);
     document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
     document.getElementById('btnBukaModalKas').addEventListener('click', () => openModal('modalInputKas'));
     document.getElementById('btnBukaModalWarga').addEventListener('click', () => openModal('modalTambahWarga'));
+    
+    // Tombol Toggle Password (Hide/Show)
+    document.getElementById('btnTogglePass').addEventListener('click', togglePasswordView);
 
-    // Filter Change Event Listener
     document.getElementById('filterMulai').addEventListener('change', muatBukuKasAdmin);
     document.getElementById('filterSelesai').addEventListener('change', muatBukuKasAdmin);
 
-    // Bottom Navigation Controller
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => switchAdminTab(btn.getAttribute('data-target')));
     });
@@ -40,21 +34,19 @@ function cekSessionAdmin() {
     if (localStorage.getItem('admin_logged_in') === 'true') {
         document.getElementById('scr-login-admin').style.display = 'none';
 
-        // Mengatur default filter tanggal (Awal bulan berjalan s/d hari ini)
         const hariIni = new Date();
         const y = hariIni.getFullYear();
         const m = String(hariIni.getMonth() + 1).padStart(2, '0');
         document.getElementById('filterMulai').value = `${y}-${m}-01`;
         document.getElementById('filterSelesai').value = hariIni.toISOString().split('T')[0];
 
-        // Jalankan sinkronisasi data utama
         sinkronUlangAdmin();
     } else {
         document.getElementById('scr-login-admin').style.display = 'flex';
     }
 }
 
-// Alur Validasi Akun Login Admin Dinamis via Nomor HP dari Node /admin_account
+// FUNGSI UTAMA: Login Admin Fixed (Support Multi-Format Node Database)
 async function prosesLoginAdmin(e) {
     e.preventDefault();
     document.getElementById('loadingOverlay').style.display = 'flex';
@@ -66,7 +58,24 @@ async function prosesLoginAdmin(e) {
         const res = await fetch(`${DB_URL}/admin_account.json`);
         const accountData = await res.json();
         
-        if (accountData && hp === accountData.username && pass === accountData.password) {
+        let loginSukses = false;
+
+        if (accountData) {
+            // Kasus 1: Jika data di Firebase berbentuk objek ber-ID dinamis (contoh: /admin_account/-Oxxx/username)
+            if (typeof accountData === 'object' && !accountData.username) {
+                Object.keys(accountData).forEach(key => {
+                    if (accountData[key].username === hp && accountData[key].password === pass) {
+                        loginSukses = true;
+                    }
+                });
+            } 
+            // Kasus 2: Jika data langsung baris tunggal (contoh: /admin_account/username)
+            else if (accountData.username === hp && accountData.password === pass) {
+                loginSukses = true;
+            }
+        }
+
+        if (loginSukses) {
             localStorage.setItem('admin_logged_in', 'true');
             document.getElementById('scr-login-admin').style.display = 'none';
             showNotif('Login Admin Berhasil!', 'sukses');
@@ -81,13 +90,27 @@ async function prosesLoginAdmin(e) {
     }
 }
 
-// Sinkronisasi data menyeluruh berbalut Try/Catch agar aman (Anti-Stuck)
+// LOGIKA BARU: Hide/Show Password Toggle Switcher
+function togglePasswordView() {
+    const passInput = document.getElementById('loginPassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
 async function sinkronUlangAdmin() {
     if (localStorage.getItem('admin_logged_in') !== 'true') return;
     document.getElementById('loadingOverlay').style.display = 'flex';
     
     try {
-        // Eksekusi beriringan secara paralel
         await Promise.all([
             muatBukuKasAdmin(),
             muatDataWargaAdmin(),
@@ -96,10 +119,9 @@ async function sinkronUlangAdmin() {
             muatFormKontenPopup()
         ]);
     } catch (error) {
-        console.error("Gagal sinkron data utama:", error);
+        console.error(error);
         showNotif("Koneksi bermasalah saat memuat data", "gagal");
     } finally {
-        // Garansi penutupan tab overlay loading apa pun kondisinya
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
@@ -112,7 +134,6 @@ function switchAdminTab(id) {
     event.currentTarget.classList.add('active');
 }
 
-// Menghitung & Render Transaksi Kas RT Dinamis
 async function muatBukuKasAdmin() {
     const res = await fetch(`${DB_URL}/kas_rt04.json`);
     const data = await res.json();
@@ -193,7 +214,6 @@ async function hapusTransaksiKas(key) {
     muatBukuKasAdmin();
 }
 
-// Sinkronisasi Sisi Warga Menggunakan Atribut bulan_bergabung
 async function muatDataWargaAdmin() {
     const res = await fetch(`${DB_URL}/warga_rt04.json`);
     const data = await res.json();
@@ -234,7 +254,7 @@ async function simpanWargaBaru(e) {
     await fetch(`${DB_URL}/warga_rt04.json`, { method: 'POST', body: JSON.stringify(body) });
     closeModal('modalTambahWarga');
     document.getElementById('formWargaBaru').reset();
-    document.getElementById('addPass').value = "tuntas04"; // Reset default value kembali
+    document.getElementById('addPass').value = "tuntas04";
     showNotif('Warga Baru Berhasil Didaftarkan!', 'sukses');
     sinkronUlangAdmin();
 }
@@ -246,7 +266,6 @@ async function hapusWarga(key) {
     sinkronUlangAdmin();
 }
 
-// Penanganan Log Pengangkutan Sampah Warga
 async function simpanLogSampah(e) {
     e.preventDefault();
     const select = document.getElementById('logSampahWargaSelect');
@@ -263,7 +282,6 @@ async function simpanLogSampah(e) {
     showNotif('Log Sampah Rumah Berhasil Disimpan!', 'sukses');
 }
 
-// Penanganan Distribusi Data Iuran Bulanan
 async function simpanIuranWarga(e) {
     e.preventDefault();
     const select = document.getElementById('iuranWargaSelect');
@@ -283,7 +301,6 @@ async function simpanIuranWarga(e) {
     showNotif(`Iuran Sukses! Token: ${token}`, 'sukses');
 }
 
-// Pengelolaan Rilis Berita/Blog Publik
 async function simpanBerita(e) {
     e.preventDefault();
     const body = {
@@ -297,7 +314,6 @@ async function simpanBerita(e) {
     showNotif('Berita berhasil terpublish!', 'sukses');
 }
 
-// Memuat Dropdown Menu untuk Opsi Pilihan Warga
 async function muatSelectDropdownWarga() {
     const res = await fetch(`${DB_URL}/warga_rt04.json`);
     const data = await res.json();
@@ -316,7 +332,6 @@ async function muatSelectDropdownWarga() {
     }
 }
 
-// Pengelolaan Kotak Aspirasi/Saran Masuk
 async function muatSaranAdmin() {
     const res = await fetch(`${DB_URL}/saran_warga.json`);
     const data = await res.json();
@@ -352,7 +367,6 @@ async function hapusSaran(key) {
     muatSaranAdmin();
 }
 
-// Konfigurasi Pop-up Konten Maklumat Banner Aplikasi
 async function muatFormKontenPopup() {
     const res = await fetch(`${DB_URL}/informasi_popup.json`);
     const data = await res.json();
