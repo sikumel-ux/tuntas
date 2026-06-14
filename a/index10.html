@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TUNTAS - Admin Panel</title>
     
-    <!-- Google Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- Link Ke CSS Kustom -->
     <link rel="stylesheet" href="10.css">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
 
-    <!-- SCREEN LOGIN ADMIN -->
     <div id="scr-login-admin" class="fixed inset-0 bg-gradient-to-br from-slate-950 to-slate-900 z-[9999] flex flex-col justify-center p-6">
         <div class="max-w-sm w-full mx-auto space-y-6 bg-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-200">
             <div class="text-center space-y-1">
@@ -27,13 +25,17 @@
             </div>
             <form id="formLoginAdmin" class="space-y-3">
                 <input type="tel" id="loginUsername" placeholder="No. HP Admin" class="modern-in" required>
-                <input type="password" id="loginPassword" placeholder="Password Admin" class="modern-in" required>
+                <div class="relative">
+                    <input type="password" id="loginPassword" placeholder="Password Admin" class="modern-in pr-12" required>
+                    <button type="button" id="btnTogglePass" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fa-solid fa-eye text-xs" id="eyeIcon"></i>
+                    </button>
+                </div>
                 <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide">Masuk Dashboard</button>
             </form>
         </div>
     </div>
 
-    <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="flex flex-col items-center gap-2">
             <i class="fa-solid fa-spinner animate-spin text-xl"></i>
@@ -41,13 +43,11 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
     <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
         <i id="notifIcon" class="fa-solid text-base"></i>
         <span id="notifText" class="flex-1"></span>
     </div>
 
-    <!-- HEADER UTAMA -->
     <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
             <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
@@ -66,14 +66,8 @@
         </div>
     </header>
 
-    <!-- CORE MANAGEMENT PANEL -->
     <main class="p-4 space-y-4">
-        
-        <!-- ========================================== -->
-        <!-- TAB 1: MANAJEMEN KAS RT                    -->
-        <!-- ========================================== -->
         <div id="scr-a-kas" class="tab-content active space-y-4 animate-fade-in">
-            <!-- Card Dashboard Keuangan Utama -->
             <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-slate-800">
                 <div>
                     <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Total Saldo Bersih RT 04</p>
@@ -95,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- Filter Tanggal & Tombol Tambah Transaksi -->
             <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-3">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="date" id="filterMulai" class="modern-in !p-2 text-center">
@@ -104,31 +97,20 @@
                 <button id="btnBukaModalKas" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wide flex items-center justify-center gap-2"><i class="fa-solid fa-plus text-[10px]"></i> Input Transaksi Kas Baru</button>
             </div>
 
-            <!-- List Histori Transaksi -->
             <div class="space-y-2">
                 <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Log Buku Kas Terfilter</h3>
-                <div id="listKasAdmin" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden">
-                    <!-- Dinamis via JS -->
-                </div>
+                <div id="listKasAdmin" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden"></div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- TAB 2: MANAJEMEN DATA WARGA                -->
-        <!-- ========================================== -->
         <div id="scr-a-warga" class="tab-content space-y-4 animate-fade-in">
             <div class="flex justify-between items-center px-1">
                 <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Database Warga RT 04</h2>
                 <button id="btnBukaModalWarga" class="bg-emerald-900 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wide"><i class="fa-solid fa-user-plus"></i> Tambah</button>
             </div>
-            <div id="listManageWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden">
-                <!-- Dinamis via JS -->
-            </div>
+            <div id="listManageWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden"></div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- TAB 3: INPUT LOG PENJEMPUTAN SAMPAH        -->
-        <!-- ========================================== -->
         <div id="scr-a-sampah" class="tab-content space-y-4 animate-fade-in">
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
                 <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Input Log Pengangkutan Sampah Harian</h3>
@@ -139,9 +121,7 @@
                     </div>
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Pilih Warga</label>
-                        <select id="logSampahWargaSelect" class="modern-in" required>
-                            <!-- Pilihan warga dinamis -->
-                        </select>
+                        <select id="logSampahWargaSelect" class="modern-in" required></select>
                     </div>
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Status Keberadaan Sampah</label>
@@ -156,11 +136,7 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- TAB 4: IURAN & BERITA                      -->
-        <!-- ========================================== -->
         <div id="scr-a-iuran" class="tab-content space-y-6 animate-fade-in">
-            <!-- Form Catat Pembayaran Iuran Warga -->
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
                 <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Pencatatan Iuran Bulanan Warga</h3>
                 <form id="formIuranAdmin" class="space-y-3">
@@ -188,7 +164,6 @@
                 </form>
             </div>
 
-            <!-- Form Publish Pengumuman/Berita -->
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
                 <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Rilis Berita & Kegiatan Lingkungan</h3>
                 <form id="formBeritaAdmin" class="space-y-3">
@@ -199,11 +174,7 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- TAB 5: SARAN & POP-UP PANEL                -->
-        <!-- ========================================== -->
         <div id="scr-a-saran" class="tab-content space-y-6 animate-fade-in">
-            <!-- Manajemen Konten Pop-up Maklumat -->
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
                 <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Atur Pop-up Maklumat Aplikasi</h3>
                 <form id="formPopupAdmin" class="space-y-3">
@@ -213,17 +184,13 @@
                 </form>
             </div>
 
-            <!-- List Aspirasi / Kotak Saran Masuk -->
             <div class="space-y-2">
                 <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Kotak Aspirasi Masuk (Warga)</h3>
-                <div id="listSaranAdmin" class="space-y-2">
-                    <!-- Dinamis via JS -->
-                </div>
+                <div id="listSaranAdmin" class="space-y-2"></div>
             </div>
         </div>
     </main>
 
-    <!-- MODAL POPUP INPUT TRANSAKSI KAS -->
     <div id="modalInputKas" class="modal">
         <div class="modal-content space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
@@ -243,7 +210,6 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP TAMBAH WARGA BARU -->
     <div id="modalTambahWarga" class="modal">
         <div class="modal-content space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
@@ -253,7 +219,6 @@
             <form id="formWargaBaru" class="space-y-3">
                 <input type="text" id="addNama" placeholder="Nama Lengkap Warga" class="modern-in uppercase" required>
                 <input type="tel" id="addHp" placeholder="No. WhatsApp (Username)" class="modern-in" required>
-                <!-- Atribut value="tuntas04" terpasang default sesuai request -->
                 <input type="text" id="addPass" value="tuntas04" placeholder="Password Login" class="modern-in" required>
                 <input type="text" id="addBulan" placeholder="Bulan Bergabung (Contoh: Juni 2026)" class="modern-in" required>
                 <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Data Warga</button>
@@ -261,7 +226,6 @@
         </div>
     </div>
 
-    <!-- FIXED NAVBAR BAWAH (5-TAB ADMIN) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
         <button class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-kas"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS RT</button>
         <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-warga"><i class="fa-solid fa-users text-base mb-0.5"></i>WARGA</button>
@@ -270,7 +234,6 @@
         <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-saran"><i class="fa-solid fa-sliders text-base mb-0.5"></i>KONTROL</button>
     </nav>
 
-    <!-- Script Kontrol Eksternal -->
     <script src="10.js"></script>
 </body>
 </html>
