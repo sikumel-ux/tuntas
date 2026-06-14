@@ -178,7 +178,7 @@
             </div>
             <div>
                 <h3 id="profNama" class="text-xs font-black text-slate-800 uppercase">ADMIN TUNTAS RT 04</h3>
-                <p class="text-[9px] font-mono text-slate-400 mt-0.5">Klik icon kamera untuk upload foto langsung</p>
+                <p class="text-[9px] font-mono text-slate-400 mt-0.5">Kompresi otomatis aktif via HTML5 Canvas</p>
             </div>
         </div>
         <form id="formPass" onsubmit="ubahPasswordAdmin(event)" class="space-y-2">
@@ -309,29 +309,57 @@
         }
     }
 
+    // FUNGSI CANVAS RESIZER (OPTIMIZED & COMPRESSED ANTI-OVERFLOW)
     function prosesUploadFoto(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            if (file.size > 1500000) {
-                alert("Ukuran foto terlalu besar, bro! Maksimal 1.5 MB saja.");
-                return;
-            }
             document.getElementById('loadingOverlay').style.display = 'flex';
+            
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const stringBase64 = e.target.result;
-                try {
-                    await fetch(`${DB_URL}/admin_account/foto_profil.json`, {
-                        method: 'PUT',
-                        body: JSON.stringify(stringBase64)
-                    });
-                    document.getElementById('profFoto').src = stringBase64;
-                    showNotif('Foto Profil Berhasil Diperbarui!', 'sukses');
-                } catch (err) {
-                    showNotif('Gagal mengunggah gambar', 'gagal');
-                } finally {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                }
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const MAX_WIDTH = 400;
+                    const MAX_HEIGHT = 400;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress file asli segede apapun jadi jpeg ringan (.toDataURL)
+                    const stringBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    try {
+                        await fetch(`${DB_URL}/admin_account/foto_profil.json`, {
+                            method: 'PUT',
+                            body: JSON.stringify(stringBase64)
+                        });
+                        document.getElementById('profFoto').src = stringBase64;
+                        showNotif('Foto Profil Berhasil Diperbarui!', 'sukses');
+                    } catch (err) {
+                        showNotif('Gagal mengunggah gambar', 'gagal');
+                    } finally {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    }
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -389,6 +417,7 @@
         updateTampilanCardKas(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
     }
 
+    // Sisa Logic Firebase (CRUD Warga, Iuran, Sampah, dsb) Tetap Sinkron
     function updateTampilanCardKas(sk, sf, m, k) {
         document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
         document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
@@ -572,7 +601,6 @@
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    // NOTIF SYSTEM FIXED WITH TOAST TIMER CONTROL
     function showNotif(msg, type) {
         const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
         box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
