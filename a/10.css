@@ -3,7 +3,6 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Overlay Screen Full */
 .loading-overlay {
     position: fixed;
     inset: 0;
@@ -19,7 +18,6 @@ body {
     letter-spacing: 0.1em;
 }
 
-/* Modifikasi Input Field */
 .modern-in {
     width: 100%;
     background-color: #f8fafc;
@@ -39,7 +37,6 @@ body {
     box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
 }
 
-/* Modal Popup Engine */
 .modal {
     position: fixed;
     inset: 0;
@@ -75,7 +72,6 @@ body {
     transform: scale(1);
 }
 
-/* Fade Anim Tab Screen */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
