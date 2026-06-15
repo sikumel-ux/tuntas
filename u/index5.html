@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Warga Digital Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght text-slate-400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .modal { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 2.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #f1f5f9; transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #064e3b; font-weight: 800; }
+
+        /* Style khusus kalender sampah */
+        .grid-kalender { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .day-box { aspect-ratio: 1; display: flex; flex-col items-center; justify-content: center; border-radius: 0.75rem; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; position: relative; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+        <span>Menghubungkan Database...</span>
+    </div>
+</div>
+
+<div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+    <i id="notifIcon" class="fa-solid text-base"></i>
+    <span id="notifText" class="flex-1"></span>
+</div>
+
+<div id="scr-login" class="fixed inset-0 bg-emerald-950 z-[9000] flex items-center justify-center p-6">
+    <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-sm space-y-5 shadow-2xl">
+        <div class="text-center space-y-1">
+            <img src="logo.png" alt="Logo" class="w-12 h-12 mx-auto object-contain">
+            <h2 class="text-base font-black text-emerald-950 uppercase tracking-tight">Portal Warga TUNTAS</h2>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">RT 04 Dongkelan & Giwangan</p>
+        </div>
+        <form id="formLoginWarga" onsubmit="prosesLoginWarga(event)" class="space-y-3">
+            <input type="tel" id="loginHp" placeholder="No WhatsApp (Username)" class="modern-in" required>
+            <div class="relative">
+                <input type="password" id="loginPass" placeholder="Password Akun" class="modern-in pr-12" required>
+                <button type="button" onclick="toggleVisibilitasPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-700">
+                    <i id="eyeIcon" class="fa-solid fa-eye text-sm"></i>
+                </button>
+            </div>
+            <button type="submit" class="w-full bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wider shadow-md">Masuk Ke Sistem</button>
+        </form>
+    </div>
+</div>
+
+<div id="portalUtama" class="hidden">
+    <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="relative w-9 h-9 cursor-pointer group" title="Klik foto untuk ganti gambar">
+                <img id="profFotoWarga" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200" alt="Profile" class="w-9 h-9 rounded-xl object-cover border border-emerald-600/30 group-hover:opacity-80 transition-all" onclick="document.getElementById('inputFotoWargaFile').click()">
+                <input type="file" id="inputFotoWargaFile" accept="image/*" class="hidden" onchange="prosesUploadFotoWarga(this)">
+            </div>
+            <div>
+                <h1 id="lblNamaWarga" class="text-sm font-extrabold text-emerald-950 tracking-tight leading-none">WARGA TUNTAS</h1>
+                <p id="lblHpWarga" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">MEMUAT AKUN...</p>
+            </div>
+        </div>
+        <button onclick="logoutWarga()" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 active:scale-95 transition-all">
+            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+        </button>
+    </header>
+
+    <div id="mInfoWargaPopup" class="modal">
+        <div class="modal-content space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-bullhorn"></i> Pengumuman Pengurus</span>
+                <button onclick="closeModal('mInfoWargaPopup')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-1">
+                <h4 id="lblPopupJudul" class="text-xs font-black text-slate-800 uppercase">MEMUAT...</h4>
+                <p id="lblPopupIsi" class="text-xs text-slate-600 leading-relaxed font-semibold italic"></p>
+            </div>
+            <button onclick="closeModal('mInfoWargaPopup')" class="w-full bg-emerald-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Saya Mengerti</button>
+        </div>
+    </div>
+
+    <div id="mDetailSampah" class="modal" onclick="if(event.target==this)closeModal('mDetailSampah')">
+        <div class="modal-content space-y-3">
+            <div class="flex justify-between items-center border-b pb-1.5">
+                <h3 class="font-extrabold uppercase text-emerald-900 text-xs tracking-wide">Detail Penjemputan</h3>
+                <button onclick="closeModal('mDetailSampah')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between"><span class="text-slate-400 font-bold">Tanggal:</span><span id="dtlSampahTgl" class="font-black text-slate-700"></span></div>
+                <div class="flex justify-between"><span class="text-slate-400 font-bold">Jam Operasi:</span><span id="dtlSampahJam" class="font-black text-emerald-700"></span></div>
+                <div class="flex justify-between"><span class="text-slate-400 font-bold">Status Log:</span><span id="dtlSampahStatus" class="font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded uppercase tracking-wide text-[10px]"></span></div>
+            </div>
+            <button onclick="closeModal('mDetailSampah')" class="w-full bg-slate-900 text-white py-2 rounded-xl text-[10px] font-black uppercase">Tutup</button>
+        </div>
+    </div>
+
+    <div id="scr-warga-iuran" class="tab-content active p-4 space-y-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-[2rem] shadow-md border border-slate-700/30 space-y-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Informasi Rekening Iuran</p>
+                    <h3 class="text-sm font-black uppercase mt-1">Bank Mandiri Syariah / BSI</h3>
+                    <p class="text-base font-mono font-bold tracking-wider text-slate-200 mt-0.5" id="numRekening">7140024188</p>
+                    <p class="text-[10px] text-slate-400 font-bold mt-0.5">a.n Kas Gerakan TUNTAS RT 04</p>
+                </div>
+                <button onclick="salinNoRekening()" class="bg-emerald-800 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1 active:scale-95 transition-all"><i class="fa-solid fa-copy"></i> Salin</button>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Riwayat Kuitansi Iuran Anda</h3>
+            <div id="listKuitansiWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-y-auto max-h-[220px]">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada pembayaran terdata.</div>
+            </div>
+        </div>
+        
+        <div class="space-y-2">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Pengumuman & Edukasi Umum</h3>
+            <div id="listPengumumanWarga" class="space-y-2 max-h-[220px] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="scr-warga-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
+        <div class="bg-white border border-slate-100 p-4 rounded-[2rem] shadow-sm space-y-3">
+            <div class="text-center pb-2 border-b">
+                <h3 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Kalender Agenda Sampah</h3>
+                <p class="text-sm font-black text-emerald-700 uppercase tracking-tight">Juni 2026</p>
+            </div>
+            
+            <div class="grid-kalender font-black text-[9px] text-slate-400 uppercase tracking-wider border-b pb-1">
+                <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
+            </div>
+            
+            <div id="boxKalenderSampah" class="grid-kalender"></div>
+            
+            <div class="pt-2 flex items-center gap-4 text-[9px] font-black uppercase tracking-wide text-slate-400 justify-center">
+                <div class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-600 rounded-md"></span> Sampah Diambil</div>
+                <div class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-100 border rounded-md"></span> Belum Ada Log</div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kotak Saran & Aspirasi</h3>
+            <form id="formSaran" onsubmit="kirimSaranWarga(event)" class="space-y-2">
+                <textarea id="txtSaran" rows="2" placeholder="Ketik keluhan, ide, atau saran penjemputan sampah ke pengurus RT..." class="modern-in !p-3 text-xs h-auto" required></textarea>
+                <button type="submit" class="w-full bg-emerald-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Kirim Ke Pengurus</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
+        <button id="nav-warga-iuran" onclick="switchTabWarga('scr-warga-iuran')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-receipt text-base mb-0.5"></i>IURAN & INFO</button>
+        <button id="nav-warga-sampah" onclick="switchTabWarga('scr-warga-sampah')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-calendar-days text-base mb-0.5"></i>KALENDER SAMPAH</button>
+    </nav>
+</div>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+    let AKUN_WARGA_LOGGED_KEY = null;
+    let DATA_WARGA_LOGGED_OBJ = null;
+    let MEMO_LOG_SAMPAH = {}; // Tempat menampung log sampah tanggal Juni 2026
+
+    // FITUR: Toggle Show/Hide Password
+    function toggleVisibilitasPassword() {
+        const inp = document.getElementById('loginPass');
+        const eye = document.getElementById('eyeIcon');
+        if (inp.type === "password") {
+            inp.type = "text";
+            eye.classList.remove('fa-eye');
+            eye.classList.add('fa-eye-slash');
+        } else {
+            inp.type = "password";
+            eye.classList.remove('fa-eye-slash');
+            eye.classList.add('fa-eye');
+        }
+    }
+
+    // FITUR: Copy Rekening
+    function salinNoRekening() {
+        const num = document.getElementById('numRekening').innerText;
+        navigator.clipboard.writeText(num);
+        showNotif('Nomor Rekening Berhasil Disalin!', 'sukses');
+    }
+
+    async function prosesLoginWarga(e) {
+        e.preventDefault();
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        const hp = document.getElementById('loginHp').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+
+        try {
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const data = await res.json();
+            let ditemukan = false;
+
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    if (data[key].username === hp && data[key].password === pass) {
+                        ditemukan = true;
+                        AKUN_WARGA_LOGGED_KEY = key;
+                        DATA_WARGA_LOGGED_OBJ = data[key];
+                        localStorage.setItem('warga_session_key', key);
+                    }
+                });
+            }
+
+            if (ditemukan) {
+                document.getElementById('scr-login').classList.add('hidden');
+                document.getElementById('portalUtama').classList.remove('hidden');
+                initSistemWargaPortal();
+            } else {
+                showNotif('No WhatsApp atau Password Salah', 'gagal');
+            }
+        } catch (err) {
+            showNotif('Masalah jaringan database', 'gagal');
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    }
+
+    function initSistemWargaPortal() {
+        document.getElementById('lblNamaWarga').innerText = DATA_WARGA_LOGGED_OBJ.nama;
+        document.getElementById('lblHpWarga').innerText = "WA: " + DATA_WARGA_LOGGED_OBJ.username;
+        if (DATA_WARGA_LOGGED_OBJ.foto && DATA_WARGA_LOGGED_OBJ.foto !== 'default.png') {
+            document.getElementById('profFotoWarga').src = DATA_WARGA_LOGGED_OBJ.foto;
+        }
+
+        // Jalankan sinkronisasi data warga
+        sinkronDataWargaSide();
+    }
+
+    async function sinkronDataWargaSide() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        try {
+            await Promise.all([
+                muatKuitansiIuranWarga(),
+                muatPengumumanWarga(),
+                muatPopupMaklumatWarga(),
+                muatLogSampahDanKalender()
+            ]);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    }
+
+    // FITUR: Ganti Foto Profil Langsung dengan Klik Fotonya (HTML5 Canvas Resizer Compressed)
+    function prosesUploadFotoWarga(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_SIZE = 400;
+                    let w = img.width, h = img.height;
+                    
+                    if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } 
+                    else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+                    
+                    canvas.width = w; canvas.height = h;
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const base64Str = canvas.toDataURL('image/jpeg', 0.7);
+
+                    try {
+                        await fetch(`${DB_URL}/warga_rt04/${AKUN_WARGA_LOGGED_KEY}/foto.json`, {
+                            method: 'PUT',
+                            body: JSON.stringify(base64Str)
+                        });
+                        document.getElementById('profFotoWarga').src = base64Str;
+                        DATA_WARGA_LOGGED_OBJ.foto = base64Str;
+                        showNotif('Foto Profil Anda Diperbarui!', 'sukses');
+                    } catch (err) {
+                        showNotif('Gagal simpan gambar', 'gagal');
+                    } finally {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // FITUR UTAMA: Kalender Sebulan Juni 2026 + Hijau jika diambil + Detail Pop-up klik
+    async function muatLogSampahDanKalender() {
+        try {
+            const res = await fetch(`${DB_URL}/laporan_sampah.json`);
+            const data = await res.json();
+            MEMO_LOG_SAMPAH = {};
+
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    // Validasi jika log sampah ini milik warga yang sedang login saat ini
+                    if (item.warga_key === AKUN_WARGA_LOGGED_KEY) {
+                        // Simpan ke memo berdasarkan tanggal (Format: YYYY-MM-DD)
+                        MEMO_LOG_SAMPAH[item.tanggal] = item;
+                    }
+                });
+            }
+            renderKalenderJuni2026();
+        } catch (e) { console.error(e); }
+    }
+
+    function renderKalenderJuni2026() {
+        const box = document.getElementById('boxKalenderSampah');
+        box.innerHTML = "";
+
+        // Juni 2026 dimulai dari hari Senin (1 Juni 2026 = Hari Senin)
+        // Jumlah hari di bulan Juni adalah 30 hari.
+        const totalHari = 30;
+
+        for (let i = 1; i <= totalHari; i++) {
+            const tglString = `2026-06-${String(i).padStart(2, '0')}`;
+            const adaLog = MEMO_LOG_SAMPAH[tglString];
+
+            let classWarna = "bg-slate-100 text-slate-700 hover:bg-slate-200";
+            if (adaLog) {
+                // Berubah jadi hijau segar jika data penjemputan diinput admin
+                classWarna = "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 font-extrabold";
+            }
+
+            const htmlBox = `<div class="day-box ${classWarna}" onclick="klikKotakTanggalKalender('${tglString}')">${i}</div>`;
+            box.insertAdjacentHTML('beforeend', htmlBox);
+        }
+    }
+
+    function klikKotakTanggalKalender(tgl) {
+        const log = MEMO_LOG_SAMPAH[tgl];
+        if (!log) {
+            showNotif("Belum ada laporan sampah masuk di tanggal ini", "gagal");
+            return;
+        }
+        // Jika diklik akan muncul info detail penjemputannya
+        document.getElementById('dtlSampahTgl').innerText = log.tanggal;
+        document.getElementById('dtlSampahJam').innerText = log.jam_diambil ? log.jam_diambil : "Malam Hari";
+        document.getElementById('dtlSampahStatus').innerText = log.status;
+        openModal('mDetailSampah');
+    }
+
+    async function muatKuitansiIuranWarga() {
+        try {
+            const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+            const data = await res.json();
+            const list = document.getElementById('listKuitansiWarga');
+            list.innerHTML = "";
+            let ada = false;
+
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const i = data[key];
+                    if (i.warga_key === AKUN_WARGA_LOGGED_KEY) {
+                        ada = true;
+                        const link = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${i.token_kuitansi}`;
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="p-3.5 flex justify-between items-center bg-white">
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-800 uppercase">${i.bulan}</h4>
+                                    <p class="text-[9px] font-mono text-slate-400 mt-0.5">Kuitansi: ${i.token_kuitansi} (${i.tanggal})</p>
+                                </div>
+                                <button onclick="window.open('${link}', '_blank')" class="bg-emerald-50 text-emerald-800 font-black text-[9px] px-2.5 py-1.5 rounded-lg border border-emerald-200 uppercase">Lihat Kuitansi</button>
+                            </div>
+                        `);
+                    }
+                });
+            }
+            if (!ada) list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada invoice iuran.</div>`;
+        } catch (e) { console.error(e); }
+    }
+
+    async function muatPengumumanWarga() {
+        try {
+            const res = await fetch(`${DB_URL}/pengumuman.json`);
+            const data = await res.json();
+            const list = document.getElementById('listPengumumanWarga');
+            list.innerHTML = "";
+            if (!data) { list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-semibold italic">Belum ada publikasi blog.</div>`; return; }
+            Object.keys(data).forEach(key => {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-1">
+                        <div class="flex justify-between items-center text-[8px] font-black text-slate-400 uppercase tracking-wider"><span>PUBLIKASI</span><span>${data[key].tanggal}</span></div>
+                        <h4 class="text-xs font-black text-slate-800 uppercase leading-snug">${data[key].judul}</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">${data[key].isi}</p>
+                    </div>
+                `);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    async function muatPopupMaklumatWarga() {
+        try {
+            const res = await fetch(`${DB_URL}/informasi_popup.json`);
+            const data = await res.json();
+            if (data && data.judul) {
+                document.getElementById('lblPopupJudul').innerText = data.judul;
+                document.getElementById('lblPopupIsi').innerText = data.isi;
+                openModal('mInfoWargaPopup');
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    function kirimSaranWarga(e) {
+        e.preventDefault();
+        const txt = document.getElementById('txtSaran').value.trim();
+        const body = {
+            nama_warga: DATA_WARGA_LOGGED_OBJ.nama,
+            warga_key: AKUN_WARGA_LOGGED_KEY,
+            isi_saran: txt,
+            tanggal: new Date().toISOString().split('T')[0]
+        };
+        fetch(`${DB_URL}/saran_warga.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => {
+            document.getElementById('formSaran').reset();
+            showNotif('Aspirasi Terkirim Ke Pengurus', 'sukses');
+        });
+    }
+
+    function switchTabWarga(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (id === 'scr-warga-iuran') document.getElementById('nav-warga-iuran').classList.add('active');
+        if (id === 'scr-warga-sampah') document.getElementById('nav-warga-sampah').classList.add('active');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const localKey = localStorage.getItem('warga_session_key');
+        if (localKey) {
+            AKUN_WARGA_LOGGED_KEY = localKey;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            fetch(`${DB_URL}/warga_rt04/${localKey}.json`).then(r => r.json()).then(user => {
+                if (user) {
+                    DATA_WARGA_LOGGED_OBJ = user;
+                    document.getElementById('scr-login').classList.add('hidden');
+                    document.getElementById('portalUtama').classList.remove('hidden');
+                    initSistemWargaPortal();
+                } else {
+                    localStorage.clear();
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }
+            }).catch(() => { document.getElementById('loadingOverlay').style.display = 'none'; });
+        } else {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    });
+
+    function logoutWarga() { localStorage.clear(); window.location.reload(); }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
