@@ -13,7 +13,7 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
         .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
         .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
         .modal { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
@@ -30,7 +30,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
 
-<!-- LOADING OVERLAY BRING BACK ORIGINAL SPLASH -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="flex flex-col items-center gap-2">
         <i class="fa-solid fa-spinner animate-spin text-xl"></i>
@@ -38,13 +37,11 @@
     </div>
 </div>
 
-<!-- NOTIFICATION SYSTEM -->
 <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
     <i id="notifIcon" class="fa-solid text-base"></i>
     <span id="notifText" class="flex-1"></span>
 </div>
 
-<!-- HEADER UTAMA -->
 <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
     <div class="flex items-center gap-3">
         <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
@@ -66,7 +63,6 @@
     </div>
 </header>
 
-<!-- POPUP INFORMASI BERKALA -->
 <div id="mInfoLoginPopup" class="modal">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -81,9 +77,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- TAB 1: KAS OPERASIONAL                     -->
-<!-- ========================================== -->
 <div id="scr-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
     <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-emerald-800/40">
         <div>
@@ -121,7 +114,6 @@
         <button onclick="unduhLaporanPDF()" class="bg-slate-800 text-white py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1"><i class="fa-solid fa-file-pdf text-xs"></i> Unduh PDF</button>
     </div>
 
-    <!-- LINK KUITANSI GENERATOR -->
     <div id="boxKuitansiLink" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2 hidden">
         <p class="text-[10px] font-black text-emerald-800 uppercase tracking-wider">Kuitansi Digital Siap!</p>
         <p id="textKodeKuitansi" class="text-xs font-mono font-bold text-slate-700 break-all"></p>
@@ -139,9 +131,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- TAB 2: DATA REGISTRASI WARGA               -->
-<!-- ========================================== -->
 <div id="scr-warga" class="tab-content p-4 space-y-4 animate-fade-in">
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Daftarkan Anggota Warga Baru</h2>
@@ -156,9 +145,6 @@
     <div id="listWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm text-xs max-h-[300px] overflow-y-auto"></div>
 </div>
 
-<!-- ========================================== -->
-<!-- TAB 3: OPERASIONAL SAMPAH                  -->
-<!-- ========================================== -->
 <div id="scr-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Laporan Sampah Operasional</h2>
@@ -175,9 +161,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- TAB 4: HISTORI ARSIP IURAN                 -->
-<!-- ========================================== -->
 <div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
     <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Buku Riwayat Arsip Iuran</h2>
     <div id="listRiwayatIuranWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm">
@@ -185,11 +168,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- TAB 5: MODUL UTILITY & LAINNYA             -->
-<!-- ========================================== -->
 <div id="scr-modul" class="tab-content p-4 space-y-6 animate-fade-in">
-    <!-- Profil Admin & Upload Image Handler -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <div class="flex items-center gap-4 border-b pb-4">
             <div class="relative w-16 h-16 flex-shrink-0">
@@ -211,7 +190,6 @@
         </form>
     </div>
 
-    <!-- Modul Popup Banner -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Maklumat / Info Pop-Up</h3>
         <form id="formInformasiPopup" onsubmit="simpanInfoPopup(event)" class="space-y-2">
@@ -221,7 +199,6 @@
         </form>
     </div>
 
-    <!-- Modul Publikasi Mini Blog -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Modul Berita & Publikasi (Mini Blog)</h3>
         <form id="formBerita" onsubmit="simpanBerita(event)" class="space-y-2">
@@ -232,18 +209,12 @@
         <div id="listBeritaAdmin" class="bg-slate-50 rounded-xl divide-y divide-slate-200 p-2 space-y-2 max-h-[150px] overflow-y-auto"></div>
     </div>
 
-    <!-- Kotak Aspirasi Warga -->
     <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
         <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kotak Tampung Aspirasi & Saran</h3>
         <div id="listSaranWargaAdmin" class="divide-y divide-slate-100 max-h-[160px] overflow-y-auto"></div>
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL OVERLAY POPUPS                       -->
-<!-- ========================================== -->
-
-<!-- Modal Input Kas Umum -->
 <div id="mInputKas" class="modal" onclick="if(event.target==this)closeModal('mInputKas')">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -259,7 +230,6 @@
     </div>
 </div>
 
-<!-- Modal Input Penerbitan Iuran -->
 <div id="mInputIuran" class="modal" onclick="if(event.target==this)closeModal('mInputIuran')">
     <div class="modal-content space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -276,7 +246,6 @@
     </div>
 </div>
 
-<!-- BOTTOM NAVIGATION BAR -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
     <button id="nav-btn-kas" onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
     <button id="nav-btn-warga" onclick="switchTab('scr-warga')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-plus text-base mb-0.5"></i>+WARGA</button>
@@ -285,9 +254,6 @@
     <button id="nav-btn-riwayat" onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>HISTORI</button>
 </nav>
 
-<!-- ========================================== -->
-<!-- SCRIPTS LOGIC CORE SYSTEM                  -->
-<!-- ========================================== -->
 <script>
     const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
     let DATA_KAS_TERFILTER = []; 
@@ -307,10 +273,22 @@
         });
     });
 
+    // AMAN ANTI-STUCK: Dilengkapi pelindung Error Catching agar overlay otomatis menutup
     async function sinkronUlangData() {
         document.getElementById('loadingOverlay').style.display = 'flex';
-        await Promise.all([muatSistemKas(), muatSistemWarga(), muatRiwayatIuran(), muatBeritaAdmin(), muatSaranAdmin()]);
-        document.getElementById('loadingOverlay').style.display = 'none';
+        try {
+            await Promise.all([
+                muatSistemKas(), 
+                muatSistemWarga(), 
+                muatRiwayatIuran(), 
+                muatBeritaAdmin(), 
+                muatSaranAdmin()
+            ]);
+        } catch (err) {
+            console.error("Sinkronisasi database mengalami kendala:", err);
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
     }
 
     function switchTab(id) {
@@ -343,7 +321,6 @@
         }
     }
 
-    // CANVAS IMAGE RESIZER WITH AUTO-COMPRESSION SYSTEM
     function prosesUploadFoto(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
@@ -399,55 +376,57 @@
     }
 
     async function muatSistemKas() {
-        const res = await fetch(`${DB_URL}/kas_rt04.json`);
-        const data = await res.json();
-        const list = document.getElementById('listMutasiKasMasyarakat');
-        list.innerHTML = "";
+        try {
+            const res = await fetch(`${DB_URL}/kas_rt04.json`);
+            const data = await res.json();
+            const list = document.getElementById('listMutasiKasMasyarakat');
+            list.innerHTML = "";
 
-        let start = new Date(document.getElementById('filterMulai').value);
-        let end = new Date(document.getElementById('filterSelesai').value);
-        end.setHours(23,59,59,999);
+            let start = new Date(document.getElementById('filterMulai').value);
+            let end = new Date(document.getElementById('filterSelesai').value);
+            end.setHours(23,59,59,999);
 
-        let saldoKeseluruhan = 0; 
-        let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
-        DATA_KAS_TERFILTER = [];
+            let saldoKeseluruhan = 0; 
+            let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
+            DATA_KAS_TERFILTER = [];
 
-        if(!data) {
-            list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Buku Kas Kosong.</div>`;
-            updateTampilanCardKas(0, 0, 0, 0); return;
-        }
-
-        Object.keys(data).forEach(key => {
-            const v = data[key];
-            const nom = parseInt(v.nominal) || 0;
-            const tglItem = new Date(v.tanggal);
-
-            if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
-
-            if(tglItem >= start && tglItem <= end) {
-                if(v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
-                sldTerapit = mskTerapit - klrTerapit;
-
-                DATA_KAS_TERFILTER.push({ tanggal: v.tanggal, keterangan: v.keterangan, jenis: v.jenis, nominal: nom });
-
-                list.insertAdjacentHTML('afterbegin', `
-                    <div class="p-4 flex justify-between items-center bg-white">
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
-                            <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
-                                ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
-                            </span>
-                            <button onclick="hapusKas('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                        </div>
-                    </div>
-                `);
+            if(!data) {
+                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Buku Kas Kosong.</div>`;
+                updateTampilanCardKas(0, 0, 0, 0); return;
             }
-        });
 
-        updateTampilanCardKas(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+            Object.keys(data).forEach(key => {
+                const v = data[key];
+                const nom = parseInt(v.nominal) || 0;
+                const tglItem = new Date(v.tanggal);
+
+                if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
+
+                if(tglItem >= start && tglItem <= end) {
+                    if(v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
+                    sldTerapit = mskTerapit - klrTerapit;
+
+                    DATA_KAS_TERFILTER.push({ tanggal: v.tanggal, keterangan: v.keterangan, jenis: v.jenis, nominal: nom });
+
+                    list.insertAdjacentHTML('afterbegin', `
+                        <div class="p-4 flex justify-between items-center bg-white">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                                <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
+                                    ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
+                                </span>
+                                <button onclick="hapusKas('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            updateTampilanCardKas(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+        } catch (e) { console.error(e); }
     }
 
     function updateTampilanCardKas(sk, sf, m, k) {
@@ -493,6 +472,7 @@
         });
     }
 
+    // FIX: Method diganti ke PUT (REST API Firebase yang valid untuk menimpa objek tunggal)
     function simpanInfoPopup(e) {
         e.preventDefault();
         const body = { judul: document.getElementById('popJudul').value.trim().toUpperCase(), isi: document.getElementById('popIsi').value.trim(), tanggal: new Date().toISOString().split('T')[0] };
@@ -500,13 +480,15 @@
     }
 
     async function jalankanPopupInfoOtomatis() {
-        const res = await fetch(`${DB_URL}/informasi_popup.json`);
-        const data = await res.json();
-        if(data && data.judul) {
-            document.getElementById('popupInfoJudul').innerText = data.judul;
-            document.getElementById('popupInfoIsi').innerText = data.isi;
-            openModal('mInfoLoginPopup');
-        }
+        try {
+            const res = await fetch(`${DB_URL}/informasi_popup.json`);
+            const data = await res.json();
+            if(data && data.judul) {
+                document.getElementById('popupInfoJudul').innerText = data.judul;
+                document.getElementById('popupInfoIsi').innerText = data.isi;
+                openModal('mInfoLoginPopup');
+            }
+        } catch (err) { console.error(err); }
     }
 
     function simpanBerita(e) {
@@ -516,18 +498,20 @@
     }
 
     async function muatBeritaAdmin() {
-        const res = await fetch(`${DB_URL}/pengumuman.json`);
-        const data = await res.json();
-        const list = document.getElementById('listBeritaAdmin');
-        list.innerHTML = ""; if(!data) return;
-        Object.keys(data).forEach(key => {
-            list.insertAdjacentHTML('afterbegin', `
-                <div class="p-2 bg-white rounded-lg border border-slate-100 mt-1">
-                    <div class="flex justify-between items-center"><h5 class="text-[11px] font-black text-slate-800">${data[key].judul}</h5><button onclick="hapusBerita('${key}')" class="text-slate-300 hover:text-rose-500 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></div>
-                    <p class="text-[11px] text-slate-500 mt-0.5 leading-tight">${data[key].isi}</p>
-                </div>
-            `);
-        });
+        try {
+            const res = await fetch(`${DB_URL}/pengumuman.json`);
+            const data = await res.json();
+            const list = document.getElementById('listBeritaAdmin');
+            list.innerHTML = ""; if(!data) return;
+            Object.keys(data).forEach(key => {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-2 bg-white rounded-lg border border-slate-100 mt-1">
+                        <div class="flex justify-between items-center"><h5 class="text-[11px] font-black text-slate-800">${data[key].judul}</h5><button onclick="hapusBerita('${key}')" class="text-slate-300 hover:text-rose-500 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></div>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-tight">${data[key].isi}</p>
+                    </div>
+                `);
+            });
+        } catch (e) { console.error(e); }
     }
 
     function hapusBerita(key) {
@@ -536,43 +520,47 @@
     }
 
     async function muatSaranAdmin() {
-        const res = await fetch(`${DB_URL}/saran_warga.json`);
-        const data = await res.json();
-        const list = document.getElementById('listSaranWargaAdmin');
-        list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada saran masuk.</div>`; return; }
-        Object.keys(data).forEach(key => {
-            list.insertAdjacentHTML('afterbegin', `
-                <div class="p-2.5 my-1 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="flex justify-between items-center text-[9px] font-black"><span class="text-emerald-800 uppercase">${data[key].nama_warga}</span><span class="text-slate-400">${data[key].tanggal}</span></div>
-                    <p class="text-[11px] text-slate-600 italic mt-0.5">"${data[key].isi_saran}"</p>
-                </div>
-            `);
-        });
+        try {
+            const res = await fetch(`${DB_URL}/saran_warga.json`);
+            const data = await res.json();
+            const list = document.getElementById('listSaranWargaAdmin');
+            list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada saran masuk.</div>`; return; }
+            Object.keys(data).forEach(key => {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-2.5 my-1 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="flex justify-between items-center text-[9px] font-black"><span class="text-emerald-800 uppercase">${data[key].nama_warga}</span><span class="text-slate-400">${data[key].tanggal}</span></div>
+                        <p class="text-[11px] text-slate-600 italic mt-0.5">"${data[key].isi_saran}"</p>
+                    </div>
+                `);
+            });
+        } catch (e) { console.error(e); }
     }
 
     async function muatSistemWarga() {
-        const res = await fetch(`${DB_URL}/warga_rt04.json`);
-        const data = await res.json();
-        const list = document.getElementById('listWarga');
-        const d1 = document.getElementById('iuranWarga');
-        const d2 = document.getElementById('smphWarga');
+        try {
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const data = await res.json();
+            const list = document.getElementById('listWarga');
+            const d1 = document.getElementById('iuranWarga');
+            const d2 = document.getElementById('smphWarga');
 
-        list.innerHTML = ""; d1.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>'; d2.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>';
-        if(!data) return;
-        Object.keys(data).forEach(key => {
-            const w = data[key];
-            d1.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
-            d2.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
-            list.insertAdjacentHTML('beforeend', `
-                <div class="p-3 flex justify-between items-center bg-white my-1 rounded-xl border border-slate-100">
-                    <div>
-                        <p class="font-extrabold text-slate-700 uppercase tracking-wide">${w.nama}</p>
-                        <p class="text-[9px] text-slate-400 font-mono">WA: ${w.username} | Reg: ${w.bulan_bergabung}</p>
+            list.innerHTML = ""; d1.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>'; d2.innerHTML = '<option value="">-- PILIH NAMA WARGA --</option>';
+            if(!data) return;
+            Object.keys(data).forEach(key => {
+                const w = data[key];
+                d1.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+                d2.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="p-3 flex justify-between items-center bg-white my-1 rounded-xl border border-slate-100">
+                        <div>
+                            <p class="font-extrabold text-slate-700 uppercase tracking-wide">${w.nama}</p>
+                            <p class="text-[9px] text-slate-400 font-mono">WA: ${w.username} | Reg: ${w.bulan_bergabung}</p>
+                        </div>
+                        <button onclick="hapusWarga('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-user-xmark text-xs"></i></button>
                     </div>
-                    <button onclick="hapusWarga('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-user-xmark text-xs"></i></button>
-                </div>
-            `);
-        });
+                `);
+            });
+        } catch (e) { console.error(e); }
     }
 
     function simpanWarga(e) {
@@ -594,22 +582,24 @@
     }
 
     async function muatRiwayatIuran() {
-        const res = await fetch(`${DB_URL}/iuran_sampah.json`);
-        const data = await res.json();
-        const list = document.getElementById('listRiwayatIuranWarga');
-        list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Kosong.</div>`; return; }
-        Object.keys(data).forEach(key => {
-            const i = data[key];
-            list.insertAdjacentHTML('afterbegin', `
-                <div class="p-4 flex justify-between items-center bg-white border border-slate-100 rounded-xl my-1">
-                    <div>
-                        <h4 class="text-xs font-black text-slate-700 uppercase">${i.nama_warga}</h4>
-                        <p class="text-[9px] text-slate-400 font-bold mt-0.5">${i.bulan} | Token: ${i.token_kuitansi}</p>
+        try {
+            const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+            const data = await res.json();
+            const list = document.getElementById('listRiwayatIuranWarga');
+            list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Kosong.</div>`; return; }
+            Object.keys(data).forEach(key => {
+                const i = data[key];
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 flex justify-between items-center bg-white border border-slate-100 rounded-xl my-1">
+                        <div>
+                            <h4 class="text-xs font-black text-slate-700 uppercase">${i.nama_warga}</h4>
+                            <p class="text-[9px] text-slate-400 font-bold mt-0.5">${i.bulan} | Token: ${i.token_kuitansi}</p>
+                        </div>
+                        <span class="text-xs font-black text-slate-800">Rp ${i.nominal.toLocaleString('id-ID')}</span>
                     </div>
-                    <span class="text-xs font-black text-slate-800">Rp ${i.nominal.toLocaleString('id-ID')}</span>
-                </div>
-            `);
-        });
+                `);
+            });
+        } catch (e) { console.error(e); }
     }
 
     function unduhLaporanPDF() {
