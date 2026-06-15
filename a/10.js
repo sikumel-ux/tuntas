@@ -1,6 +1,6 @@
 /**
  * TUNTAS - Admin Panel Management Logic
- * Fixed Version: Automated Firebase String/JSON Quote Stripping
+ * Fixed Version: Berdasarkan Logika Login Warga yang Berhasil
  */
 
 const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -41,7 +41,7 @@ function cekSessionAdmin() {
     if (localStorage.getItem('admin_logged_in') === 'true') {
         document.getElementById('scr-login-admin').style.display = 'none';
 
-        // Set default filter bulan ini
+        // Set default filter bulan ini (Juni 2026)
         const hariIni = new Date();
         const y = hariIni.getFullYear();
         const m = String(hariIni.getMonth() + 1).padStart(2, '0');
@@ -55,28 +55,33 @@ function cekSessionAdmin() {
 }
 
 // ==========================================
-// FIX LOGIN SYSTEM (ANTI-MENTAL & ANTI-KUTIP)
+// FIX LOGIN ADMIN (SAMA DENGAN LOGIKA WARGA)
 // ==========================================
 async function prosesLoginAdmin(e) {
     e.preventDefault();
     document.getElementById('loadingOverlay').style.display = 'flex';
     
-    const inputHp = document.getElementById('loginUsername').value.trim();
-    const inputPass = document.getElementById('loginPassword').value.trim();
+    const hp = document.getElementById('loginUsername').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
 
     try {
-        // Menggunakan .json() secara paralel otomatis mengonversi data mentah Firebase ke tipe data JS asli
-        const [resHp, resPass] = await Promise.all([
-            fetch(`${DB_URL}/admin_account/username.json`).then(r => r.json()),
-            fetch(`${DB_URL}/admin_account/password.json`).then(r => r.json())
-        ]);
+        const res = await fetch(`${DB_URL}/admin_account.json`);
+        const data = await res.json();
+        
+        let ketemu = false;
+        
+        if (data) {
+            Object.keys(data).forEach(key => {
+                if (data[key].username === hp && data[key].password === pass) {
+                    ketemu = true;
+                    localStorage.setItem('admin_logged_in', 'true');
+                    localStorage.setItem('KEY_ADMIN_LOGGED_IN', key);
+                    localStorage.setItem('AKUN_ADMIN_LOGGED_IN', JSON.stringify(data[key]));
+                }
+            });
+        }
 
-        // Pastikan dikonversi ke string bersih untuk dicocokkan
-        const dbHp = resHp ? resHp.toString().trim() : "";
-        const dbPass = resPass ? resPass.toString().trim() : "";
-
-        if (dbHp && dbPass && inputHp === dbHp && inputPass === dbPass) {
-            localStorage.setItem('admin_logged_in', 'true');
+        if (ketemu) {
             document.getElementById('scr-login-admin').style.display = 'none';
             showNotif('Login Admin Berhasil!', 'sukses');
             cekSessionAdmin();
@@ -84,7 +89,7 @@ async function prosesLoginAdmin(e) {
             showNotif('No HP atau Password Admin Salah!', 'gagal');
         }
     } catch (err) {
-        console.error("Login Error:", err);
+        console.error("Login Admin Error:", err);
         showNotif('Gagal terhubung ke database', 'gagal');
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
