@@ -1,5 +1,6 @@
 /**
- * TUNTAS - Admin Panel Management Logic (FIXED LOGIN STRING FORMAT)
+ * TUNTAS - Admin Panel Management Logic
+ * Fixed Version: Automated Firebase String/JSON Quote Stripping
  */
 
 const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -10,6 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function initEventListeners() {
+    // Form Submissions
     document.getElementById('formLoginAdmin').addEventListener('submit', prosesLoginAdmin);
     document.getElementById('formTransaksiKas').addEventListener('submit', simpanTransaksiKas);
     document.getElementById('formWargaBaru').addEventListener('submit', simpanWargaBaru);
@@ -18,19 +20,20 @@ function initEventListeners() {
     document.getElementById('formBeritaAdmin').addEventListener('submit', simpanBerita);
     document.getElementById('formPopupAdmin').addEventListener('submit', simpanPopupMaklumat);
 
+    // Buttons & Toggles
     document.getElementById('btnRefresh').addEventListener('click', sinkronUlangAdmin);
     document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
     document.getElementById('btnBukaModalKas').addEventListener('click', () => openModal('modalInputKas'));
     document.getElementById('btnBukaModalWarga').addEventListener('click', () => openModal('modalTambahWarga'));
-    
-    // Toggle View Password
     document.getElementById('btnTogglePass').addEventListener('click', togglePasswordView);
 
+    // Filters
     document.getElementById('filterMulai').addEventListener('change', muatBukuKasAdmin);
     document.getElementById('filterSelesai').addEventListener('change', muatBukuKasAdmin);
 
+    // Navigation Tabs
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchAdminTab(btn.getAttribute('data-target')));
+        btn.addEventListener('click', (e) => switchAdminTab(btn.getAttribute('data-target'), e));
     });
 }
 
@@ -38,6 +41,7 @@ function cekSessionAdmin() {
     if (localStorage.getItem('admin_logged_in') === 'true') {
         document.getElementById('scr-login-admin').style.display = 'none';
 
+        // Set default filter bulan ini
         const hariIni = new Date();
         const y = hariIni.getFullYear();
         const m = String(hariIni.getMonth() + 1).padStart(2, '0');
@@ -50,7 +54,9 @@ function cekSessionAdmin() {
     }
 }
 
-// FIX UTAMA: Mengambil data string langsung dari masing-masing node Firebase
+// ==========================================
+// FIX LOGIN SYSTEM (ANTI-MENTAL & ANTI-KUTIP)
+// ==========================================
 async function prosesLoginAdmin(e) {
     e.preventDefault();
     document.getElementById('loadingOverlay').style.display = 'flex';
@@ -59,17 +65,17 @@ async function prosesLoginAdmin(e) {
     const inputPass = document.getElementById('loginPassword').value.trim();
 
     try {
-        // Tembak langsung ke endpoint string masing-masing variabel
+        // Menggunakan .json() secara paralel otomatis mengonversi data mentah Firebase ke tipe data JS asli
         const [resHp, resPass] = await Promise.all([
-            fetch(`${DB_URL}/admin_account/username.json`),
-            fetch(`${DB_URL}/admin_account/password.json`)
+            fetch(`${DB_URL}/admin_account/username.json`).then(r => r.json()),
+            fetch(`${DB_URL}/admin_account/password.json`).then(r => r.json())
         ]);
 
-        const dbHp = await resHp.json();
-        const dbPass = await resPass.json();
+        // Pastikan dikonversi ke string bersih untuk dicocokkan
+        const dbHp = resHp ? resHp.toString().trim() : "";
+        const dbPass = resPass ? resPass.toString().trim() : "";
 
-        // Validasi kecocokan string polosan
-        if (dbHp && dbPass && inputHp === dbHp.toString().trim() && inputPass === dbPass.toString().trim()) {
+        if (dbHp && dbPass && inputHp === dbHp && inputPass === dbPass) {
             localStorage.setItem('admin_logged_in', 'true');
             document.getElementById('scr-login-admin').style.display = 'none';
             showNotif('Login Admin Berhasil!', 'sukses');
@@ -100,6 +106,9 @@ function togglePasswordView() {
     }
 }
 
+// ==========================================
+// CORE DATA SYNC & NAVIGATION
+// ==========================================
 async function sinkronUlangAdmin() {
     if (localStorage.getItem('admin_logged_in') !== 'true') return;
     document.getElementById('loadingOverlay').style.display = 'flex';
@@ -113,21 +122,26 @@ async function sinkronUlangAdmin() {
             muatFormKontenPopup()
         ]);
     } catch (error) {
-        console.error(error);
+        console.error("Sync Error:", error);
         showNotif("Koneksi bermasalah saat memuat data", "gagal");
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
 
-function switchAdminTab(id) {
+function switchAdminTab(targetId, event) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
-    document.getElementById(id).classList.add('active');
-    event.currentTarget.classList.add('active');
+    document.getElementById(targetId).classList.add('active');
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 }
 
+// ==========================================
+// TAB 1: BUKU KAS RT 04
+// ==========================================
 async function muatBukuKasAdmin() {
     const res = await fetch(`${DB_URL}/kas_rt04.json`);
     const data = await res.json();
@@ -136,7 +150,7 @@ async function muatBukuKasAdmin() {
 
     let start = new Date(document.getElementById('filterMulai').value);
     let end = new Date(document.getElementById('filterSelesai').value);
-    end.setHours(23,59,59,999);
+    end.setHours(23, 59, 59, 999);
 
     let totalKeseluruhan = 0;
     let sldFilter = 0, mskFilter = 0, klrFilter = 0;
@@ -152,23 +166,25 @@ async function muatBukuKasAdmin() {
         const nom = parseInt(v.nominal) || 0;
         const tglItem = new Date(v.tanggal);
 
-        if(v.jenis === 'masuk') { totalKeseluruhan += nom; } else { totalKeseluruhan -= nom; }
+        if (v.jenis === 'masuk') { totalKeseluruhan += nom; } else { totalKeseluruhan -= nom; }
 
-        if(tglItem >= start && tglItem <= end) {
-            if(v.jenis === 'masuk') { mskFilter += nom; } else { klrFilter += nom; }
+        if (tglItem >= start && tglItem <= end) {
+            if (v.jenis === 'masuk') { mskFilter += nom; } else { klrFilter += nom; }
             sldFilter = mskFilter - klrFilter;
 
             list.insertAdjacentHTML('afterbegin', `
-                <div class="p-4 flex justify-between items-center bg-white">
+                <div class="p-4 flex justify-between items-center bg-white border-b border-slate-100">
                     <div>
                         <h4 class="text-xs font-black text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
                         <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
-                            ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
+                        <span class="text-xs font-black ${v.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${v.jenis === 'masuk' ? '+' : '-'} ${nom.toLocaleString('id-ID')}
                         </span>
-                        <button onclick="hapusTransaksiKas('${key}')" class="text-slate-300 hover:text-rose-600 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="hapusTransaksiKas('${key}')" class="text-slate-300 hover:text-rose-600 text-xs transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                 </div>
             `);
@@ -202,12 +218,15 @@ async function simpanTransaksiKas(e) {
 }
 
 async function hapusTransaksiKas(key) {
-    if(!confirm("Hapus transaksi kas ini?")) return;
+    if (!confirm("Hapus transaksi kas ini?")) return;
     await fetch(`${DB_URL}/kas_rt04/${key}.json`, { method: 'DELETE' });
     showNotif('Transaksi terhapus', 'sukses');
     muatBukuKasAdmin();
 }
 
+// ==========================================
+// TAB 2: MANAGEMENT DATA WARGA
+// ==========================================
 async function muatDataWargaAdmin() {
     const res = await fetch(`${DB_URL}/warga_rt04.json`);
     const data = await res.json();
@@ -224,12 +243,14 @@ async function muatDataWargaAdmin() {
         const bulanBergabung = w.bulan_bergabung || "Juni 2026"; 
 
         list.insertAdjacentHTML('beforeend', `
-            <div class="p-4 flex justify-between items-center bg-white">
+            <div class="p-4 flex justify-between items-center bg-white border-b border-slate-100">
                 <div>
                     <h4 class="text-xs font-black text-slate-800 uppercase">${w.nama}</h4>
                     <p class="text-[9px] text-slate-400 font-bold mt-0.5">WA: ${w.username} | Gabung: ${bulanBergabung}</p>
                 </div>
-                <button onclick="hapusWarga('${key}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 transition-colors"><i class="fa-solid fa-user-xmark text-xs"></i></button>
+                <button onclick="hapusWarga('${key}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 transition-colors">
+                    <i class="fa-solid fa-user-xmark text-xs"></i>
+                </button>
             </div>
         `);
     });
@@ -254,12 +275,15 @@ async function simpanWargaBaru(e) {
 }
 
 async function hapusWarga(key) {
-    if(!confirm("Apakah anda yakin ingin menghapus warga ini dari sistem?")) return;
+    if (!confirm("Apakah anda yakin ingin menghapus warga ini dari sistem?")) return;
     await fetch(`${DB_URL}/warga_rt04/${key}.json`, { method: 'DELETE' });
     showNotif('Data warga terhapus', 'sukses');
     sinkronUlangAdmin();
 }
 
+// ==========================================
+// TAB 3: OPERASIONAL LOG SAMPAH
+// ==========================================
 async function simpanLogSampah(e) {
     e.preventDefault();
     const select = document.getElementById('logSampahWargaSelect');
@@ -276,6 +300,9 @@ async function simpanLogSampah(e) {
     showNotif('Log Sampah Rumah Berhasil Disimpan!', 'sukses');
 }
 
+// ==========================================
+// TAB 4: MANAGEMENT IURAN & BERITA
+// ==========================================
 async function simpanIuranWarga(e) {
     e.preventDefault();
     const select = document.getElementById('iuranWargaSelect');
@@ -317,7 +344,7 @@ async function muatSelectDropdownWarga() {
     
     selSampah.innerHTML = ""; selIuran.innerHTML = "";
 
-    if(data) {
+    if (data) {
         Object.keys(data).forEach(key => {
             const opt = `<option value="${key}">${data[key].nama}</option>`;
             selSampah.insertAdjacentHTML('beforeend', opt);
@@ -326,6 +353,9 @@ async function muatSelectDropdownWarga() {
     }
 }
 
+// ==========================================
+// TAB 5: BANNER POP-UP & ASPIRASI WARGA
+// ==========================================
 async function muatSaranAdmin() {
     const res = await fetch(`${DB_URL}/saran_warga.json`);
     const data = await res.json();
@@ -347,7 +377,9 @@ async function muatSaranAdmin() {
                 </div>
                 <p class="text-xs text-slate-600 font-semibold leading-relaxed">${s.isi_saran}</p>
                 <div class="text-right pt-1">
-                    <button onclick="hapusSaran('${key}')" class="text-[9px] text-rose-600 font-bold uppercase hover:underline"><i class="fa-solid fa-trash-can"></i> Hapus Aspirasi</button>
+                    <button onclick="hapusSaran('${key}')" class="text-[9px] text-rose-600 font-bold uppercase hover:underline">
+                        <i class="fa-solid fa-trash-can"></i> Hapus Aspirasi
+                    </button>
                 </div>
             </div>
         `);
@@ -355,7 +387,7 @@ async function muatSaranAdmin() {
 }
 
 async function hapusSaran(key) {
-    if(!confirm("Hapus aspirasi masuk warga ini?")) return;
+    if (!confirm("Hapus aspirasi masuk warga ini?")) return;
     await fetch(`${DB_URL}/saran_warga/${key}.json`, { method: 'DELETE' });
     showNotif('Aspirasi terhapus', 'sukses');
     muatSaranAdmin();
@@ -364,7 +396,7 @@ async function hapusSaran(key) {
 async function muatFormKontenPopup() {
     const res = await fetch(`${DB_URL}/informasi_popup.json`);
     const data = await res.json();
-    if(data) {
+    if (data) {
         document.getElementById('popJudul').value = data.judul || "";
         document.getElementById('popIsi').value = data.isi || "";
     }
@@ -382,9 +414,12 @@ async function simpanPopupMaklumat(e) {
     showNotif('Pop-up Maklumat Diperbarui!', 'sukses');
 }
 
+// ==========================================
+// MODALS & UTILITIES
+// ==========================================
 function logoutAdmin() {
-    if(!confirm("Keluar dari panel dashboard admin?")) return;
-    localStorage.removeItem('admin_logged_in');
+    if (!confirm("Keluar dari panel dashboard admin?")) return;
+    localStorage.clear();
     document.getElementById('loginUsername').value = "";
     document.getElementById('loginPassword').value = "";
     document.getElementById('scr-login-admin').style.display = 'flex';
@@ -394,8 +429,14 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 function showNotif(msg, type) {
-    const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
-    box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
-    icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
-    box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    const box = document.getElementById('notificationAlert'); 
+    const icon = document.getElementById('notifIcon'); 
+    const text = document.getElementById('notifText'); 
+    text.innerText = msg;
+    
+    box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type === 'sukses' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`;
+    icon.className = `fa-solid ${type === 'sukses' ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-base`;
+    
+    box.classList.remove('hidden'); 
+    setTimeout(() => box.classList.add('hidden'), 3000);
 }
