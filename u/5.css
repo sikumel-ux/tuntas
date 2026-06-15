@@ -1,0 +1,141 @@
+/* ==========================================================================
+   TUNTAS - MASYARAKAT STYLING SYSTEM (4.css)
+   ========================================================================== */
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* --- OVERLAY LOADING --- */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 78, 59, 0.95);
+    color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* --- FORM COMPONENT --- */
+.modern-in {
+    width: 100%;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 14px 16px;
+    border-radius: 1rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.modern-in:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
+/* --- MODAL SYSTEM --- */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 200;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 2rem;
+    width: 100%;
+    max-w: 360px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+/* --- NAVIGATION COMPONENT --- */
+.nav-btn {
+    transition: all 0.2s ease;
+}
+
+.nav-btn.active {
+    color: #064e3b !important;
+}
+
+.nav-btn.active i {
+    transform: translateY(-2px);
+    color: #059669;
+}
+
+/* --- ANIMATION PACK --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   FITUR BARU: GRID KALENDER KONTEMPORER (LOG SAMPAH SEBULAN)
+   ========================================================================== */
+.grid-kalender {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+}
+
+.day-box {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+/* Efek feedback saat kotak tanggal ditekan di HP */
+.day-box:active {
+    transform: scale(0.9);
+}
+
+/* Sembunyikan kontainer tab secara bawaan, tampilkan hanya yang aktif */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
