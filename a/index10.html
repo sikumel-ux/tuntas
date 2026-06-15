@@ -2,238 +2,764 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TUNTAS - Admin Panel</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUNTAS - Admin Panel RT 04</title>
+    <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    
-    <link rel="stylesheet" href="10.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { background-color: #f1f5f9; color: #0f172a; border-color: #0f172a; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-24">
 
-    <div id="scr-login-admin" class="fixed inset-0 bg-gradient-to-br from-slate-950 to-slate-900 z-[9999] flex flex-col justify-center p-6">
-        <div class="max-w-sm w-full mx-auto space-y-6 bg-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-200">
+    <!-- ========================================== -->
+    <!-- SCREEN 1: LOGIN ADMIN                      -->
+    <!-- ========================================== -->
+    <div id="scr-login-admin" class="fixed inset-0 bg-slate-900 z-[99999] flex flex-col justify-center items-center p-6">
+        <div class="w-full max-w-sm bg-white p-6 rounded-3xl shadow-2xl space-y-6">
             <div class="text-center space-y-1">
-                <img src="logo.png" alt="Logo" class="w-14 h-14 mx-auto object-contain rounded-2xl shadow-sm">
-                <h2 class="text-base font-extrabold text-slate-950 tracking-tight">TUNTAS ADMIN</h2>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Sistem Pengurus RT 04</p>
+                <h1 class="text-xl font-black tracking-wider text-slate-900">TUNTAS ADMIN</h1>
+                <p class="text-xs text-slate-400 font-bold uppercase">Masuk ke Dashboard Pengurus RT 04</p>
             </div>
-            <form id="formLoginAdmin" class="space-y-3">
-                <input type="tel" id="loginUsername" placeholder="No. HP Admin" class="modern-in" required>
-                <div class="relative">
-                    <input type="password" id="loginPassword" placeholder="Password Admin" class="modern-in pr-12" required>
-                    <button type="button" id="btnTogglePass" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                        <i class="fa-solid fa-eye text-xs" id="eyeIcon"></i>
-                    </button>
+            
+            <form id="formLoginAdmin" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">No. HP Admin</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-phone text-xs"></i></span>
+                        <input type="tel" id="loginUsername" required placeholder="Contoh: 085163233482" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-slate-900">
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide">Masuk Dashboard</button>
+
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-lock text-xs"></i></span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-slate-900">
+                        <button type="button" id="btnTogglePass" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600">
+                            <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-colors shadow-lg shadow-slate-900/20">Masuk Dashboard</button>
             </form>
         </div>
     </div>
 
-    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
-        <div class="flex flex-col items-center gap-2">
-            <i class="fa-solid fa-spinner animate-spin text-xl"></i>
-            <span>Menghubungkan Database...</span>
-        </div>
-    </div>
-
-    <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
-        <i id="notifIcon" class="fa-solid text-base"></i>
-        <span id="notifText" class="flex-1"></span>
-    </div>
-
-    <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
-        <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
+    <!-- ========================================== -->
+    <!-- MAIN INTERFACE (DASHBOARD)                 -->
+    <!-- ========================================== -->
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3.5 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-sm">T</div>
             <div>
-                <h1 class="text-sm font-extrabold text-slate-950 tracking-tight leading-none">TUNTAS ADMIN</h1>
-                <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-wide mt-0.5">Kelola Lingkungan RT 04</p>
+                <h2 class="text-xs font-black text-slate-900 uppercase">Panel Utama RT 04</h2>
+                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-wide flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Sistem Aktif
+                </p>
             </div>
         </div>
-        <div class="flex items-center gap-1.5">
-            <button id="btnRefresh" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
-                <i class="fa-solid fa-rotate text-xs"></i>
-            </button>
-            <button id="btnLogout" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 active:scale-95 transition-all">
-                <i class="fa-solid fa-power-off text-xs"></i>
-            </button>
+        <div class="flex items-center gap-2">
+            <button id="btnRefresh" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center hover:bg-slate-200 transition-colors"><i class="fa-solid fa-rotate text-xs"></i></button>
+            <button id="btnLogout" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 transition-colors"><i class="fa-solid fa-power-off text-xs"></i></button>
         </div>
     </header>
 
-    <main class="p-4 space-y-4">
-        <div id="scr-a-kas" class="tab-content active space-y-4 animate-fade-in">
-            <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-slate-800">
+    <main class="p-4 flex-1 max-w-md mx-auto w-full space-y-4">
+        
+        <!-- TAB 1: KAS RT -->
+        <section id="tab-kas" class="tab-content active space-y-4">
+            <!-- Card Ringkasan Kas -->
+            <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-xl space-y-4">
                 <div>
-                    <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Total Saldo Bersih RT 04</p>
-                    <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">0</h2>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Saldo Kas RT (Global)</p>
+                    <h3 id="totalSaldoKeseluruhan" class="text-xl font-black tracking-tight mt-0.5">Rp 0</h3>
                 </div>
-                <div class="grid grid-cols-3 gap-1.5 pt-3 border-t border-slate-800">
-                    <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <p class="text-[7px] text-slate-400 font-black uppercase tracking-wide">Terfilter</p>
-                        <h3 id="totalSaldo" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+                <div class="h-px bg-slate-800"></div>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase">Mulai - Selesai</p>
+                        <p id="totalSaldo" class="text-xs font-black text-slate-200 mt-0.5">0</p>
                     </div>
-                    <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <p class="text-[7px] text-emerald-400 font-black uppercase tracking-wide">Pemasukan</p>
-                        <h3 id="textMasuk" class="text-xs font-extrabold text-emerald-400 mt-0.5">0</h3>
+                    <div>
+                        <p class="text-[8px] font-bold text-emerald-400 uppercase">Total Masuk</p>
+                        <p id="textMasuk" class="text-xs font-black text-emerald-400 mt-0.5">0</p>
                     </div>
-                    <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <p class="text-[7px] text-rose-400 font-black uppercase tracking-wide">Pengeluaran</p>
-                        <h3 id="textKeluar" class="text-xs font-extrabold text-rose-400 mt-0.5">0</h3>
+                    <div>
+                        <p class="text-[8px] font-bold text-rose-400 uppercase">Total Keluar</p>
+                        <p id="textKeluar" class="text-xs font-black text-rose-400 mt-0.5">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-3">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="date" id="filterMulai" class="modern-in !p-2 text-center">
-                    <input type="date" id="filterSelesai" class="modern-in !p-2 text-center">
+            <!-- Filter Tanggal -->
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black uppercase text-slate-400">Dari Tanggal</label>
+                    <input type="date" id="filterMulai" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl text-[11px] font-bold focus:outline-none">
                 </div>
-                <button id="btnBukaModalKas" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wide flex items-center justify-center gap-2"><i class="fa-solid fa-plus text-[10px]"></i> Input Transaksi Kas Baru</button>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black uppercase text-slate-400">Sampai Tanggal</label>
+                    <input type="date" id="filterSelesai" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl text-[11px] font-bold focus:outline-none">
+                </div>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Log Buku Kas Terfilter</h3>
-                <div id="listKasAdmin" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden"></div>
+            <!-- List Histori Transaksi -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="p-3.5 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Log Aliran Kas Terfilter</h3>
+                    <button id="btnBukaModalKas" class="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-wider"><i class="fa-solid fa-plus mr-1"></i> Catat Kas</button>
+                </div>
+                <div id="listKasAdmin" class="divide-y divide-slate-100">
+                    <!-- Data kas di-render disini -->
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div id="scr-a-warga" class="tab-content space-y-4 animate-fade-in">
-            <div class="flex justify-between items-center px-1">
-                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Database Warga RT 04</h2>
-                <button id="btnBukaModalWarga" class="bg-emerald-900 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wide"><i class="fa-solid fa-user-plus"></i> Tambah</button>
+        <!-- TAB 2: DATA WARGA -->
+        <section id="tab-warga" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="p-3.5 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Daftar Warga Terregistrasi</h3>
+                    <button id="btnBukaModalWarga" class="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-wider"><i class="fa-solid fa-user-plus mr-1"></i> Tambah Warga</button>
+                </div>
+                <div id="listManageWarga" class="divide-y divide-slate-100">
+                    <!-- Data warga di-render disini -->
+                </div>
             </div>
-            <div id="listManageWarga" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden"></div>
-        </div>
+        </section>
 
-        <div id="scr-a-sampah" class="tab-content space-y-4 animate-fade-in">
-            <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Input Log Pengangkutan Sampah Harian</h3>
+        <!-- TAB 3: LOG SAMPAH -->
+        <section id="tab-sampah" class="tab-content space-y-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider border-b pb-2">Input Log Pengambilan Sampah</h3>
                 <form id="formSampahAdmin" class="space-y-3">
-                    <div>
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Tanggal Operasional</label>
-                        <input type="date" id="logSampahTanggal" class="modern-in" required>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Pilih Rumah Warga</label>
+                        <select id="logSampahWargaSelect" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none"></select>
                     </div>
-                    <div>
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Pilih Warga</label>
-                        <select id="logSampahWargaSelect" class="modern-in" required></select>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Tanggal Pengambilan</label>
+                        <input type="date" id="logSampahTanggal" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
                     </div>
-                    <div>
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Status Keberadaan Sampah</label>
-                        <select id="logSampahStatus" class="modern-in" required>
-                            <option value="diambil">DIAMBIL PETUGAS (ADA SAMPAH)</option>
-                            <option value="diantar">DIANTAR WARGA MANDIRI</option>
-                            <option value="kosong">KOSONG (TIDAK ADA SAMPAH)</option>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Status Rumah</label>
+                        <select id="logSampahStatus" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                            <option value="DIAMBIL">SAMPAH SELESAI DIAMBIL</option>
+                            <option value="KOSONG">RUMAH KOSONG / LEWAT</option>
+                            <option value="TERKUNCI">GERBANG TERKUNCI</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full bg-emerald-900 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wide">Simpan Log Sampah</button>
+                    <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider mt-2">Simpan Log Sampah</button>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <div id="scr-a-iuran" class="tab-content space-y-6 animate-fade-in">
-            <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Pencatatan Iuran Bulanan Warga</h3>
+        <!-- TAB 4: IURAN & BERITA -->
+        <section id="tab-iuran" class="tab-content space-y-4">
+            <!-- Form Kuitansi Iuran -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider border-b pb-2">Catat Pembayaran Iuran Sampah</h3>
                 <form id="formIuranAdmin" class="space-y-3">
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Warga Pembayar</label>
-                            <select id="iuranWargaSelect" class="modern-in !p-3" required></select>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black uppercase text-slate-400">Nama Warga</label>
+                            <select id="iuranWargaSelect" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none"></select>
                         </div>
-                        <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Bulan Iuran</label>
-                            <input type="text" id="iuranBulan" placeholder="Contoh: JUNI 2026" class="modern-in !p-3 uppercase" required>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black uppercase text-slate-400">Untuk Bulan</label>
+                            <input type="text" id="iuranBulan" required placeholder="Contoh: JULI 2026" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Nominal (Rp)</label>
-                            <input type="number" id="iuranNominal" value="20000" class="modern-in !p-3" required>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black uppercase text-slate-400">Nominal (Rp)</label>
+                            <input type="number" id="iuranNominal" value="20000" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
                         </div>
-                        <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wide block mb-1">Tanggal Setor</label>
-                            <input type="date" id="iuranTanggal" class="modern-in !p-3" required>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black uppercase text-slate-400">Tanggal Bayar</label>
+                            <input type="date" id="iuranTanggal" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-slate-900 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wide">Terbitkan Invoice & Kuitansi</button>
+                    <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider">Terbitkan Kuitansi Digital</button>
                 </form>
             </div>
 
-            <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Rilis Berita & Kegiatan Lingkungan</h3>
+            <!-- Form Broadcast Berita -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider border-b pb-2">Publish Berita / Pengumuman RT</h3>
                 <form id="formBeritaAdmin" class="space-y-3">
-                    <input type="text" id="newsJudul" placeholder="Judul Berita Baru" class="modern-in" required>
-                    <textarea id="newsIsi" rows="2" placeholder="Tulis isi pengumuman lengkap..." class="modern-in h-auto" required></textarea>
-                    <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Publish Berita Warga</button>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Judul Pengumuman</label>
+                        <input type="text" id="newsJudul" required placeholder="CONTOH: KERJA BAKTI AHAD LEGI" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Isi Berita/Pengumuman</label>
+                        <textarea id="newsIsi" rows="3" required placeholder="Tulis rincian informasi di sini..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider">Publish Pengumuman</button>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <div id="scr-a-saran" class="tab-content space-y-6 animate-fade-in">
-            <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Atur Pop-up Maklumat Aplikasi</h3>
+        <!-- TAB 5: LAINNYA & POPUP -->
+        <section id="tab-lainnya" class="tab-content space-y-4">
+            <!-- Form Atur Banner Maklumat -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider border-b pb-2">Kontrol Banner Pop-up Warga</h3>
                 <form id="formPopupAdmin" class="space-y-3">
-                    <input type="text" id="popJudul" placeholder="Judul Informasi Utama" class="modern-in" required>
-                    <textarea id="popIsi" rows="2" placeholder="Isi pesan mendesak..." class="modern-in h-auto" required></textarea>
-                    <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Simpan & Update Banner</button>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Judul Pop-up</label>
+                        <input type="text" id="popJudul" required placeholder="JUDUL MAKLUMAT PENTING" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Isi Pengumuman Pop-up</label>
+                        <textarea id="popIsi" rows="3" required placeholder="Isi detail maklumat popup darurat..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider">Update Banner Pop-up</button>
                 </form>
             </div>
 
+            <!-- List Aspirasi / Kotak Saran -->
             <div class="space-y-2">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Kotak Aspirasi Masuk (Warga)</h3>
-                <div id="listSaranAdmin" class="space-y-2"></div>
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Aspirasi & Saran Warga Masuk</h3>
+                <div id="listSaranAdmin" class="space-y-3">
+                    <!-- Saran warga di-render disini -->
+                </div>
             </div>
-        </div>
+        </section>
+
     </main>
 
-    <div id="modalInputKas" class="modal">
-        <div class="modal-content space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-xs font-black uppercase tracking-wide">Form Mutasi Buku Kas</h3>
-                <button class="text-slate-400" onclick="closeModal('modalInputKas')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="formTransaksiKas" class="space-y-3">
-                <select id="kasJenis" class="modern-in" required>
-                    <option value="masuk">UANG MASUK / PENERIMAAN</option>
-                    <option value="keluar">UANG KELUAR / PENGELUARAN</option>
-                </select>
-                <input type="number" id="kasNominal" placeholder="Nominal Angka (Rp)" class="modern-in" required>
-                <input type="text" id="kasKeterangan" placeholder="Keterangan Alokasi Dana" class="modern-in uppercase" required>
-                <input type="date" id="kasTanggal" class="modern-in" required>
-                <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Transaksi</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modalTambahWarga" class="modal">
-        <div class="modal-content space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-xs font-black uppercase tracking-wide">Daftarkan Warga Baru</h3>
-                <button class="text-slate-400" onclick="closeModal('modalTambahWarga')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="formWargaBaru" class="space-y-3">
-                <input type="text" id="addNama" placeholder="Nama Lengkap Warga" class="modern-in uppercase" required>
-                <input type="tel" id="addHp" placeholder="No. WhatsApp (Username)" class="modern-in" required>
-                <input type="text" id="addPass" value="tuntas04" placeholder="Password Login" class="modern-in" required>
-                <input type="text" id="addBulan" placeholder="Bulan Bergabung (Contoh: Juni 2026)" class="modern-in" required>
-                <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-xl text-xs font-black uppercase">Simpan Data Warga</button>
-            </form>
-        </div>
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
-        <button class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-kas"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS RT</button>
-        <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-warga"><i class="fa-solid fa-users text-base mb-0.5"></i>WARGA</button>
-        <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-sampah"><i class="fa-solid fa-truck-garbage text-base mb-0.5"></i>SAMPAH</button>
-        <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-iuran"><i class="fa-solid fa-receipt text-base mb-0.5"></i>IURAN</button>
-        <button class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold" data-target="scr-a-saran"><i class="fa-solid fa-sliders text-base mb-0.5"></i>KONTROL</button>
+    <!-- Navigation Bottom Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2 grid grid-cols-5 gap-1 z-40 max-w-md mx-auto">
+        <button data-target="tab-kas" class="nav-btn active flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 border border-transparent transition-all">
+            <i class="fa-solid fa-wallet text-sm"></i>
+            <span class="text-[8px] font-black uppercase mt-1">Kas RT</span>
+        </button>
+        <button data-target="tab-warga" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 border border-transparent transition-all">
+            <i class="fa-solid fa-users text-sm"></i>
+            <span class="text-[8px] font-black uppercase mt-1">Warga</span>
+        </button>
+        <button data-target="tab-sampah" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 border border-transparent transition-all">
+            <i class="fa-solid fa-trash-can text-sm"></i>
+            <span class="text-[8px] font-black uppercase mt-1">Sampah</span>
+        </button>
+        <button data-target="tab-iuran" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 border border-transparent transition-all">
+            <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+            <span class="text-[8px] font-black uppercase mt-1">Tagihan</span>
+        </button>
+        <button data-target="tab-lainnya" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 border border-transparent transition-all">
+            <i class="fa-solid fa-sliders text-sm"></i>
+            <span class="text-[8px] font-black uppercase mt-1">Lainnya</span>
+        </button>
     </nav>
 
-    <script src="10.js"></script>
+    <!-- ========================================== -->
+    <!-- OVERLAY DIALOGS (MODAL & NOTIFIKASI)       -->
+    <!-- ========================================== -->
+    <!-- Loading Screen Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999999] hidden flex-col justify-center items-center gap-3">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-900 bg-white px-3 py-1.5 rounded-full shadow-md">Menghubungkan Database...</p>
+    </div>
+
+    <!-- Alert Notifikasi Global -->
+    <div id="notificationAlert" class="hidden">
+        <i id="notifIcon"></i>
+        <span id="notifText"></span>
+    </div>
+
+    <!-- Modal Catat Kas -->
+    <div id="modalInputKas" class="modal fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 p-4 items-center justify-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-900 uppercase">Input Transaksi Kas RT</h3>
+                <button onclick="closeModal('modalInputKas')" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formTransaksiKas" class="p-4 space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Jenis Aliran</label>
+                        <select id="kasJenis" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                            <option value="masuk">UANG MASUK (+)</option>
+                            <option value="keluar">UANG KELUAR (-)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Tanggal Transaksi</label>
+                        <input type="date" id="kasTanggal" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black uppercase text-slate-400">Nominal Rupiah (Angka Saja)</label>
+                    <input type="number" id="kasNominal" placeholder="Contoh: 50000" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black uppercase text-slate-400">Keterangan/Keperluan</label>
+                    <input type="text" id="kasKeterangan" placeholder="CONTOH: IURAN WARGA JANUARI" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider mt-2">Simpan Transaksi</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Warga -->
+    <div id="modalTambahWarga" class="modal fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 p-4 items-center justify-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-900 uppercase">Daftarkan Warga Baru</h3>
+                <button onclick="closeModal('modalTambahWarga')" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formWargaBaru" class="p-4 space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black uppercase text-slate-400">Nama Lengkap Kepala Keluarga</label>
+                    <input type="text" id="addNama" placeholder="NAMA SESUAI KTP" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black uppercase text-slate-400">No. HP / No. WhatsApp Warga</label>
+                    <input type="tel" id="addHp" placeholder="Contoh: 08123456789" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Bulan Bergabung</label>
+                        <input type="text" id="addBulan" value="Juni 2026" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black uppercase text-slate-400">Password Login</label>
+                        <input type="text" id="addPass" value="tuntas04" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider mt-2">Daftarkan Warga</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- LOGIKA JAVASCRIPT SYSTEM                   -->
+    <!-- ========================================== -->
+    <script>
+        // Database URL Sesuai Screenshot Sistem TUNTAS
+        const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initEventListeners();
+            cekSessionAdmin();
+        });
+
+        function initEventListeners() {
+            // Form Submissions
+            document.getElementById('formLoginAdmin').addEventListener('submit', prosesLoginAdmin);
+            document.getElementById('formTransaksiKas').addEventListener('submit', simpanTransaksiKas);
+            document.getElementById('formWargaBaru').addEventListener('submit', simpanWargaBaru);
+            document.getElementById('formSampahAdmin').addEventListener('submit', simpanLogSampah);
+            document.getElementById('formIuranAdmin').addEventListener('submit', simpanIuranWarga);
+            document.getElementById('formBeritaAdmin').addEventListener('submit', simpanBerita);
+            document.getElementById('formPopupAdmin').addEventListener('submit', simpanPopupMaklumat);
+
+            // Action Buttons
+            document.getElementById('btnRefresh').addEventListener('click', sinkronUlangAdmin);
+            document.getElementById('btnLogout').addEventListener('click', logoutAdmin);
+            document.getElementById('btnBukaModalKas').addEventListener('click', () => openModal('modalInputKas'));
+            document.getElementById('btnBukaModalWarga').addEventListener('click', () => openModal('modalTambahWarga'));
+            document.getElementById('btnTogglePass').addEventListener('click', togglePasswordView);
+
+            // Filter Dates
+            document.getElementById('filterMulai').addEventListener('change', muatBukuKasAdmin);
+            document.getElementById('filterSelesai').addEventListener('change', muatBukuKasAdmin);
+
+            // Tab Navigation System
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => switchAdminTab(btn.getAttribute('data-target'), e));
+            });
+        }
+
+        function cekSessionAdmin() {
+            if (localStorage.getItem('admin_logged_in') === 'true') {
+                document.getElementById('scr-login-admin').style.display = 'none';
+
+                // Set Default rentang filter penanggalan
+                const hariIni = new Date();
+                const y = hariIni.getFullYear();
+                const m = String(hariIni.getMonth() + 1).padStart(2, '0');
+                document.getElementById('filterMulai').value = `${y}-${m}-01`;
+                document.getElementById('filterSelesai').value = hariIni.toISOString().split('T')[0];
+
+                sinkronUlangAdmin();
+            } else {
+                document.getElementById('scr-login-admin').style.display = 'flex';
+            }
+        }
+
+        // ==========================================
+        // KEY LOGIN FIX: 100% AKURAT DENGAN SCREENSHOT REALTIME DB
+        // ==========================================
+        async function prosesLoginAdmin(e) {
+            e.preventDefault();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            const inputHp = document.getElementById('loginUsername').value.trim();
+            const inputPass = document.getElementById('loginPassword').value.trim();
+
+            try {
+                // Tembak lurus ke endpoint admin_account.json
+                const res = await fetch(`${DB_URL}/admin_account.json`);
+                const dbData = await res.json();
+
+                // Karena bentuknya objek tunggal (bukan kumpulan push key dinamis), langsung ambil propertinya
+                if (dbData && dbData.username && dbData.password) {
+                    const validHp = dbData.username.toString().trim();
+                    const validPass = dbData.password.toString().trim();
+
+                    if (inputHp === validHp && inputPass === validPass) {
+                        localStorage.setItem('admin_logged_in', 'true');
+                        document.getElementById('scr-login-admin').style.display = 'none';
+                        showNotif('Login Admin Berhasil!', 'sukses');
+                        cekSessionAdmin();
+                        return;
+                    }
+                }
+                
+                showNotif('No HP atau Password Admin Salah!', 'gagal');
+
+            } catch (err) {
+                console.error("Login Admin Error:", err);
+                showNotif('Gagal terhubung ke database', 'gagal');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        function togglePasswordView() {
+            const passInput = document.getElementById('loginPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // ==========================================
+        // DATA SYNC ENGINE & UI CONTROL
+        // ==========================================
+        async function sinkronUlangAdmin() {
+            if (localStorage.getItem('admin_logged_in') !== 'true') return;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            try {
+                await Promise.all([
+                    muatBukuKasAdmin(),
+                    muatDataWargaAdmin(),
+                    muatSaranAdmin(),
+                    muatSelectDropdownWarga(),
+                    muatFormKontenPopup()
+                ]);
+            } catch (error) {
+                console.error("Sync Error:", error);
+                showNotif("Koneksi bermasalah saat memuat data", "gagal");
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        function switchAdminTab(targetId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(targetId).classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else if (event) {
+                event.classList.add('active');
+            }
+        }
+
+        // ==========================================
+        // BUSINESS LOGIC: KAS MANAGEMENT
+        // ==========================================
+        async function muatBukuKasAdmin() {
+            const res = await fetch(`${DB_URL}/kas_rt04.json`);
+            const data = await res.json();
+            const list = document.getElementById('listKasAdmin');
+            list.innerHTML = "";
+
+            let start = new Date(document.getElementById('filterMulai').value);
+            let end = new Date(document.getElementById('filterSelesai').value);
+            end.setHours(23, 59, 59, 999);
+
+            let totalKeseluruhan = 0;
+            let sldFilter = 0, mskFilter = 0, klrFilter = 0;
+
+            if (!data) {
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Buku kas masih kosong.</div>`;
+                updateCardUiAdmin(0, 0, 0, 0);
+                return;
+            }
+
+            Object.keys(data).forEach(key => {
+                const v = data[key];
+                const nom = parseInt(v.nominal) || 0;
+                const tglItem = new Date(v.tanggal);
+
+                if (v.jenis === 'masuk') { totalKeseluruhan += nom; } else { totalKeseluruhan -= nom; }
+
+                if (tglItem >= start && tglItem <= end) {
+                    if (v.jenis === 'masuk') { mskFilter += nom; } else { klrFilter += nom; }
+                    sldFilter = mskFilter - klrFilter;
+
+                    list.insertAdjacentHTML('afterbegin', `
+                        <div class="p-4 flex justify-between items-center bg-white border-b border-slate-100">
+                            <div>
+                                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                                <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-black ${v.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                                    ${v.jenis === 'masuk' ? '+' : '-'} ${nom.toLocaleString('id-ID')}
+                                </span>
+                                <button type="button" onclick="hapusTransaksiKas('${key}')" class="text-slate-300 hover:text-rose-600 text-xs transition-colors">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            updateCardUiAdmin(totalKeseluruhan, sldFilter, mskFilter, klrFilter);
+        }
+
+        function updateCardUiAdmin(sk, sf, m, k) {
+            document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + sk.toLocaleString('id-ID');
+            document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+            document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+            document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+        }
+
+        async function simpanTransaksiKas(e) {
+            e.preventDefault();
+            const body = {
+                jenis: document.getElementById('kasJenis').value,
+                nominal: parseInt(document.getElementById('kasNominal').value),
+                keterangan: document.getElementById('kasKeterangan').value.trim().toUpperCase(),
+                tanggal: document.getElementById('kasTanggal').value
+            };
+            await fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(body) });
+            closeModal('modalInputKas');
+            document.getElementById('formTransaksiKas').reset();
+            showNotif('Transaksi Berhasil Tersimpan!', 'sukses');
+            muatBukuKasAdmin();
+        }
+
+        async function hapusTransaksiKas(key) {
+            if (!confirm("Hapus transaksi kas ini?")) return;
+            await fetch(`${DB_URL}/kas_rt04/${key}.json`, { method: 'DELETE' });
+            showNotif('Transaksi terhapus', 'sukses');
+            muatBukuKasAdmin();
+        }
+
+        // ==========================================
+        // BUSINESS LOGIC: WARGA MANAGEMENT
+        // ==========================================
+        async function muatDataWargaAdmin() {
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const data = await res.json();
+            const list = document.getElementById('listManageWarga');
+            list.innerHTML = "";
+
+            if (!data) {
+                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada data warga terdaftar.</div>`;
+                return;
+            }
+
+            Object.keys(data).forEach(key => {
+                const w = data[key];
+                const bulanBergabung = w.bulan_bergabung || "Juni 2026"; 
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="p-4 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div>
+                            <h4 class="text-xs font-black text-slate-800 uppercase">${w.nama}</h4>
+                            <p class="text-[9px] text-slate-400 font-bold mt-0.5">WA: ${w.username} | Gabung: ${bulanBergabung}</p>
+                        </div>
+                        <button type="button" onclick="hapusWarga('${key}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 transition-colors">
+                            <i class="fa-solid fa-user-xmark text-xs"></i>
+                        </button>
+                    </div>
+                `);
+            });
+        }
+
+        async function simpanWargaBaru(e) {
+            e.preventDefault();
+            const body = {
+                nama: document.getElementById('addNama').value.trim().toUpperCase(),
+                username: document.getElementById('addHp').value.trim(),
+                password: document.getElementById('addPass').value.trim(),
+                bulan_bergabung: document.getElementById('addBulan').value.trim(),
+                foto: "default.png"
+            };
+            await fetch(`${DB_URL}/warga_rt04.json`, { method: 'POST', body: JSON.stringify(body) });
+            closeModal('modalTambahWarga');
+            document.getElementById('formWargaBaru').reset();
+            document.getElementById('addPass').value = "tuntas04";
+            showNotif('Warga Baru Berhasil Didaftarkan!', 'sukses');
+            sinkronUlangAdmin();
+        }
+
+        async function hapusWarga(key) {
+            if (!confirm("Apakah anda yakin ingin menghapus warga ini?")) return;
+            await fetch(`${DB_URL}/warga_rt04/${key}.json`, { method: 'DELETE' });
+            showNotif('Data warga terhapus', 'sukses');
+            sinkronUlangAdmin();
+        }
+
+        // ==========================================
+        // BUSINESS LOGIC: OPERATIONS & UTILITIES
+        // ==========================================
+        async function simpanLogSampah(e) {
+            e.preventDefault();
+            const select = document.getElementById('logSampahWargaSelect');
+            const body = {
+                tanggal: document.getElementById('logSampahTanggal').value,
+                warga_key: select.value,
+                nama_warga: select.options[select.selectedIndex].text,
+                status: document.getElementById('logSampahStatus').value,
+                jam_diambil: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB"
+            };
+            await fetch(`${DB_URL}/laporan_sampah.json`, { method: 'POST', body: JSON.stringify(body) });
+            document.getElementById('formSampahAdmin').reset();
+            showNotif('Log Sampah Rumah Berhasil Disimpan!', 'sukses');
+        }
+
+        async function simpanIuranWarga(e) {
+            e.preventDefault();
+            const select = document.getElementById('iuranWargaSelect');
+            const token = "T-" + Math.floor(100000 + Math.random() * 900000);
+            const body = {
+                warga_key: select.value,
+                nama_warga: select.options[select.selectedIndex].text,
+                bulan: document.getElementById('iuranBulan').value.trim().toUpperCase(),
+                nominal: parseInt(document.getElementById('iuranNominal').value),
+                tanggal: document.getElementById('iuranTanggal').value,
+                token_kuitansi: token
+            };
+            await fetch(`${DB_URL}/iuran_sampah.json`, { method: 'POST', body: JSON.stringify(body) });
+            document.getElementById('formIuranAdmin').reset();
+            document.getElementById('iuranNominal').value = "20000";
+            showNotif(`Iuran Sukses! Token: ${token}`, 'sukses');
+        }
+
+        async function simpanBerita(e) {
+            e.preventDefault();
+            const body = {
+                judul: document.getElementById('newsJudul').value.trim().toUpperCase(),
+                isi: document.getElementById('newsIsi').value.trim(),
+                tanggal: new Date().toISOString().split('T')[0]
+            };
+            await fetch(`${DB_URL}/pengumuman.json`, { method: 'POST', body: JSON.stringify(body) });
+            document.getElementById('formBeritaAdmin').reset();
+            showNotif('Berita berhasil terpublish!', 'sukses');
+        }
+
+        async function muatSelectDropdownWarga() {
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const data = await res.json();
+            const selSampah = document.getElementById('logSampahWargaSelect');
+            const selIuran = document.getElementById('iuranWargaSelect');
+            selSampah.innerHTML = ""; selIuran.innerHTML = "";
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const opt = `<option value="${key}">${data[key].nama}</option>`;
+                    selSampah.insertAdjacentHTML('beforeend', opt);
+                    selIuran.insertAdjacentHTML('beforeend', opt);
+                });
+            }
+        }
+
+        async function muatSaranAdmin() {
+            const res = await fetch(`${DB_URL}/saran_warga.json`);
+            const data = await res.json();
+            const list = document.getElementById('listSaranAdmin');
+            list.innerHTML = "";
+            if (!data) {
+                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Belum ada saran aspirasi masuk.</div>`;
+                return;
+            }
+            Object.keys(data).forEach(key => {
+                const s = data[key];
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-black text-emerald-950 bg-emerald-50 px-2 py-0.5 rounded uppercase">${s.nama_warga}</span>
+                            <span class="text-[8px] font-mono text-slate-400">${s.tanggal}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 font-semibold leading-relaxed">${s.isi_saran}</p>
+                        <div class="text-right pt-1">
+                            <button type="button" onclick="hapusSaran('${key}')" class="text-[9px] text-rose-600 font-bold uppercase hover:underline"><i class="fa-solid fa-trash-can"></i> Hapus</button>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        async function hapusSaran(key) {
+            if (!confirm("Hapus aspirasi masuk warga ini?")) return;
+            await fetch(`${DB_URL}/saran_warga/${key}.json`, { method: 'DELETE' });
+            showNotif('Aspirasi terhapus', 'sukses');
+            muatSaranAdmin();
+        }
+
+        async function muatFormKontenPopup() {
+            const res = await fetch(`${DB_URL}/informasi_popup.json`);
+            const data = await res.json();
+            if (data) {
+                document.getElementById('popJudul').value = data.judul || "";
+                document.getElementById('popIsi').value = data.isi || "";
+            }
+        }
+
+        async function simpanPopupMaklumat(e) {
+            e.preventDefault();
+            const body = {
+                judul: document.getElementById('popJudul').value.trim().toUpperCase(),
+                isi: document.getElementById('popIsi').value.trim(),
+                tanggal: new Date().toISOString().split('T')[0]
+            };
+            await fetch(`${DB_URL}/informasi_popup.json`, { method: 'PUT', body: JSON.stringify(body) });
+            showNotif('Pop-up Maklumat Diperbarui!', 'sukses');
+        }
+
+        function logoutAdmin() {
+            if (!confirm("Keluar dari panel dashboard admin?")) return;
+            localStorage.clear();
+            document.getElementById('loginUsername').value = "";
+            document.getElementById('loginPassword').value = "";
+            document.getElementById('scr-login-admin').style.display = 'flex';
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function showNotif(msg, type) {
+            const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
+            box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[999999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type === 'sukses' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`;
+            icon.className = `fa-solid ${type === 'sukses' ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-base`;
+            box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+        }
+    </script>
 </body>
 </html>
