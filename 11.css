@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TUNTAS - MASYARAKAT STYLING SYSTEM V2 (4.css)
+   TUNTAS - STYLING
    ========================================================================== */
 
 body {
@@ -7,7 +7,7 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* --- OVERLAY LOADING (LEBIH ELEGAN) --- */
+/* --- OVERLAY LOADING --- */
 .loading-overlay {
     position: fixed;
     inset: 0;
