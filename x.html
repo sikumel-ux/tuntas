@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TUNTAS - Warga Panel</title>
+    <title>TUNTAS - Control Panel</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -28,7 +28,7 @@
             <div class="text-center space-y-2">
                 <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto object-contain rounded-2xl shadow-md">
                 <div class="space-y-0.5">
-                    <h2 class="text-lg font-extrabold text-emerald-950 tracking-tight">TUNTAS WARGA</h2>
+                    <h2 class="text-lg font-extrabold text-emerald-950 tracking-tight">TUNTAS</h2>
                     <p class="text-[9px] font-bold text-emerald-700/70 uppercase tracking-widest">Turun Tangan Atasi Sampah</p>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-800 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-emerald-900/20 active:scale-[0.98] transition-all mt-2">
-                    Masuk Aplikasi
+                    Masuk
                 </button>
             </form>
 
@@ -68,7 +68,7 @@
             <img src="logo.png" alt="Logo" class="w-7 h-7 object-contain rounded-lg shadow-sm">
             <div>
                 <h1 class="text-xs font-extrabold text-slate-900 tracking-tight leading-none">TUNTAS</h1>
-                <p class="text-[8px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5">RT 04 DONGKELAN</p>
+                <p class="text-[8px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5">Turun Tangan Atasi Sampah</p>
             </div>
         </div>
         <div class="flex items-center gap-1">
@@ -88,7 +88,7 @@
         <div class="modal-content space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
                 <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1">
-                    <i class="fa-solid fa-circle-exclamation"></i> Pengumuman Pengurus
+                    <i class="fa-solid fa-circle-exclamation"></i> Sekilas Info
                 </span>
                 <button type="button" class="text-slate-400 btn-close-modal" data-target="mInfoWargaPopup">
                     <i class="fa-solid fa-xmark"></i>
@@ -99,7 +99,7 @@
                 <p id="popupWargaIsi" class="text-xs text-slate-600 leading-relaxed font-semibold italic"></p>
             </div>
             <button type="button" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase btn-close-modal" data-target="mInfoWargaPopup">
-                Selesai Membaca
+                OK
             </button>
         </div>
     </div>
@@ -107,14 +107,14 @@
     <div id="mDetailSampahWarga" class="modal">
         <div class="modal-content space-y-3">
             <div class="flex justify-between items-center border-b pb-1.5">
-                <h3 class="font-extrabold uppercase text-emerald-900 text-xs tracking-wide">Log Ambil Sampah</h3>
+                <h3 class="font-extrabold uppercase text-emerald-900 text-xs tracking-wide">Log Pengambilan Sampah</h3>
                 <button type="button" class="text-slate-400" onclick="closeModal('mDetailSampahWarga')">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div class="space-y-2 text-xs">
                 <div class="flex justify-between"><span class="text-slate-400 font-bold">Tanggal:</span><span id="dtlSampahTgl" class="font-black text-slate-700">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-400 font-bold">Jam Kerja:</span><span id="dtlSampahJam" class="font-black text-emerald-700">-</span></div>
+                <div class="flex justify-between"><span class="text-slate-400 font-bold">Jam:</span><span id="dtlSampahJam" class="font-black text-emerald-700">-</span></div>
                 <div class="flex justify-between"><span class="text-slate-400 font-bold">Status:</span><span id="dtlSampahStatus" class="font-black px-2 py-0.5 rounded uppercase tracking-wide text-[10px]">-</span></div>
             </div>
             <button type="button" class="w-full bg-slate-900 text-white py-2 rounded-xl text-[10px] font-black uppercase" onclick="closeModal('mDetailSampahWarga')">
@@ -128,7 +128,7 @@
         <div id="scr-w-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
             <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-6 rounded-[2.5rem] shadow-xl space-y-5 border border-emerald-800/20">
                 <div>
-                    <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo Keseluruhan RT 04</p>
+                    <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo</p>
                     <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">0</h2>
                 </div>
                 
@@ -153,7 +153,7 @@
             </div>
 
             <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal Kas RT</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal</p>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="date" id="filterMulaiWarga" class="modern-in !p-2 text-center">
                     <input type="date" id="filterSelesaiWarga" class="modern-in !p-2 text-center">
@@ -161,7 +161,7 @@
             </div>
 
             <div class="space-y-2">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Mutasi Kas RT</h3>
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Mutasi Kas</h3>
                 <div id="listWargaKas" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[280px] shadow-sm">
                     <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat mutasi...</div>
                 </div>
@@ -169,16 +169,16 @@
         </div>
 
         <div id="scr-w-iuran" class="tab-content p-4 space-y-4 animate-fade-in">
-            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Riwayat Pembayaran Iuran Saya</h2>
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Riwayat Pembayaran</h2>
             <div id="listIuranSaya" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden">
-                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat data iuran...</div>
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat data...</div>
             </div>
         </div>
 
         <div id="scr-w-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
             <div class="bg-white border border-slate-100 p-4 rounded-[2rem] shadow-sm space-y-3">
                 <div class="text-center pb-2 border-b">
-                    <h3 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Log Penjemputan Sampah Mandiri</h3>
+                    <h3 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Log Pengambilan Sampah</h3>
                     <p class="text-sm font-black text-emerald-700 uppercase tracking-tight">Juni 2026</p>
                 </div>
                 
@@ -197,7 +197,7 @@
         </div>
 
         <div id="scr-w-berita" class="tab-content p-4 space-y-4 animate-fade-in">
-            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Rilis Berita & Kegiatan RT</h2>
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Rilis Berita & Kegiatan</h2>
             <div id="listBeritaWarga" class="space-y-3">
                 <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Belum ada rilis berita.</div>
             </div>
@@ -224,19 +224,19 @@
             </div>
 
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-building-columns text-emerald-700"></i> Rekening Pembayaran RT</h3>
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-building-columns text-emerald-700"></i> Rekening Pembayaran</h3>
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-2 font-semibold text-slate-700 relative">
-                    <p>Bank: <span class="font-black text-slate-900">Bank Mandiri</span></p>
+                    <p>Bank: <span class="font-black text-slate-900">Bank Central Asia (BCA) </span></p>
                     <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200/60 mt-1">
-                        <p class="m-0">No. Rek: <span id="norekSaku" class="font-mono font-black text-emerald-800 select-all">1370012345678</span></p>
+                        <p class="m-0">No. Rek: <span id="norekSaku" class="font-mono font-black text-emerald-800 select-all"> 4452284387</span></p>
                         <button type="button" onclick="salinNorekKeClipboard()" class="bg-emerald-50 text-emerald-800 text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-200 active:scale-95 transition-all">
                             <i class="fa-solid fa-copy"></i> Salin
                         </button>
                     </div>
-                    <p class="pt-1">Atas Nama: <span class="font-black text-slate-900">KAS RT 04 DONGKELAN</span></p>
+                    <p class="pt-1">Atas Nama: <span class="font-black text-slate-900">APRIYANTO</span></p>
                 </div>
                 <button id="btnKonfirmasiWa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> Konfirmasi Pembayaran via WA
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Konfirmasi Pembayaran
                 </button>
                 
                 <div class="pt-4 border-t-2 border-dashed border-slate-200 text-center">
@@ -245,10 +245,10 @@
             </div>
 
             <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-comment-dots text-teal-600"></i> Kotak Saran & Aspirasi</h3>
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-comment-dots text-teal-600"></i> Kotak Saran</h3>
                 <form id="formSaranWarga" class="space-y-2">
                     <textarea id="isiSaranWarga" rows="3" placeholder="Tulis masukan, keluhan, atau aspirasi kamu..." class="modern-in !p-3 text-xs h-auto" required></textarea>
-                    <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Kirim Aspirasi</button>
+                    <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Kirim</button>
                 </form>
             </div>
         </div>
