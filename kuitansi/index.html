@@ -17,7 +17,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f1f5f9; /* Background luar abu-abu terang yang bikin kuitansi putihnya menonjol */
         }
-        /* Efek Dot Pattern Halus di Background Luar seperti pada file 1001002763.jpg */
+        /* Efek Dot Pattern Halus di Background Luar */
         .bg-pattern {
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 16px 16px;
@@ -43,10 +43,10 @@
 </head>
 <body class="bg-pattern min-h-screen flex items-center justify-center p-4">
 
-    <!-- KONTAINER UTAMA KUITANSI (MAX WIDTH NYAMAN DI HP) -->
+    <!-- KONTAINER UTAMA KUITANSI -->
     <div class="w-full max-w-sm ticket-card rounded-[2.5rem] shadow-xl border border-slate-200/60 overflow-hidden animate-fade-in p-6 space-y-6">
         
-        <!-- HEADER KUITANSI: BERSIH & MINIMALIS -->
+        <!-- HEADER KUITANSI -->
         <div class="text-center space-y-1">
             <h1 class="text-2xl font-extrabold text-emerald-950 tracking-tight">TUNTAS.</h1>
             <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Turun Tangan Atasi Sampah</p>
@@ -65,10 +65,10 @@
         <!-- KONTEN UTAMA NOTIFIKASI PEMBAYARAN -->
         <div class="text-center px-2 space-y-5">
             <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                Diterima dari Bapak/Ibu <span id="lblNamaWarga" class="font-extrabold text-slate-800 uppercase">APRIYANTO</span>, untuk iuran sampah bulan <span id="lblBulanIuran" class="font-extrabold text-slate-800 uppercase">JUNI 2026</span>, sebesar:
+                Diterima dari Bapak/Ibu <span id="lblNamaWarga" class="font-extrabold text-slate-800 uppercase">APRIYANTO</span>, untuk pembayaran sampah bulan <span id="lblBulanIuran" class="font-extrabold text-slate-800 uppercase">JUNI 2026</span>, sebesar:
             </p>
 
-            <!-- CARD NOMINAL YANG DI-PREMIUMKAN (GLASSMORPHISM STYLE) -->
+            <!-- CARD NOMINAL YANG DI-PREMIUMKAN -->
             <div class="bg-gradient-to-b from-emerald-50/60 to-emerald-50/10 border border-emerald-100/80 p-5 rounded-3xl space-y-1 shadow-sm">
                 <h2 id="lblNominal" class="text-3xl font-black text-emerald-800 tracking-tight">Rp 50.000</h2>
                 <p id="lblTerbilang" class="text-[9px] font-bold text-emerald-600 italic tracking-wide">~ LIMA PULUH RIBU RUPIAH ~</p>
