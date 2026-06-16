@@ -1,0 +1,136 @@
+/* ==========================================================================
+   TUNTAS - MASYARAKAT STYLING SYSTEM V2 (4.css)
+   ========================================================================== */
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* --- OVERLAY LOADING (LEBIH ELEGAN) --- */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- FORM COMPONENT --- */
+.modern-in {
+    width: 100%;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    padding: 14px 16px;
+    border-radius: 1.25rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0f172a;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-in:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.08);
+}
+
+/* --- MODAL SYSTEM --- */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 200;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 2.25rem;
+    width: 100%;
+    max-w: 350px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+/* --- NAVIGATION COMPONENT --- */
+.nav-btn {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-btn.active {
+    color: #064e3b !important;
+}
+
+.nav-btn.active i {
+    transform: translateY(-2px);
+    color: #059669;
+}
+
+/* --- ANIMATION PACK --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- GRID KALENDER LOG SAMPAH --- */
+.grid-kalender {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+}
+
+.day-box {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.day-box:active {
+    transform: scale(0.88);
+}
+
+/* --- MANAGEMENT TAB --- */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+  }
