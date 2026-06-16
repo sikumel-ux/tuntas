@@ -566,7 +566,7 @@
             const kasBody = { jenis: 'masuk', nominal: body.nominal, keterangan: `IURAN SAMPAH: ${body.nama_warga} (${body.bulan})`, tanggal: body.tanggal };
             fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasBody) });
 
-            CURRENT_KUITANSI_LINK = `https://sikumel-ux.github.io/Tuntas/kuitansi/${kodeKuitansi.toLowerCase()}`;
+            CURRENT_KUITANSI_LINK = `https://app.sekawan.my.id/kuitansi/${kodeKuitansi.toLowerCase()}`;
             
             document.getElementById('textKodeKuitansi').innerText = `KODE: ${kodeKuitansi}\nLINK: ${CURRENT_KUITANSI_LINK}`;
             document.getElementById('boxKuitansiLink').classList.remove('hidden');
