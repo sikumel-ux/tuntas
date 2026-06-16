@@ -1,8 +1,8 @@
 {
   "name": "TUNTAS",
   "short_name": "TUNTAS",
-  "description": "Aplikasi Turun Tangan Atasi Sampah RT 04 Dongkelan",
-  "start_url": "index4.html",
+  "description": "Turun Tangan Atasi Sampah",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme-color": "#064e3b",
@@ -15,7 +15,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "logo.png",
+      "src": "splash.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
