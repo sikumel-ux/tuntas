@@ -18,6 +18,7 @@
 
     <div id="scr-login" class="fixed inset-0 bg-gradient-to-tr from-slate-900 via-emerald-950 to-slate-900 z-[9999] flex flex-col justify-center p-6">
         <div class="max-w-sm w-full mx-auto space-y-6 bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] shadow-2xl border border-white/20">
+            
             <div class="text-center space-y-2">
                 <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto object-contain rounded-2xl shadow-md">
                 <div class="space-y-0.5">
@@ -25,16 +26,22 @@
                     <p class="text-[9px] font-bold text-emerald-700/70 uppercase tracking-widest">Turun Tangan Atasi Sampah</p>
                 </div>
             </div>
+
             <form id="formLoginWarga" class="space-y-3 pt-2">
                 <input type="tel" id="loginHp" placeholder="No. WhatsApp" class="modern-in" required>
+                
                 <div class="relative">
                     <input type="password" id="loginPass" placeholder="Password" class="modern-in pr-12" required>
                     <button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-700 transition-colors">
                         <i id="eyeIconLogin" class="fa-solid fa-eye text-sm"></i>
                     </button>
                 </div>
-                <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-800 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-emerald-900/20 active:scale-[0.98] transition-all mt-2">Masuk Aplikasi</button>
+
+                <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-800 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-emerald-900/20 active:scale-[0.98] transition-all mt-2">
+                    Masuk Aplikasi
+                </button>
             </form>
+
         </div>
     </div>
 
@@ -74,14 +81,20 @@
     <div id="mInfoWargaPopup" class="modal">
         <div class="modal-content space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
-                <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Pengumuman Pengurus</span>
-                <button type="button" class="text-slate-400 btn-close-modal" data-target="mInfoWargaPopup"><i class="fa-solid fa-xmark"></i></button>
+                <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1">
+                    <i class="fa-solid fa-circle-exclamation"></i> Pengumuman Pengurus
+                </span>
+                <button type="button" class="text-slate-400 btn-close-modal" data-target="mInfoWargaPopup">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             <div class="space-y-1">
                 <h4 id="popupWargaJudul" class="text-xs font-black text-slate-800 uppercase">MEMUAT...</h4>
                 <p id="popupWargaIsi" class="text-xs text-slate-600 leading-relaxed font-semibold italic"></p>
             </div>
-            <button type="button" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase btn-close-modal" data-target="mInfoWargaPopup">Selesai Membaca</button>
+            <button type="button" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase btn-close-modal" data-target="mInfoWargaPopup">
+                Selesai Membaca
+            </button>
         </div>
     </div>
 
@@ -89,18 +102,23 @@
         <div class="modal-content space-y-3">
             <div class="flex justify-between items-center border-b pb-1.5">
                 <h3 class="font-extrabold uppercase text-emerald-900 text-xs tracking-wide">Log Ambil Sampah</h3>
-                <button type="button" class="text-slate-400" onclick="closeModal('mDetailSampahWarga')"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" class="text-slate-400" onclick="closeModal('mDetailSampahWarga')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             <div class="space-y-2 text-xs">
                 <div class="flex justify-between"><span class="text-slate-400 font-bold">Tanggal:</span><span id="dtlSampahTgl" class="font-black text-slate-700">-</span></div>
                 <div class="flex justify-between"><span class="text-slate-400 font-bold">Jam Kerja:</span><span id="dtlSampahJam" class="font-black text-emerald-700">-</span></div>
                 <div class="flex justify-between"><span class="text-slate-400 font-bold">Status:</span><span id="dtlSampahStatus" class="font-black px-2 py-0.5 rounded uppercase tracking-wide text-[10px]">-</span></div>
             </div>
-            <button type="button" class="w-full bg-slate-900 text-white py-2 rounded-xl text-[10px] font-black uppercase" onclick="closeModal('mDetailSampahWarga')">Tutup</button>
+            <button type="button" class="w-full bg-slate-900 text-white py-2 rounded-xl text-[10px] font-black uppercase" onclick="closeModal('mDetailSampahWarga')">
+                Tutup
+            </button>
         </div>
     </div>
 
     <main class="max-w-md mx-auto">
+        
         <div id="scr-w-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
             <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-6 rounded-[2.5rem] shadow-xl space-y-5 border border-emerald-800/20">
                 <div>
@@ -250,8 +268,15 @@
                 icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
+
+        function salinNorekKeClipboard() {
+            const text = document.getElementById('norekSaku').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Nomor Rekening Berhasil Disalin!');
+            });
+        }
     </script>
+    
     <script src="users.js"></script>
 </body>
-  </html>
-  
+</html>
