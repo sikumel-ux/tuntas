@@ -206,7 +206,7 @@ async function muatIuranSaya() {
             const i = data[key];
             if (i.warga_key === KEY_WARGA_LOGGED_IN) {
                 adaData = true;
-                const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${i.token_kuitansi}`;
+                const linkKuitansi = `https://app.sekawan.my.id/kuitansi/?id=${i.token_kuitansi}`;
                 list.insertAdjacentHTML('afterbegin', `
                     <div class="p-4 flex justify-between items-center bg-white">
                         <div>
@@ -376,7 +376,7 @@ function perbaruiPasswordWarga(e) {
 
 function bukaKonfirmasiWa() {
     const teks = encodeURIComponent(`Halo Pengurus TUNTAS RT 04, saya ${AKUN_WARGA_LOGGED_IN.nama} ingin konfirmasi bahwa saya telah melakukan transfer iuran sampah/kas. Mohon untuk dicek, terima kasih.`);
-    window.open(`https://wa.me/6281234567890?text=${teks}`, '_blank'); 
+    window.open(`https://wa.me/6285163233482?text=${teks}`, '_blank'); 
 }
 
 function kirimSaranAspirasi(e) {
@@ -395,7 +395,7 @@ function kirimSaranAspirasi(e) {
         body: JSON.stringify(body) 
     }).then(() => {
         input.value = "";
-        showNotif('Aspirasi berhasil dikirim!', 'sukses');
+        showNotif('Berhasil dikirim!', 'sukses');
     });
 }
 
@@ -412,7 +412,7 @@ function unduhPdfKasWarga() {
     const tglSelesaiIndo = formatTanggalIndo(document.getElementById('filterSelesaiWarga').value);
 
     doc.setFont("Helvetica", "bold");
-    doc.text("LAPORAN MUTASI KAS RT 04 DONGKELAN", 14, 15);
+    doc.text("LAPORAN MUTASI KAS TUNTAS", 14, 15);
     doc.setFontSize(9);
     doc.setFont("Helvetica", "normal");
     doc.text(`Periode: ${tglMulaiIndo} s/d ${tglSelesaiIndo}`, 14, 21);
