@@ -32,8 +32,16 @@ function initEventListeners() {
     });
 }
 
-function toggleLoading(show) {
-    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+// Fungsi Helper untuk merubah YYYY-MM-DD menjadi DD-MM-YYYY
+function formatTanggalIndo(tglStr) {
+    if (!tglStr) return "-";
+    if (tglStr.includes('-') && tglStr.split('-')[0].length === 2) return tglStr;
+    
+    const parts = tglStr.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return tglStr;
 }
 
 function cekSessionWarga() {
@@ -69,24 +77,20 @@ function cekSessionWarga() {
 
 async function prosesLoginWarga(e) {
     e.preventDefault();
-    toggleLoading(true);
+    document.getElementById('loadingOverlay').style.display = 'flex';
     
     const hp = document.getElementById('loginHp').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
 
     try {
-        // Dikembalikan ke path database yang benar (warga_rt04)
         const res = await fetch(`${DB_URL}/warga_rt04.json`);
         const data = await res.json();
         
         let ketemu = false;
         if (data) {
             Object.keys(data).forEach(key => {
-                // Dipastikan mencocokkan String, trim spasi, dan memakai key .username & .password sesuai db asli
-                const dbUsername = String(data[key].username || '').trim();
-                const dbPassword = String(data[key].password || '').trim();
-
-                if (dbUsername === hp && dbPassword === pass) {
+                // Dikembalikan ke logika pencocokan asli milikmu yang terbukti sukses
+                if (data[key].username === hp && data[key].password === pass) {
                     ketemu = true;
                     KEY_WARGA_LOGGED_IN = key;
                     AKUN_WARGA_LOGGED_IN = data[key];
@@ -98,21 +102,21 @@ async function prosesLoginWarga(e) {
         }
 
         if (ketemu) {
-            showNotif('Selamat Datang Kembali!', 'sukses');
+            showNotif('Login Berhasil!', 'sukses');
             cekSessionWarga();
         } else {
-            showNotif('No WhatsApp atau Password Salah', 'gagal');
+            showNotif('No WA atau Password Salah', 'gagal');
         }
     } catch (err) {
         showNotif('Gagal terhubung ke database', 'gagal');
     } finally {
-        toggleLoading(false);
+        document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
 
 async function sinkronUlangWarga() {
     if (!KEY_WARGA_LOGGED_IN) return;
-    toggleLoading(true);
+    document.getElementById('loadingOverlay').style.display = 'flex';
     await Promise.all([
         muatKasMasyarakat(), 
         muatIuranSaya(), 
@@ -120,7 +124,7 @@ async function sinkronUlangWarga() {
         muatBeritaWarga(), 
         jalankanPopupMaklumat()
     ]);
-    toggleLoading(false);
+    document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 function switchWargaTab(id) {
@@ -129,175 +133,195 @@ function switchWargaTab(id) {
     
     document.getElementById(id).classList.add('active');
     
-    const map = {
-        'scr-w-kas': 'nav-btn-w-kas', 
-        'scr-w-iuran': 'nav-btn-w-iuran', 
-        'scr-w-sampah': 'nav-btn-w-sampah', 
-        'scr-w-berita': 'nav-btn-w-berita', 
-        'scr-w-profil': 'nav-btn-w-profil'
-    };
+    const map = {'scr-w-kas': 'nav-btn-w-kas', 'scr-w-iuran': 'nav-btn-w-iuran', 'scr-w-sampah': 'nav-btn-w-sampah', 'scr-w-berita': 'nav-btn-w-berita', 'scr-w-profil': 'nav-btn-w-profil'};
     if (map[id]) document.getElementById(map[id]).classList.add('active');
 }
 
 async function muatKasMasyarakat() {
-    try {
-        const res = await fetch(`${DB_URL}/kas_rt04.json`);
-        const data = await res.json();
-        const list = document.getElementById('listWargaKas');
-        list.innerHTML = "";
-        DATA_KAS_TERFILTER = [];
+    const res = await fetch(`${DB_URL}/kas_rt04.json`);
+    const data = await res.json();
+    const list = document.getElementById('listWargaKas');
+    list.innerHTML = "";
+    DATA_KAS_TERFILTER = [];
 
-        let start = new Date(document.getElementById('filterMulaiWarga').value);
-        let end = new Date(document.getElementById('filterSelesaiWarga').value);
-        end.setHours(23,59,59,999);
+    let start = new Date(document.getElementById('filterMulaiWarga').value);
+    let end = new Date(document.getElementById('filterSelesaiWarga').value);
+    end.setHours(23,59,59,999);
 
-        let saldoKeseluruhan = 0;
-        let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
+    let saldoKeseluruhan = 0;
+    let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
 
-        if (!data) {
-            list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada catatan kas.</div>`;
-            updateTampilanCardKasWarga(0, 0, 0, 0);
-            return;
+    if (!data) {
+        list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Belum ada catatan kas.</div>`;
+        updateTampilanCardKasWarga(0, 0, 0, 0);
+        return;
+    }
+
+    Object.keys(data).forEach(key => {
+        const v = data[key];
+        const nom = parseInt(v.nominal) || 0;
+        const tglItem = new Date(v.tanggal);
+
+        if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
+
+        if(tglItem >= start && tglItem <= end) {
+            if(v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
+            sldTerapit = mskTerapit - klrTerapit;
+
+            DATA_KAS_TERFILTER.push(v);
+
+            list.insertAdjacentHTML('afterbegin', `
+                <div class="p-4 flex justify-between items-center bg-white">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                        <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatTanggalIndo(v.tanggal)}</p>
+                    </div>
+                    <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
+                        ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
+                    </span>
+                </div>
+            `);
         }
+    });
 
+    updateTampilanCardKasWarga(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+}
+
+function updateTampilanCardKasWarga(sk, sf, m, k) {
+    document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
+    document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+    document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+    document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+}
+
+async function muatIuranSaya() {
+    const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+    const data = await res.json();
+    const list = document.getElementById('listIuranSaya');
+    list.innerHTML = "";
+
+    let adaData = false;
+    if (data) {
         Object.keys(data).forEach(key => {
-            const v = data[key];
-            const nom = parseInt(v.nominal) || 0;
-            const tglItem = new Date(v.tanggal);
-
-            if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
-
-            if(tglItem >= start && tglItem <= end) {
-                if(v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
-                sldTerapit = mskTerapit - klrTerapit;
-
-                DATA_KAS_TERFILTER.push(v);
-
+            const i = data[key];
+            if (i.warga_key === KEY_WARGA_LOGGED_IN) {
+                adaData = true;
+                const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${i.token_kuitansi}`;
                 list.insertAdjacentHTML('afterbegin', `
                     <div class="p-4 flex justify-between items-center bg-white">
                         <div>
-                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
-                            <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatTanggalIndo(v.tanggal)}</p>
+                            <h4 class="text-xs font-black text-slate-700 uppercase">IURAN BULAN ${i.bulan}</h4>
+                            <p class="text-[9px] text-slate-400 font-bold mt-0.5">Tgl Bayar: ${formatTanggalIndo(i.tanggal)} | Token: ${i.token_kuitansi}</p>
                         </div>
-                        <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
-                            ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
-                        </span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="text-xs font-black text-emerald-600">Rp ${i.nominal.toLocaleString('id-ID')}</span>
+                            <a href="${linkKuitansi}" target="_blank" class="text-[9px] bg-slate-100 hover:bg-emerald-50 text-slate-700 font-black px-2 py-1 rounded border border-slate-200 uppercase tracking-wide"><i class="fa-solid fa-file-invoice"></i> Kuitansi</a>
+                        </div>
                     </div>
                 `);
             }
         });
-
-        updateTampilanCardKasWarga(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
-    } catch(e){}
-}
-
-function updateTampilanCardKasWarga(sk, sf, m, k) {
-    document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + sk.toLocaleString('id-ID');
-    document.getElementById('totalSaldo').innerText = "Rp " + sf.toLocaleString('id-ID');
-    document.getElementById('textMasuk').innerText = "Rp " + m.toLocaleString('id-ID');
-    document.getElementById('textKeluar').innerText = "Rp " + k.toLocaleString('id-ID');
-}
-
-async function muatIuranSaya() {
-    try {
-        const res = await fetch(`${DB_URL}/iuran_sampah.json`);
-        const data = await res.json();
-        const list = document.getElementById('listIuranSaya');
-        list.innerHTML = "";
-
-        let adaData = false;
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const i = data[key];
-                if (i.warga_key === KEY_WARGA_LOGGED_IN) {
-                    adaData = true;
-                    const linkKuitansi = `https://sikumel-ux.github.io/Tuntas/kuitansi/?id=${i.token_kuitansi}`;
-                    list.insertAdjacentHTML('afterbegin', `
-                        <div class="p-4 flex justify-between items-center bg-white">
-                            <div>
-                                <h4 class="text-xs font-black text-slate-700 uppercase">IURAN BULAN ${i.bulan}</h4>
-                                <p class="text-[9px] text-slate-400 font-bold mt-0.5">Tgl Bayar: ${formatTanggalIndo(i.tanggal)} | Token: ${i.token_kuitansi}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <span class="text-xs font-black text-emerald-600">Rp ${i.nominal.toLocaleString('id-ID')}</span>
-                                <a href="${linkKuitansi}" target="_blank" class="text-[9px] bg-slate-100 hover:bg-emerald-50 text-slate-700 font-black px-2 py-1 rounded border border-slate-200 uppercase tracking-wide"><i class="fa-solid fa-file-invoice"></i> Kuitansi</a>
-                            </div>
-                        </div>
-                    `);
-                }
-            });
-        }
-        if(!adaData) list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Kamu belum memiliki riwayat iuran.</div>`;
-    } catch(e){}
+    }
+    if(!adaData) list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Kamu belum memiliki riwayat iuran.</div>`;
 }
 
 async function muatSampahSaya() {
-    try {
-        const res = await fetch(`${DB_URL}/laporan_sampah.json`);
-        const data = await res.json();
-        const list = document.getElementById('listSampahSaya');
-        list.innerHTML = "";
+    const res = await fetch(`${DB_URL}/laporan_sampah.json`);
+    const data = await res.json();
+    const boxKalender = document.getElementById('boxKalenderSampahWarga');
+    if (!boxKalender) return;
+    
+    boxKalender.innerHTML = "";
+    const mapSampahJuni = {};
 
-        let adaData = false;
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const s = data[key];
-                if (s.warga_key === KEY_WARGA_LOGGED_IN) {
-                    adaData = true;
-                    let warnaStatus = "bg-slate-100 text-slate-700";
-                    if (s.status === 'diambil') warnaStatus = "bg-emerald-50 text-emerald-800 border-emerald-200";
-                    if (s.status === 'diantar') warnaStatus = "bg-teal-50 text-teal-800 border-teal-200";
-                    if (s.status === 'kosong') warnaStatus = "bg-rose-50 text-rose-800 border-rose-200";
-
-                    list.insertAdjacentHTML('afterbegin', `
-                        <div class="p-4 flex justify-between items-center bg-white">
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-700 uppercase">Jadwal Tanggal ${formatTanggalIndo(s.tanggal)}</h4>
-                                <p class="text-[9px] font-mono text-slate-400 mt-0.5">Jam Log: ${s.jam_diambil || '-'}</p>
-                            </div>
-                            <span class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${warnaStatus}">
-                                ${s.status}
-                            </span>
-                        </div>
-                    `);
+    if (data) {
+        Object.keys(data).forEach(key => {
+            const s = data[key];
+            if (s.warga_key === KEY_WARGA_LOGGED_IN && s.tanggal) {
+                const partTgl = s.tanggal.split('-');
+                if (partTgl[0] === "2026" && partTgl[1] === "06") {
+                    const tanggalAngka = parseInt(partTgl[2]);
+                    mapSampahJuni[tanggalAngka] = {
+                        jam: s.jam_diambil || "Malam Hari",
+                        status: s.status || "diambil"
+                    };
                 }
-            });
+            }
+        });
+    }
+
+    for (let i = 1; i <= 30; i++) {
+        let classWarna = "bg-slate-100 text-slate-700 hover:bg-slate-200";
+
+        if (mapSampahJuni[i]) {
+            const stat = mapSampahJuni[i].status.toLowerCase();
+            if (stat === 'diambil' || stat === 'diantar') {
+                classWarna = "bg-emerald-600 text-white shadow-sm font-extrabold";
+            } else if (stat === 'kosong') {
+                classWarna = "bg-rose-100 text-rose-800 border border-rose-200";
+            }
         }
-        if(!adaData) list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada rekaman log sampah rumah.</div>`;
-    } catch(e){}
+
+        const jamLog = mapSampahJuni[i] ? mapSampahJuni[i].jam : "-";
+        const statusLog = mapSampahJuni[i] ? mapSampahJuni[i].status : "Belum Ada Log";
+
+        boxKalender.insertAdjacentHTML('beforeend', `
+            <div class="day-box ${classWarna}" onclick="bukaDetailSampahKalender('${i}', '${jamLog}', '${statusLog}')">
+                ${i}
+            </div>
+        `);
+    }
+}
+
+function bukaDetailSampahKalender(tanggal, jam, status) {
+    const tglDuaDigit = String(tanggal).padStart(2, '0');
+    document.getElementById('dtlSampahTgl').innerText = `${tglDuaDigit}-06-2026`;
+    document.getElementById('dtlSampahJam').innerText = jam;
+    
+    const statusEl = document.getElementById('dtlSampahStatus');
+    statusEl.innerText = status;
+    
+    statusEl.className = "font-black px-2 py-0.5 rounded uppercase tracking-wide text-[10px]";
+    if(status === 'diambil' || status === 'diantar') {
+        statusEl.classList.add('bg-emerald-100', 'text-emerald-800');
+    } else if(status === 'kosong') {
+        statusEl.classList.add('bg-rose-100', 'text-rose-800');
+    } else {
+        statusEl.classList.add('bg-slate-100', 'text-slate-600');
+    }
+
+    openModal('mDetailSampahWarga');
 }
 
 async function muatBeritaWarga() {
-    try {
-        const res = await fetch(`${DB_URL}/pengumuman.json`);
-        const data = await res.json();
-        const list = document.getElementById('listBeritaWarga');
-        list.innerHTML = ""; 
-        
-        if(!data) {
-            list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Belum ada berita terbaru.</div>`;
-            return;
-        }
-        
-        Object.keys(data).forEach(key => {
-            list.insertAdjacentHTML('afterbegin', `
-                <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-1">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-black text-slate-800 uppercase">${data[key].judul}</h4>
-                        <span class="text-[8px] font-mono text-slate-400">${formatTanggalIndo(data[key].tanggal)}</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed font-semibold">${data[key].isi}</p>
+    const res = await fetch(`${DB_URL}/pengumuman.json`);
+    const data = await res.json();
+    const list = document.getElementById('listBeritaWarga');
+    list.innerHTML = ""; 
+    
+    if(!data) {
+        list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Belum ada berita terbaru.</div>`;
+        return;
+    }
+    
+    Object.keys(data).forEach(key => {
+        list.insertAdjacentHTML('afterbegin', `
+            <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-1">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-black text-slate-800 uppercase">${data[key].judul}</h4>
+                    <span class="text-[8px] font-mono text-slate-400">${formatTanggalIndo(data[key].tanggal)}</span>
                 </div>
-            `);
-        });
-    } catch(e){}
+                <p class="text-xs text-slate-600 leading-relaxed font-semibold">${data[key].isi}</p>
+            </div>
+        `);
+    });
 }
 
 function prosesUnggahFotoWarga(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    toggleLoading(true);
+    document.getElementById('loadingOverlay').style.display = 'flex';
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = function (event) {
@@ -323,19 +347,18 @@ function prosesUnggahFotoWarga(e) {
                 localStorage.setItem('warga_data', JSON.stringify(AKUN_WARGA_LOGGED_IN));
                 document.getElementById('imgProfilWarga').src = compressedBase64;
                 showNotif('Foto Profil Berhasil Diperbarui!', 'sukses');
-            }).catch(() => {
-                showNotif('Gagal memperbarui foto profil', 'gagal');
             }).finally(() => {
-                toggleLoading(false);
+                document.getElementById('loadingOverlay').style.display = 'none';
             });
         };
     };
 }
 
+// Fungsi Edit Password
 function perbaruiPasswordWarga(e) {
     e.preventDefault();
     const newPass = document.getElementById('newPassWarga').value.trim();
-    toggleLoading(true);
+    document.getElementById('loadingOverlay').style.display = 'flex';
 
     fetch(`${DB_URL}/warga_rt04/${KEY_WARGA_LOGGED_IN}/password.json`, {
         method: 'PUT',
@@ -345,15 +368,12 @@ function perbaruiPasswordWarga(e) {
         localStorage.setItem('warga_data', JSON.stringify(AKUN_WARGA_LOGGED_IN));
         document.getElementById('formPassWarga').reset();
         showNotif('Password Berhasil Diperbarui!', 'sukses');
-    }).catch(() => {
-        showNotif('Gagal memperbarui password', 'gagal');
     }).finally(() => {
-        toggleLoading(false);
+        document.getElementById('loadingOverlay').style.display = 'none';
     });
 }
 
 function bukaKonfirmasiWa() {
-    if(!AKUN_WARGA_LOGGED_IN) return;
     const teks = encodeURIComponent(`Halo Pengurus TUNTAS RT 04, saya ${AKUN_WARGA_LOGGED_IN.nama} ingin konfirmasi bahwa saya telah melakukan transfer iuran sampah/kas. Mohon untuk dicek, terima kasih.`);
     window.open(`https://wa.me/6281234567890?text=${teks}`, '_blank'); 
 }
@@ -361,23 +381,20 @@ function bukaKonfirmasiWa() {
 function kirimSaranAspirasi(e) {
     e.preventDefault();
     const input = document.getElementById('isiSaranWarga');
+    const tglHariIni = new Date().toISOString().split('T')[0];
+
     const body = {
         nama_warga: AKUN_WARGA_LOGGED_IN.nama,
         isi_saran: input.value.trim(),
-        tanggal: new Date().toISOString().split('T')[0]
+        tanggal: tglHariIni
     };
 
-    toggleLoading(true);
     fetch(`${DB_URL}/saran_warga.json`, { 
         method: 'POST', 
         body: JSON.stringify(body) 
     }).then(() => {
         input.value = "";
         showNotif('Aspirasi berhasil dikirim!', 'sukses');
-    }).catch(() => {
-        showNotif('Gagal mengirim aspirasi', 'gagal');
-    }).finally(() => {
-        toggleLoading(false);
     });
 }
 
@@ -389,18 +406,21 @@ function unduhPdfKasWarga() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
+    const tglMulaiIndo = formatTanggalIndo(document.getElementById('filterMulaiWarga').value);
+    const tglSelesaiIndo = formatTanggalIndo(document.getElementById('filterSelesaiWarga').value);
+
     doc.setFont("Helvetica", "bold");
-    doc.text("LAPORAN MUTASI KAS TUNTAS RT 04 DONGKELAN", 14, 15);
+    doc.text("LAPORAN MUTASI KAS RT 04 DONGKELAN", 14, 15);
     doc.setFontSize(9);
     doc.setFont("Helvetica", "normal");
-    doc.text(`Periode: ${document.getElementById('filterMulaiWarga').value} s/d ${document.getElementById('filterSelesaiWarga').value}`, 14, 21);
+    doc.text(`Periode: ${tglMulaiIndo} s/d ${tglSelesaiIndo}`, 14, 21);
     doc.text(`Diunduh oleh Warga: ${AKUN_WARGA_LOGGED_IN.nama}`, 14, 25);
 
     const rows = [];
     const sortedData = [...DATA_KAS_TERFILTER].reverse();
     sortedData.forEach(item => {
         rows.push([
-            formatTanggalIndo(item.tanggal),
+            formatTanggalIndo(item.tanggal), 
             item.keterangan.toUpperCase(),
             item.jenis === 'masuk' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-',
             item.jenis === 'keluar' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-'
@@ -415,27 +435,34 @@ function unduhPdfKasWarga() {
         theme: 'grid'
     });
 
-    doc.save(`Kas_RT04_Warga_${document.getElementById('filterMulaiWarga').value}.pdf`);
-    showNotif('Laporan PDF Berhasil Diunduh!', 'sukses');
+    doc.save(`Kas_RT04_Warga_${tglMulaiIndo}.pdf`);
 }
 
 async function jalankanPopupMaklumat() {
-    try {
-        const res = await fetch(`${DB_URL}/informasi_popup.json`);
-        const data = await res.json();
-        if(data && data.judul) {
-            document.getElementById('popupWargaJudul').innerText = data.judul;
-            document.getElementById('popupWargaIsi').innerText = data.isi;
-            openModal('mInfoWargaPopup');
-        }
-    } catch(e){}
+    const res = await fetch(`${DB_URL}/informasi_popup.json`);
+    const data = await res.json();
+    if(data && data.judul) {
+        document.getElementById('popupWargaJudul').innerText = data.judul;
+        document.getElementById('popupWargaIsi').innerText = data.isi;
+        openModal('mInfoWargaPopup');
+    }
 }
 
-// ==========================================
-// SYSTEM CUSTOM NOTIFIKASI FLOATING (MODERN)
-// ==========================================
-let timerNotifWarga = null;
+function logoutWarga() {
+    if(!confirm("Apakah anda ingin keluar dari aplikasi?")) return;
+    localStorage.clear();
+    KEY_WARGA_LOGGED_IN = null;
+    AKUN_WARGA_LOGGED_IN = null;
+    document.getElementById('scr-login').style.display = 'flex';
+}
 
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ===============================================
+// SYSTEM FLOATING NOTIFICATION ALERT (PREMIUM V2)
+// ===============================================
+let timerNotifWarga = null;
 function showNotif(msg, type) {
     const box = document.getElementById('notificationAlert'); 
     const icon = document.getElementById('notifIcon'); 
@@ -446,50 +473,14 @@ function showNotif(msg, type) {
     
     text.innerText = msg;
     
-    // Set style melayang modern dengan transisi halus
     if(type === 'sukses') {
-        box.className = "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-xl border bg-emerald-50 border-emerald-200 text-emerald-900 font-extrabold uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 transform translate-y-0 opacity-100";
-        icon.className = "fa-solid fa-circle-check text-emerald-600 text-base";
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 bg-emerald-50 border-emerald-200 text-emerald-800`;
+        icon.className = `fa-solid fa-circle-check text-emerald-600 text-base`;
     } else {
-        box.className = "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-xl border bg-rose-50 border-rose-200 text-rose-900 font-extrabold uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 transform translate-y-0 opacity-100";
-        icon.className = "fa-solid fa-circle-xmark text-rose-600 text-base";
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 bg-rose-50 border-rose-200 text-rose-800`;
+        icon.className = `fa-solid fa-circle-xmark text-rose-600 text-base`;
     }
     
     box.classList.remove('hidden'); 
-    
-    timerNotifWarga = setTimeout(() => {
-        box.classList.add('opacity-0', '-translate-y-2');
-        setTimeout(() => {
-            box.classList.add('hidden');
-            box.classList.remove('opacity-0', '-translate-y-2');
-        }, 300);
-    }, 3000);
-}
-
-function logoutWarga() {
-    // Diganti transisi halus interaktif tanpa confirm bawaan browser kaku
-    localStorage.clear();
-    KEY_WARGA_LOGGED_IN = null;
-    AKUN_WARGA_LOGGED_IN = null;
-    
-    showNotif('Berhasil keluar dari aplikasi', 'sukses');
-    
-    setTimeout(() => {
-        const scrLogin = document.getElementById('scr-login');
-        if(scrLogin) {
-            scrLogin.style.display = 'flex';
-            scrLogin.classList.add('animate-fade-in');
-        }
-    }, 800);
-}
-
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-function formatTanggalIndo(tglStr) {
-    if(!tglStr) return '-';
-    const d = new Date(tglStr);
-    if(isNaN(d.getTime())) return tglStr; // fallback kalau format string custom
-    const opt = { day: 'numeric', month: 'long', year: 'numeric' };
-    return d.toLocaleDateString('id-ID', opt);
+    timerNotifWarga = setTimeout(() => box.classList.add('hidden'), 3000);
 }
