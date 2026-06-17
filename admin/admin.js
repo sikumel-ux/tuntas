@@ -187,8 +187,9 @@ async function muatSistemKas() {
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
-                                ${v.jenis==='masuk'?'Custom Alert +':'-'} ${nom.toLocaleString('id-ID')}
-                            </span>
+    ${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}
+</span>
+
                             <button class="btn-hapus-kas text-slate-200 hover:text-rose-600 p-1" data-key="${key}"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
