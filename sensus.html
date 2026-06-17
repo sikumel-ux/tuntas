@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tuntas Warga</title>
+
+<meta name="theme-color" content="#6EC1E4">
+
+<link rel="manifest" href="manifest.json">
+
+<link rel="stylesheet" href="sensus.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-circle bg1"></div>
+<div class="bg-circle bg2"></div>
+<div class="bg-circle bg3"></div>
+
+<!-- HEADER -->
+<header class="header">
+
+    <div class="logo-box">
+        <i class="fas fa-users"></i>
+    </div>
+
+    <h1>Tuntas Warga</h1>
+
+    <p>
+        Pendataan Penghuni Lingkungan
+    </p>
+
+</header>
+
+<!-- DASHBOARD -->
+<section class="dashboard">
+
+    <div class="glass-card stat-card">
+        <h2 id="totalWarga">0</h2>
+        <span>Total Penghuni</span>
+    </div>
+
+    <div class="glass-card stat-card">
+        <h2 id="totalTetap">0</h2>
+        <span>Warga Tetap</span>
+    </div>
+
+    <div class="glass-card stat-card">
+        <h2 id="totalKos">0</h2>
+        <span>Kos</span>
+    </div>
+
+    <div class="glass-card stat-card">
+        <h2 id="totalArt">0</h2>
+        <span>ART</span>
+    </div>
+
+</section>
+
+<!-- SEARCH -->
+<section class="search-section">
+
+    <div class="search-box">
+
+        <i class="fas fa-search"></i>
+
+        <input
+        type="text"
+        id="searchInput"
+        placeholder="Cari nama atau NIK...">
+
+    </div>
+
+</section>
+
+<!-- FILTER -->
+<section class="filter-section">
+
+    <button class="filter-btn active">
+        Semua
+    </button>
+
+    <button class="filter-btn">
+        Tetap
+    </button>
+
+    <button class="filter-btn">
+        Kos
+    </button>
+
+    <button class="filter-btn">
+        Kontrakan
+    </button>
+
+    <button class="filter-btn">
+        ART
+    </button>
+
+</section>
+
+<!-- LIST WARGA -->
+<section class="list-section">
+
+    <div id="listWarga">
+
+        <!-- DATA FIREBASE -->
+
+        <div class="glass-card warga-card">
+
+            <div class="avatar">
+
+                <i class="fas fa-user"></i>
+
+            </div>
+
+            <div class="warga-info">
+
+                <h3>Budi Santoso</h3>
+
+                <p>NIK : 3273XXXXXXXXXX</p>
+
+                <span class="badge tetap">
+                    Warga Tetap
+                </span>
+
+            </div>
+
+            <div class="aksi">
+
+                <i class="fas fa-chevron-right"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- FAB -->
+<button class="fab" id="btnTambah">
+
+    <i class="fas fa-plus"></i>
+
+</button>
+
+<!-- MODAL TAMBAH -->
+<div class="modal" id="modalTambah">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>Tambah Penghuni</h2>
+
+            <button id="btnClose">
+
+                <i class="fas fa-times"></i>
+
+            </button>
+
+        </div>
+
+        <form id="formWarga">
+
+            <input
+            type="text"
+            id="nik"
+            placeholder="NIK"
+            required>
+
+            <input
+            type="text"
+            id="nama"
+            placeholder="Nama Lengkap"
+            required>
+
+            <select id="jk">
+
+                <option value="">
+                    Jenis Kelamin
+                </option>
+
+                <option>
+                    Laki-laki
+                </option>
+
+                <option>
+                    Perempuan
+                </option>
+
+            </select>
+
+            <input
+            type="date"
+            id="tgl_lahir">
+
+            <input
+            type="text"
+            id="hp"
+            placeholder="Nomor HP">
+
+            <input
+            type="text"
+            id="pekerjaan"
+            placeholder="Pekerjaan">
+
+            <textarea
+            id="alamat_ktp"
+            placeholder="Alamat KTP"></textarea>
+
+            <textarea
+            id="alamat_domisili"
+            placeholder="Alamat Domisili"></textarea>
+
+            <select id="status">
+
+                <option>
+                    Warga Tetap
+                </option>
+
+                <option>
+                    Kos
+                </option>
+
+                <option>
+                    Kontrakan
+                </option>
+
+                <option>
+                    ART
+                </option>
+
+            </select>
+
+            <input
+            type="text"
+            id="penanggung_jawab"
+            placeholder="Penanggung Jawab">
+
+            <input
+            type="date"
+            id="tgl_masuk">
+
+            <textarea
+            id="keterangan"
+            placeholder="Keterangan"></textarea>
+
+            <button
+            type="submit"
+            class="btn-simpan">
+
+                Simpan Data
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+
+    <a href="#" class="active">
+
+        <i class="fas fa-house"></i>
+
+        <span>Home</span>
+
+    </a>
+
+    <a href="#">
+
+        <i class="fas fa-users"></i>
+
+        <span>Data</span>
+
+    </a>
+
+    <a href="#">
+
+        <i class="fas fa-chart-pie"></i>
+
+        <span>Statistik</span>
+
+    </a>
+
+    <a href="#">
+
+        <i class="fas fa-gear"></i>
+
+        <span>Setting</span>
+
+    </a>
+
+</nav>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
