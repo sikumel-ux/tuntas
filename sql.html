@@ -174,6 +174,59 @@
             img.addEventListener('error', () => { img.src = 'default.png'; });
         });
     </script>
+        <script>
+        async function loginLangsungHP(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            const hp = document.getElementById('loginHp').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            
+            // Alert pertama buat mastiin tombolnya ngerespon
+            alert("Mencoba login untuk nomor: " + hp);
+
+            const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+            try {
+                const res = await fetch(`${DB_URL}/warga_rt04.json`);
+                const data = await res.json();
+                
+                let ketemu = false;
+                let wargaKey = null;
+                let wargaData = null;
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        if (data[key].username === hp && data[key].password === pass) {
+                            ketemu = true;
+                            wargaKey = key;
+                            wargaData = data[key];
+                        }
+                    });
+                }
+
+                if (ketemu) {
+                    alert("LOGIN BERHASIL! Menyiapkan halaman...");
+                    localStorage.setItem('warga_key', wargaKey);
+                    localStorage.setItem('warga_data', JSON.stringify(wargaData));
+                    
+                    // Reload biar session barunya kebaca sama sistem utama
+                    window.location.reload();
+                } else {
+                    alert("Gagal: Nomor WA atau Password salah, bro.");
+                }
+            } catch (err) {
+                alert("Gagal terhubung ke database. Cek koneksi internetmu.");
+            }
+        }
+        // Pasang ke window global
+        window.prosesLoginWargaDirect = loginLangsungHP;
+    </script>
+
     <script src="sql.js"></script>
 </body>
+    
+    
 </html>
