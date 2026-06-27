@@ -4,8 +4,8 @@
 const SUPABASE_URL = "https://dgxdrgphsybpbonsfmve.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_ng4doS4MiUqzH6O-7U2lyg_IwW1QbIT";
 
-// Inisialisasi client Supabase menggunakan global window object via CDN
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inisialisasi yang benar dan aman agar tidak crash di browser HP
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let AKUN_WARGA_LOGGED_IN = null;
 let KEY_WARGA_LOGGED_IN = null; // Menyimpan ID primary key (integer) warga yang login
@@ -87,7 +87,10 @@ function cekSessionWarga() {
 // PROSES LOGIN WARGA
 async function prosesLoginWarga(e) {
     e.preventDefault();
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Cek apakah elemen loading ada sebelum diubah stylenya
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) loading.style.display = 'flex';
     
     const hp = document.getElementById('loginHp').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
@@ -100,7 +103,13 @@ async function prosesLoginWarga(e) {
             .eq('password', pass)
             .maybeSingle();
 
-        if (error || !data) {
+        if (error) {
+            console.error("Supabase Error:", error);
+            showNotif('Gagal memeriksa data database', 'gagal');
+            return;
+        }
+
+        if (!data) {
             showNotif('No WA atau Password Salah', 'gagal');
         } else {
             KEY_WARGA_LOGGED_IN = data.id;
@@ -113,15 +122,18 @@ async function prosesLoginWarga(e) {
             cekSessionWarga();
         }
     } catch (err) {
-        showNotif('Gagal terhubung ke database', 'gagal');
+        console.error("Sistem Error:", err);
+        showNotif('Koneksi bermasalah atau gagal', 'gagal');
     } finally {
-        document.getElementById('loadingOverlay').style.display = 'none';
+        if (loading) loading.style.display = 'none';
     }
 }
 
 async function sinkronUlangWarga() {
     if (!KEY_WARGA_LOGGED_IN) return;
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) loading.style.display = 'flex';
+    
     await Promise.all([
         muatKasMasyarakat(), 
         muatIuranSaya(), 
@@ -129,7 +141,8 @@ async function sinkronUlangWarga() {
         muatBeritaWarga(), 
         jalankanPopupMaklumat()
     ]);
-    document.getElementById('loadingOverlay').style.display = 'none';
+    
+    if (loading) loading.style.display = 'none';
 }
 
 function switchWargaTab(id) {
@@ -153,6 +166,7 @@ function switchWargaTab(id) {
 // ==========================================
 async function muatKasMasyarakat() {
     const list = document.getElementById('listWargaKas');
+    if (!list) return;
     list.innerHTML = "";
     DATA_KAS_TERFILTER = [];
 
@@ -160,7 +174,6 @@ async function muatKasMasyarakat() {
     let end = document.getElementById('filterSelesaiWarga').value;
 
     try {
-        // Ambil data kas untuk hitung saldo keseluruhan
         const { data: semuaKas } = await supabase.from('kas_rt04').select('*');
         let saldoKeseluruhan = 0;
         
@@ -171,7 +184,6 @@ async function muatKasMasyarakat() {
             });
         }
 
-        // Ambil data kas terfilter rentang tanggal
         const { data: kasTerfilter, error } = await supabase
             .from('kas_rt04')
             .select('*')
@@ -214,10 +226,10 @@ async function muatKasMasyarakat() {
 }
 
 function updateTampilanCardKasWarga(sk, sf, m, k) {
-    document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
-    document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
-    document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
-    document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+    if(document.getElementById('totalSaldoKeseluruhan')) document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
+    if(document.getElementById('totalSaldo')) document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+    if(document.getElementById('textMasuk')) document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+    if(document.getElementById('textKeluar')) document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
 }
 
 // ==========================================
@@ -225,6 +237,7 @@ function updateTampilanCardKasWarga(sk, sf, m, k) {
 // ==========================================
 async function muatIuranSaya() {
     const list = document.getElementById('listIuranSaya');
+    if (!list) return;
     list.innerHTML = "";
 
     const { data, error } = await supabase
@@ -332,6 +345,7 @@ function bukaDetailSampahKalender(tanggal, jam, status) {
 // ==========================================
 async function muatBeritaWarga() {
     const list = document.getElementById('listBeritaWarga');
+    if (!list) return;
     list.innerHTML = ""; 
     
     const { data, error } = await supabase
@@ -364,7 +378,7 @@ function prosesUnggahFotoWarga(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    if(document.getElementById('loadingOverlay')) document.getElementById('loadingOverlay').style.display = 'flex';
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = function (event) {
@@ -372,7 +386,7 @@ function prosesUnggahFotoWarga(e) {
         img.src = event.target.result;
         img.onload = function () {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 400; // Kompres gambar
+            const MAX_WIDTH = 400; 
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -397,7 +411,7 @@ function prosesUnggahFotoWarga(e) {
                         showNotif('Gagal mengunggah foto', 'gagal');
                     }
                 }).finally(() => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
+                    if(document.getElementById('loadingOverlay')) document.getElementById('loadingOverlay').style.display = 'none';
                 });
         };
     };
@@ -409,14 +423,14 @@ function prosesUnggahFotoWarga(e) {
 async function perbaruiPasswordWarga(e) {
     e.preventDefault();
     const newPass = document.getElementById('newPassWarga').value.trim();
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    if(document.getElementById('loadingOverlay')) document.getElementById('loadingOverlay').style.display = 'flex';
 
     const { error } = await supabase
         .from('warga_rt04')
         .update({ password: newPass })
         .eq('id', KEY_WARGA_LOGGED_IN);
 
-    document.getElementById('loadingOverlay').style.display = 'none';
+    if(document.getElementById('loadingOverlay')) document.getElementById('loadingOverlay').style.display = 'none';
 
     if (!error) {
         AKUN_WARGA_LOGGED_IN.password = newPass;
@@ -508,8 +522,8 @@ async function jalankanPopupMaklumat() {
         .maybeSingle();
 
     if(data && data.judul) {
-        document.getElementById('popupWargaJudul').innerText = data.judul;
-        document.getElementById('popupWargaIsi').innerText = data.isi;
+        if(document.getElementById('popupWargaJudul')) document.getElementById('popupWargaJudul').innerText = data.judul;
+        if(document.getElementById('popupWargaIsi')) document.getElementById('popupWargaIsi').innerText = data.isi;
         openModal('mInfoWargaPopup');
     }
 }
@@ -528,8 +542,8 @@ function logoutWarga() {
 }
 
 // CONTROL MODAL UTILITY
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openModal(id) { if(document.getElementById(id)) document.getElementById(id).classList.add('active'); }
+function closeModal(id) { if(document.getElementById(id)) document.getElementById(id).classList.remove('active'); }
 
 // CUSTOM TOAST NOTIFICATION ALERT
 function showNotif(msg, type) {
