@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Control Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #059669; border-top-color: #059669; }
+        .modal-box { display: none; }
+        .modal-box.active { display: flex; }
+        .day-box { width: calc(100% / 7 - 8px); margin: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-emerald-500 selection:text-white select-none">
+
+    <div id="notificationAlert" class="hidden">
+        <i id="notifIcon"></i>
+        <span id="notifText"></span>
+    </div>
+
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-3" style="display: none;">
+        <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-white text-[10px] font-black uppercase tracking-widest animate-pulse">Memproses Data...</p>
+    </div>
+
+    <div id="scr-login" class="fixed inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950 z-[99] flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 space-y-5">
+            <div class="text-center">
+                <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-700 text-2xl mx-auto mb-3 shadow-inner"><i class="fa-solid fa-leaf animate-bounce"></i></div>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">TUNTAS MASYARAKAT</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Sistem Pengelolaan Sampah RT 04</p>
+            </div>
+            <form id="formLoginWarga" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">No. WhatsApp</label>
+                    <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="tel" id="loginHp" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="Contoh: 0812345..."></div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Password Akses</label>
+                    <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="password" id="loginPass" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-12 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••••"><button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 text-xs"><i id="eyeIconLogin" class="fa-solid fa-eye"></i></button></div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black py-3.5 rounded-2xl shadow-lg shadow-emerald-700/20 uppercase tracking-wider transition-all">Masuk Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="pb-24 max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative border-x border-slate-100">
+        <header class="bg-emerald-900 text-white p-5 rounded-b-[2.5rem] shadow-lg sticky top-0 z-40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-white/10 rounded-2xl border border-white/20 overflow-hidden flex items-center justify-center shadow-inner"><img id="imgProfilWarga" src="default.png" class="w-full h-full object-cover onerror-image" alt="Profile"></div>
+                    <div>
+                        <p class="text-[9px] font-bold text-emerald-300 uppercase tracking-widest">Selamat Datang,</p>
+                        <h3 id="labelNamaWarga" class="text-sm font-black tracking-tight">-</h3>
+                    </div>
+                </div>
+                <button id="btnRefresh" class="w-9 h-9 bg-white/10 active:bg-white/20 active:scale-90 rounded-xl flex items-center justify-center border border-white/10 transition-all text-sm"><i class="fa-solid fa-rotate"></i></button>
+            </div>
+            <div class="mt-4 bg-emerald-950/40 border border-white/5 rounded-2xl p-3 flex justify-between items-center text-xs">
+                <span class="text-[10px] text-emerald-200 font-bold uppercase"><i class="fa-solid fa-calendar-check mr-1.5 text-emerald-400"></i> Bergabung Sejak:</span>
+                <span id="labelBulanBergabung" class="font-extrabold text-white">-</span>
+            </div>
+        </header>
+
+        <main class="p-4">
+            <section id="scr-w-kas" class="tab-content active space-y-4">
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-800 text-white rounded-3xl p-5 shadow-xl space-y-4 relative overflow-hidden"><div class="absolute -right-6 -bottom-6 text-white/5 text-8xl font-black pointer-events-none"><i class="fa-solid fa-wallet"></i></div><p class="text-[10px] font-bold text-emerald-100 uppercase tracking-widest">Total Saldo Kas RT Saat Ini</p><h2 class="text-2xl font-black tracking-tight">Rp <span id="totalSaldoKeseluruhan">0</span></h2><div class="grid grid-cols-3 gap-2 pt-4 border-t border-white/10 text-center"><div><p class="text-[8px] text-emerald-200 font-bold uppercase">Terfilter</p><p class="text-[11px] font-black text-white mt-0.5">Rp <span id="totalSaldo">0</span></p></div><div><p class="text-[8px] text-emerald-200 font-bold uppercase">Masuk</p><p class="text-[11px] font-black text-emerald-300 mt-0.5">Rp <span id="textMasuk">0</span></p></div><div><p class="text-[8px] text-emerald-200 font-bold uppercase">Keluar</p><p class="text-[11px] font-black text-rose-300 mt-0.5">Rp <span id="textKeluar">0</span></p></div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1"><label class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Mulai</label><input type="date" id="filterMulaiWarga" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"></div>
+                        <div class="space-y-1"><label class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Selesai</label><input type="date" id="filterSelesaiWarga" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"></div>
+                    </div>
+                    <button id="btnCetakPdf" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black py-2.5 rounded-xl uppercase tracking-wider transition-colors"><i class="fa-solid fa-file-pdf mr-1.5 text-rose-500 text-xs"></i> Cetak Mutasi Kas (PDF)</button>
+                </div>
+                <div class="space-y-2"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Riwayat Mutasi Terfilter</h3><div id="listWargaKas" class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden"></div></div>
+            </section>
+
+            <section id="scr-w-iuran" class="tab-content space-y-4">
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-tight"><i class="fa-solid fa-circle-info mr-1.5 text-emerald-600"></i> Informasi Rekening Pembayaran</h3>
+                    <p class="text-xs text-slate-500 font-semibold leading-relaxed">Pembayaran Iuran Bulanan atau Dana Sosial Kas warga RT 04 dapat ditransfer langsung melalui rekening resmi pengurus di bawah ini:</p>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 relative">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Bank Mandiri / Saku Digital</p>
+                        <h4 id="norekSaku" class="text-base font-mono font-black text-slate-800 tracking-wider">1370023456789</h4>
+                        <p class="text-[10px] text-slate-700 font-extrabold uppercase">A.N. PAGUYUBAN WARGA TUNTAS RT 04</p>
+                        <button onclick="salinNorekKeClipboard()" class="absolute right-4 top-4 w-8 h-8 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 active:scale-90 transition-all shadow-sm"><i class="fa-solid fa-copy text-xs"></i></button>
+                    </div>
+                    <button id="btnKonfirmasiWa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black py-3 rounded-xl uppercase tracking-wider transition-colors shadow-md shadow-emerald-700/10"><i class="fa-brands fa-whatsapp mr-1.5 text-sm"></i> Konfirmasi Bayar via WhatsApp</button>
+                </div>
+                <div class="space-y-2"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Riwayat Pembayaran Iuran Saya</h3><div id="listIuranSaya" class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden"></div></div>
+            </section>
+
+            <section id="scr-w-sampah" class="tab-content space-y-4">
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center"><h3 class="text-xs font-black text-slate-800 uppercase tracking-tight">Kalender Pengambilan Juni 2026</h3><div class="flex gap-2 items-center"><span class="flex items-center gap-1 text-[9px] font-bold text-slate-500"><span class="w-2.5 h-2.5 bg-emerald-600 rounded-full"></span> Ok</span><span class="flex items-center gap-1 text-[9px] font-bold text-slate-500"><span class="w-2.5 h-2.5 bg-rose-100 border border-rose-300 rounded-full"></span> Kosong</span></div></div>
+                    <div class="flex text-center font-black text-[9px] text-slate-400 uppercase border-b border-slate-50 pb-1.5"><div class="w-[calc(100%/7)]">Sen</div><div class="w-[calc(100%/7)]">Sel</div><div class="w-[calc(100%/7)]">Rab</div><div class="w-[calc(100%/7)]">Kam</div><div class="w-[calc(100%/7)]">Jum</div><div class="w-[calc(100%/7)]">Sab</div><div class="w-[calc(100%/7)]">Min</div></div>
+                    <div id="boxKalenderSampahWarga" class="flex flex-wrap -mx-1"></div>
+                </div>
+            </section>
+
+            <section id="scr-w-berita" class="tab-content space-y-4">
+                <div id="listBeritaWarga" class="space-y-3"></div>
+            </section>
+
+            <section id="scr-w-profil" class="tab-content space-y-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm text-center space-y-3">
+                    <div class="w-20 h-20 bg-slate-50 rounded-2xl border border-slate-200 mx-auto overflow-hidden relative group"><img id="imgProfilWargaBesar" src="default.png" class="w-full h-full object-cover onerror-image"><label class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs"><i class="fa-solid fa-camera"></i><input type="file" id="inputFotoWarga" accept="image/*" class="hidden"></label></div>
+                    <div><h3 id="namaWargaProfil" class="text-sm font-black text-slate-800 uppercase tracking-wide">-</h3><p id="hpWargaProfil" class="text-[10px] font-mono text-slate-400 mt-0.5">WA: -</p></div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3"><h3 class="text-xs font-black text-slate-800 uppercase tracking-tight">Perbarui Password Akses</h3><form id="formPassWarga" class="space-y-3"><input type="text" id="newPassWarga" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold focus:outline-none focus:border-emerald-500" placeholder="Masukkan Password Baru"><button type="submit" class="w-full bg-slate-800 text-white text-[10px] font-black py-2.5 rounded-xl uppercase tracking-wider">Simpan Perubahan</button></form></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3"><h3 class="text-xs font-black text-slate-800 uppercase tracking-tight">Aspirasi & Kotak Saran Warga</h3><form id="formSaranWarga" class="space-y-3"><textarea id="isiSaranWarga" required rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-emerald-500 resize-none" placeholder="Tulis kritik, saran, atau aduan masalah lingkungan di sini..."></textarea><button type="submit" class="w-full bg-emerald-600 text-white text-[10px] font-black py-2.5 rounded-xl uppercase tracking-wider shadow-md shadow-emerald-700/10">Kirim Aspirasi</button></form></div>
+                <button id="btnLogout" class="w-full bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-black py-3 rounded-2xl uppercase tracking-wider transition-colors"><i class="fa-solid fa-power-off mr-1.5"></i> Keluar Aplikasi</button>
+            </section>
+        </main>
+
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/90 backdrop-blur-md border-t border-slate-100 py-2 px-3 flex justify-around items-center z-40 shadow-xl rounded-t-[1.5rem]">
+            <button data-target="scr-w-kas" id="nav-btn-w-kas" class="nav-btn active flex flex-col items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-400 w-14 py-1 transition-colors"><i class="fa-solid fa-chart-line text-sm"></i>Kas</button>
+            <button data-target="scr-w-iuran" id="nav-btn-w-iuran" class="nav-btn flex flex-col items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-400 w-14 py-1 transition-colors"><i class="fa-solid fa-receipt text-sm"></i>Iuran</button>
+            <button data-target="scr-w-sampah" id="nav-btn-w-sampah" class="nav-btn flex flex-col items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-400 w-14 py-1 transition-colors"><i class="fa-solid fa-calendar-days text-sm"></i>Sampah</button>
+            <button data-target="scr-w-berita" id="nav-btn-w-berita" class="nav-btn flex flex-col items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-400 w-14 py-1 transition-colors"><i class="fa-solid fa-bullhorn text-sm"></i>Berita</button>
+            <button data-target="scr-w-profil" id="nav-btn-w-profil" class="nav-btn flex flex-col items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-400 w-14 py-1 transition-colors"><i class="fa-solid fa-circle-user text-sm"></i>Profil</button>
+        </nav>
+    </div>
+
+    <div id="mDetailSampahWarga" class="modal-box fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[999] items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-xs p-5 shadow-xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-50 pb-2"><h3 class="text-xs font-black text-slate-800 uppercase tracking-tight"><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-1"></i> Detil Log Sampah</h3><button data-target="mDetailSampahWarga" class="btn-close-modal text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button></div>
+            <table class="w-full text-xs font-bold text-slate-600">
+                <tr class="border-b border-slate-50"><td class="py-2 text-slate-400 uppercase text-[9px]">Tanggal</td><td id="dtlSampahTgl" class="py-2 text-right font-mono text-slate-800">-</td></tr>
+                <tr class="border-b border-slate-50"><td class="py-2 text-slate-400 uppercase text-[9px]">Waktu Ambil</td><td id="dtlSampahJam" class="py-2 text-right text-slate-800">-</td></tr>
+                <tr><td class="py-2 text-slate-400 uppercase text-[9px]">Status Log</td><td class="py-2 text-right"><span id="dtlSampahStatus">-</span></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="mInfoWargaPopup" class="modal-box fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[999] items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-xs p-5 shadow-xl border border-slate-100 space-y-4 text-center">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-inner"><i class="fa-solid fa-circle-exclamation animate-pulse"></i></div>
+            <div class="space-y-1"><h3 id="popupWargaJudul" class="text-xs font-black text-slate-800 uppercase tracking-tight">-</h3><p id="popupWargaIsi" class="text-xs text-slate-500 font-semibold leading-relaxed">-</p></div>
+            <button data-target="mInfoWargaPopup" class="btn-close-modal w-full bg-slate-800 text-white text-[10px] font-black py-2.5 rounded-xl uppercase tracking-wider">Saya Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordLogin() {
+            const field = document.getElementById('loginPass');
+            const icon = document.getElementById('eyeIconLogin');
+            if (field.type === "password") { field.type = "text"; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
+            else { field.type = "password"; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
+
+        // Handle error profile image safely
+        document.querySelectorAll('.onerror-image').forEach(img => {
+            img.addEventListener('error', () => { img.src = 'default.png'; });
+        });
+    </script>
+    <script src="indexsql.js"></script>
+</body>
+</html>
