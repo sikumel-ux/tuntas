@@ -1,8 +1,8 @@
 // ==========================================
 // 1. KONFIGURASI UTAMA SUPABASE
 // ==========================================
-const SUPABASE_URL = "https://xyz-gantidenganproyekmu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ganti_dengan_anon_key_proyekmu_di_settings_api";
+const SUPABASE_URL = "https://dgxdrgphsybpbonsfmve.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_ng4doS4MiUqzH6O-7U2lyg_IwW1QbIT";
 
 // Inisialisasi client Supabase menggunakan global window object via CDN
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -160,7 +160,7 @@ async function muatKasMasyarakat() {
     let end = document.getElementById('filterSelesaiWarga').value;
 
     try {
-        // Ambil data kas untuk hitung saldo keseluruhan (Tanpa batas filter tanggal)
+        // Ambil data kas untuk hitung saldo keseluruhan
         const { data: semuaKas } = await supabase.from('kas_rt04').select('*');
         let saldoKeseluruhan = 0;
         
@@ -171,7 +171,7 @@ async function muatKasMasyarakat() {
             });
         }
 
-        // Ambil data kas terfilter rentang tanggal dari database Supabase
+        // Ambil data kas terfilter rentang tanggal
         const { data: kasTerfilter, error } = await supabase
             .from('kas_rt04')
             .select('*')
@@ -256,7 +256,7 @@ async function muatIuranSaya() {
 }
 
 // ==========================================
-// 5. KALENDER LOG SAMPAH (Maret/Juni 2026)
+// 5. KALENDER LOG SAMPAH
 // ==========================================
 async function muatSampahSaya() {
     const boxKalender = document.getElementById('boxKalenderSampahWarga');
@@ -269,7 +269,7 @@ async function muatSampahSaya() {
         .from('laporan_sampah')
         .select('*')
         .eq('warga_key', KEY_WARGA_LOGGED_IN)
-        .like('tanggal', '2026-06-%'); // Filter SQL mengambil bulan Juni 2026 sesuai kalender web app
+        .like('tanggal', '2026-06-%');
 
     if (data) {
         data.forEach(s => {
@@ -372,7 +372,7 @@ function prosesUnggahFotoWarga(e) {
         img.src = event.target.result;
         img.onload = function () {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 400; // Kompres gambar biar enteng disimpen di database text
+            const MAX_WIDTH = 400; // Kompres gambar
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -382,7 +382,6 @@ function prosesUnggahFotoWarga(e) {
 
             const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
-            // Update row di Supabase
             supabase
                 .from('warga_rt04')
                 .update({ foto: compressedBase64 })
