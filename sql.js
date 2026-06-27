@@ -4,38 +4,54 @@
 const SUPABASE_URL = "https://dgxdrgphsybpbonsfmve.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_ng4doS4MiUqzH6O-7U2lyg_IwW1QbIT";
 
-// Inisialisasi yang benar dan aman agar tidak crash di browser HP
+// Inisialisasi client Supabase secara aman
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let AKUN_WARGA_LOGGED_IN = null;
-let KEY_WARGA_LOGGED_IN = null; // Menyimpan ID primary key (integer) warga yang login
-let DATA_KAS_TERFILTER = [];    // Cache global untuk unduh PDF mutasi kas
+let KEY_WARGA_LOGGED_IN = null; 
+let DATA_KAS_TERFILTER = [];    
 
 window.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
     cekSessionWarga();
 });
 
+// Fungsi pengikat event dengan pengaman khusus agar tidak crash jika ID HTML tidak ditemukan
+function amanIkatEvent(id, event, fungsi) {
+    const elemen = document.getElementById(id);
+    if (elemen) {
+        elemen.addEventListener(event, fungsi);
+    } else {
+        console.warn(`Peringatan TUNTAS: Elemen dengan ID "${id}" tidak ditemukan di HTML.`);
+    }
+}
+
 function initEventListeners() {
-    document.getElementById('formLoginWarga').addEventListener('submit', prosesLoginWarga);
-    document.getElementById('formSaranWarga').addEventListener('submit', kirimSaranAspirasi);
-    document.getElementById('formPassWarga').addEventListener('submit', perbaruiPasswordWarga);
+    amanIkatEvent('formLoginWarga', 'submit', prosesLoginWarga);
+    amanIkatEvent('formSaranWarga', 'submit', kirimSaranAspirasi);
+    amanIkatEvent('formPassWarga', 'submit', perbaruiPasswordWarga);
     
-    document.getElementById('btnRefresh').addEventListener('click', sinkronUlangWarga);
-    document.getElementById('btnLogout').addEventListener('click', logoutWarga);
-    document.getElementById('btnCetakPdf').addEventListener('click', unduhPdfKasWarga);
-    document.getElementById('btnKonfirmasiWa').addEventListener('click', bukaKonfirmasiWa);
+    amanIkatEvent('btnRefresh', 'click', sinkronUlangWarga);
+    amanIkatEvent('btnLogout', 'click', logoutWarga);
+    amanIkatEvent('btnCetakPdf', 'click', unduhPdfKasWarga);
+    amanIkatEvent('btnKonfirmasiWa', 'click', bukaKonfirmasiWa);
     
-    document.getElementById('filterMulaiWarga').addEventListener('change', muatKasMasyarakat);
-    document.getElementById('filterSelesaiWarga').addEventListener('change', muatKasMasyarakat);
-    document.getElementById('inputFotoWarga').addEventListener('change', prosesUnggahFotoWarga);
+    amanIkatEvent('filterMulaiWarga', 'change', muatKasMasyarakat);
+    amanIkatEvent('filterSelesaiWarga', 'change', muatKasMasyarakat);
+    amanIkatEvent('inputFotoWarga', 'change', prosesUnggahFotoWarga);
 
     document.querySelectorAll('.btn-close-modal').forEach(button => {
-        button.addEventListener('click', () => closeModal(button.getAttribute('data-target')));
+        button.addEventListener('click', () => {
+            const target = button.getAttribute('data-target');
+            if(target) closeModal(target);
+        });
     });
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchWargaTab(btn.getAttribute('data-target')));
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+            if(target) switchWargaTab(target);
+        });
     });
 }
 
@@ -60,40 +76,47 @@ function cekSessionWarga() {
         KEY_WARGA_LOGGED_IN = savedKey;
         AKUN_WARGA_LOGGED_IN = JSON.parse(savedData);
         
-        document.getElementById('scr-login').style.display = 'none';
-        document.getElementById('labelNamaWarga').innerText = AKUN_WARGA_LOGGED_IN.nama;
-        document.getElementById('labelBulanBergabung').innerText = AKUN_WARGA_LOGGED_IN.bulan_bergabung || 'Juni 2026';
+        if(document.getElementById('scr-login')) document.getElementById('scr-login').style.display = 'none';
+        if(document.getElementById('labelNamaWarga')) document.getElementById('labelNamaWarga').innerText = AKUN_WARGA_LOGGED_IN.nama;
+        if(document.getElementById('labelBulanBergabung')) document.getElementById('labelBulanBergabung').innerText = AKUN_WARGA_LOGGED_IN.bulan_bergabung || 'Juni 2026';
         
-        document.getElementById('namaWargaProfil').innerText = AKUN_WARGA_LOGGED_IN.nama;
-        document.getElementById('hpWargaProfil').innerText = "WA: " + AKUN_WARGA_LOGGED_IN.username;
+        if(document.getElementById('namaWargaProfil')) document.getElementById('namaWargaProfil').innerText = AKUN_WARGA_LOGGED_IN.nama;
+        if(document.getElementById('hpWargaProfil')) document.getElementById('hpWargaProfil').innerText = "WA: " + AKUN_WARGA_LOGGED_IN.username;
         
         const validFoto = (AKUN_WARGA_LOGGED_IN.foto && AKUN_WARGA_LOGGED_IN.foto !== 'default.png') ? AKUN_WARGA_LOGGED_IN.foto : 'default.png';
-        document.getElementById('imgProfilWarga').src = validFoto;
-        document.getElementById('imgProfilWargaBesar').src = validFoto;
+        if(document.getElementById('imgProfilWarga')) document.getElementById('imgProfilWarga').src = validFoto;
+        if(document.getElementById('imgProfilWargaBesar')) document.getElementById('imgProfilWargaBesar').src = validFoto;
 
-        // Set filter tanggal default (Awal bulan s/d Hari ini)
         const hariIni = new Date();
         const y = hariIni.getFullYear();
         const m = String(hariIni.getMonth() + 1).padStart(2, '0');
-        document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
-        document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
+        if(document.getElementById('filterMulaiWarga')) document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
+        if(document.getElementById('filterSelesaiWarga')) document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
 
         sinkronUlangWarga();
     } else {
-        document.getElementById('scr-login').style.display = 'flex';
+        if(document.getElementById('scr-login')) document.getElementById('scr-login').style.display = 'flex';
     }
 }
 
 // PROSES LOGIN WARGA
 async function prosesLoginWarga(e) {
-    e.preventDefault();
+    if(e && e.preventDefault) e.preventDefault();
     
-    // Cek apakah elemen loading ada sebelum diubah stylenya
     const loading = document.getElementById('loadingOverlay');
     if (loading) loading.style.display = 'flex';
     
-    const hp = document.getElementById('loginHp').value.trim();
-    const pass = document.getElementById('loginPass').value.trim();
+    const inputHp = document.getElementById('loginHp');
+    const inputPass = document.getElementById('loginPass');
+    
+    if(!inputHp || !inputPass) {
+        alert("Error internal: Elemen input loginHp atau loginPass tidak ditemukan di HTML!");
+        if (loading) loading.style.display = 'none';
+        return;
+    }
+
+    const hp = inputHp.value.trim();
+    const pass = inputPass.value.trim();
 
     try {
         const { data, error } = await supabase
@@ -105,7 +128,7 @@ async function prosesLoginWarga(e) {
 
         if (error) {
             console.error("Supabase Error:", error);
-            showNotif('Gagal memeriksa data database', 'gagal');
+            showNotif('Gagal memeriksa database', 'gagal');
             return;
         }
 
@@ -123,11 +146,14 @@ async function prosesLoginWarga(e) {
         }
     } catch (err) {
         console.error("Sistem Error:", err);
-        showNotif('Koneksi bermasalah atau gagal', 'gagal');
+        showNotif('Koneksi internet bermasalah', 'gagal');
     } finally {
         if (loading) loading.style.display = 'none';
     }
 }
+
+// Ekspor fungsi ke window agar bisa ditembak langsung dari HTML memakai atribut onclick
+window.tombolLoginDarurat = prosesLoginWarga;
 
 async function sinkronUlangWarga() {
     if (!KEY_WARGA_LOGGED_IN) return;
@@ -146,10 +172,13 @@ async function sinkronUlangWarga() {
 }
 
 function switchWargaTab(id) {
+    const targetEl = document.getElementById(id);
+    if(!targetEl) return;
+    
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
-    document.getElementById(id).classList.add('active');
+    targetEl.classList.add('active');
     
     const map = {
         'scr-w-kas': 'nav-btn-w-kas', 
@@ -158,7 +187,7 @@ function switchWargaTab(id) {
         'scr-w-berita': 'nav-btn-w-berita', 
         'scr-w-profil': 'nav-btn-w-profil'
     };
-    if (map[id]) document.getElementById(map[id]).classList.add('active');
+    if (map[id] && document.getElementById(map[id])) document.getElementById(map[id]).classList.add('active');
 }
 
 // ==========================================
@@ -170,8 +199,10 @@ async function muatKasMasyarakat() {
     list.innerHTML = "";
     DATA_KAS_TERFILTER = [];
 
-    let start = document.getElementById('filterMulaiWarga').value;
-    let end = document.getElementById('filterSelesaiWarga').value;
+    const fMulai = document.getElementById('filterMulaiWarga');
+    const fSelesai = document.getElementById('filterSelesaiWarga');
+    let start = fMulai ? fMulai.value : "";
+    let end = fSelesai ? fSelesai.value : "";
 
     try {
         const { data: semuaKas } = await supabase.from('kas_rt04').select('*');
@@ -182,6 +213,11 @@ async function muatKasMasyarakat() {
                 const nom = parseInt(v.nominal) || 0;
                 if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
             });
+        }
+
+        if(!start || !end) {
+            updateTampilanCardKasWarga(saldoKeseluruhan, 0, 0, 0);
+            return;
         }
 
         const { data: kasTerfilter, error } = await supabase
@@ -322,19 +358,20 @@ async function muatSampahSaya() {
 
 function bukaDetailSampahKalender(tanggal, jam, status) {
     const tglDuaDigit = String(tanggal).padStart(2, '0');
-    document.getElementById('dtlSampahTgl').innerText = `${tglDuaDigit}-06-2026`;
-    document.getElementById('dtlSampahJam').innerText = jam;
+    if(document.getElementById('dtlSampahTgl')) document.getElementById('dtlSampahTgl').innerText = `${tglDuaDigit}-06-2026`;
+    if(document.getElementById('dtlSampahJam')) document.getElementById('dtlSampahJam').innerText = jam;
     
     const statusEl = document.getElementById('dtlSampahStatus');
-    statusEl.innerText = status;
-    
-    statusEl.className = "font-black px-2 py-0.5 rounded uppercase tracking-wide text-[10px]";
-    if(status === 'diambil' || status === 'diantar') {
-        statusEl.classList.add('bg-emerald-100', 'text-emerald-800');
-    } else if(status === 'kosong') {
-        statusEl.classList.add('bg-rose-100', 'text-rose-800');
-    } else {
-        statusEl.classList.add('bg-slate-100', 'text-slate-600');
+    if(statusEl) {
+        statusEl.innerText = status;
+        statusEl.className = "font-black px-2 py-0.5 rounded uppercase tracking-wide text-[10px]";
+        if(status === 'diambil' || status === 'diantar') {
+            statusEl.classList.add('bg-emerald-100', 'text-emerald-800');
+        } else if(status === 'kosong') {
+            statusEl.classList.add('bg-rose-100', 'text-rose-800');
+        } else {
+            statusEl.classList.add('bg-slate-100', 'text-slate-600');
+        }
     }
 
     openModal('mDetailSampahWarga');
@@ -372,7 +409,7 @@ async function muatBeritaWarga() {
 }
 
 // ==========================================
-// 7. PROFIL: UPDATE FOTO PROFIL (Base64 String)
+// 7. PROFIL: UPDATE FOTO PROFIL
 // ==========================================
 function prosesUnggahFotoWarga(e) {
     const file = e.target.files[0];
@@ -404,8 +441,8 @@ function prosesUnggahFotoWarga(e) {
                     if (!error) {
                         AKUN_WARGA_LOGGED_IN.foto = compressedBase64;
                         localStorage.setItem('warga_data', JSON.stringify(AKUN_WARGA_LOGGED_IN));
-                        document.getElementById('imgProfilWarga').src = compressedBase64;
-                        document.getElementById('imgProfilWargaBesar').src = compressedBase64;
+                        if(document.getElementById('imgProfilWarga')) document.getElementById('imgProfilWarga').src = compressedBase64;
+                        if(document.getElementById('imgProfilWargaBesar')) document.getElementById('imgProfilWargaBesar').src = compressedBase64;
                         showNotif('Foto Profil Berhasil Diperbarui!', 'sukses');
                     } else {
                         showNotif('Gagal mengunggah foto', 'gagal');
@@ -421,7 +458,7 @@ function prosesUnggahFotoWarga(e) {
 // 8. PROFIL: UPDATE PASSWORD
 // ==========================================
 async function perbaruiPasswordWarga(e) {
-    e.preventDefault();
+    if(e && e.preventDefault) e.preventDefault();
     const newPass = document.getElementById('newPassWarga').value.trim();
     if(document.getElementById('loadingOverlay')) document.getElementById('loadingOverlay').style.display = 'flex';
 
@@ -435,7 +472,7 @@ async function perbaruiPasswordWarga(e) {
     if (!error) {
         AKUN_WARGA_LOGGED_IN.password = newPass;
         localStorage.setItem('warga_data', JSON.stringify(AKUN_WARGA_LOGGED_IN));
-        document.getElementById('formPassWarga').reset();
+        if(document.getElementById('formPassWarga')) document.getElementById('formPassWarga').reset();
         showNotif('Password Berhasil Diperbarui!', 'sukses');
     } else {
         showNotif('Gagal memperbarui password', 'gagal');
@@ -451,7 +488,7 @@ function bukaKonfirmasiWa() {
 // 9. PROFIL: KIRIM KOTAK SARAN & ASPIRASI
 // ==========================================
 async function kirimSaranAspirasi(e) {
-    e.preventDefault();
+    if(e && e.preventDefault) e.preventDefault();
     const input = document.getElementById('isiSaranWarga');
     const tglHariIni = new Date().toISOString().split('T')[0];
 
@@ -480,8 +517,10 @@ function unduhPdfKasWarga() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    const tglMulaiIndo = formatTanggalIndo(document.getElementById('filterMulaiWarga').value);
-    const tglSelesaiIndo = formatTanggalIndo(document.getElementById('filterSelesaiWarga').value);
+    const fMulai = document.getElementById('filterMulaiWarga');
+    const fSelesai = document.getElementById('filterSelesaiWarga');
+    const tglMulaiIndo = formatTanggalIndo(fMulai ? fMulai.value : "");
+    const tglSelesaiIndo = formatTanggalIndo(fSelesai ? fSelesai.value : "");
 
     doc.setFont("Helvetica", "bold");
     doc.text("LAPORAN MUTASI KAS TUNTAS RT 04", 14, 15);
@@ -537,7 +576,7 @@ function logoutWarga() {
     showNotif('Berhasil keluar dari aplikasi', 'sukses');
     
     setTimeout(() => {
-        document.getElementById('scr-login').style.display = 'flex';
+        if(document.getElementById('scr-login')) document.getElementById('scr-login').style.display = 'flex';
     }, 600);
 }
 
@@ -551,7 +590,11 @@ function showNotif(msg, type) {
     const icon = document.getElementById('notifIcon'); 
     const text = document.getElementById('notifText'); 
     
-    if(!box || !icon || !text) return;
+    if(!box || !icon || !text) {
+        // Fallback darurat jika elemen notifikasi custom belum dibuat di HTML
+        alert(`${type.toUpperCase()}: ${msg}`);
+        return;
+    }
     text.innerText = msg;
     
     box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
