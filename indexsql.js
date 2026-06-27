@@ -5,7 +5,7 @@ const SUPABASE_URL = "https://dgxdrgphsybpbonsfmve.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_ng4doS4MiUqzH6O-7U2lyg_IwW1QbIT";
 
 // Inisialisasi client Supabase menggunakan global window object via CDN
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let AKUN_WARGA_LOGGED_IN = null;
 let KEY_WARGA_LOGGED_IN = null; // Menyimpan ID primary key (integer) warga yang login
