@@ -49,17 +49,18 @@
                 <h2 class="text-xl font-black text-slate-800 tracking-tight">TUNTAS </h2>
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Sistem Pengelolaan Sampah RT 04</p>
             </div>
-            <form id="formLoginWarga" class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">No. WhatsApp</label>
-                    <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="tel" id="loginHp" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="Contoh: 0812345..."></div>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Password Akses</label>
-                    <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="password" id="loginPass" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-12 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••••"><button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 text-xs"><i id="eyeIconLogin" class="fa-solid fa-eye"></i></button></div>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black py-3.5 rounded-2xl shadow-lg shadow-emerald-700/20 uppercase tracking-wider transition-all">Masuk Sekarang</button>
-            </form>
+            <form id="formLoginWarga" onsubmit="window.prosesLoginWargaDirect(event)" class="space-y-4">
+    <div class="space-y-1">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">No. WhatsApp</label>
+        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="tel" id="loginHp" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="Contoh: 0812345..."></div>
+    </div>
+    <div class="space-y-1">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Password Akses</label>
+        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-xs"></i><input type="password" id="loginPass" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-12 py-3 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••••"><button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 text-xs"><i id="eyeIconLogin" class="fa-solid fa-eye"></i></button></div>
+    </div>
+    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black py-3.5 rounded-2xl shadow-lg shadow-emerald-700/20 uppercase tracking-wider transition-all">Masuk Sekarang</button>
+</form>
+
         </div>
     </div>
 
