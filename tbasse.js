@@ -2,26 +2,38 @@
 const SUPABASE_URL = "https://dgxdrgphsybpbonsfmve.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_ng4doS4MiUqzH6O-7U2lyg_IwW1QbIT";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+let supabase = null;
 let AKUN_WARGA_LOGGED_IN = null;
 let KEY_WARGA_LOGGED_IN = null; 
 let DATA_KAS_TERFILTER = [];    
 
-// LANGSUNG JALANKAN INSTAN AGAR TOMBOL NAVIGASI BERFUNGSI CEPAT DI HP
-initEventListeners();
-cekSessionWarga();
+// PASTIKAN SELURUH DOKUMEN DAN CDN SUDAH SIAP BARU JALANKAN ENGINE JS
+window.addEventListener('DOMContentLoaded', () => {
+    try {
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.error("Library Supabase gagal dimuat dari CDN!");
+        }
+    } catch (err) {
+        console.error("Gagal inisialisasi Supabase:", err);
+    }
+
+    // Tetap jalankan listener navigasi agar tombol fungsional meskipun database terkendala
+    initEventListeners();
+    cekSessionWarga();
+});
 
 function initEventListeners() {
     const ikat = (id, event, fn) => {
         const el = document.getElementById(id);
         if (el) {
-            el.removeEventListener(event, fn); // Hapus sisa listener lama agar tidak double
+            el.removeEventListener(event, fn); 
             el.addEventListener(event, fn);
         }
     };
 
-    // Ikat Event Form & Tombol Utama
+    // Form & Tombol Utama
     ikat('formLoginWarga', 'submit', prosesLoginWargaDirect);
     ikat('formSaranWarga', 'submit', kirimSaranAspirasi);
     ikat('formPassWarga', 'submit', perbaruiPasswordWarga);
@@ -33,7 +45,7 @@ function initEventListeners() {
     ikat('filterSelesaiWarga', 'change', muatKasMasyarakat);
     ikat('inputFotoWarga', 'change', prosesUnggahFotoWarga);
 
-    // Navigasi Tab Menu Bawah
+    // Navigasi Tab Menu Bawah (Wajib Berjalan Bebas)
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -67,33 +79,35 @@ function cekSessionWarga() {
         KEY_WARGA_LOGGED_IN = savedKey;
         AKUN_WARGA_LOGGED_IN = JSON.parse(savedData);
         
-        document.getElementById('scr-login').style.display = 'none';
-        document.getElementById('labelNamaWarga').innerText = AKUN_WARGA_LOGGED_IN.nama;
-        document.getElementById('labelBulanBergabung').innerText = AKUN_WARGA_LOGGED_IN.bulan_bergabung || 'Juni 2026';
-        document.getElementById('namaWargaProfil').innerText = AKUN_WARGA_LOGGED_IN.nama;
-        document.getElementById('hpWargaProfil').innerText = "WA: " + AKUN_WARGA_LOGGED_IN.username;
+        const scrLogin = document.getElementById('scr-login');
+        if (scrLogin) scrLogin.style.display = 'none';
+
+        if (document.getElementById('labelNamaWarga')) document.getElementById('labelNamaWarga').innerText = AKUN_WARGA_LOGGED_IN.nama;
+        if (document.getElementById('labelBulanBergabung')) document.getElementById('labelBulanBergabung').innerText = AKUN_WARGA_LOGGED_IN.bulan_bergabung || 'Juni 2026';
+        if (document.getElementById('namaWargaProfil')) document.getElementById('namaWargaProfil').innerText = AKUN_WARGA_LOGGED_IN.nama;
+        if (document.getElementById('hpWargaProfil')) document.getElementById('hpWargaProfil').innerText = "WA: " + AKUN_WARGA_LOGGED_IN.username;
         
         const validFoto = (AKUN_WARGA_LOGGED_IN.foto && AKUN_WARGA_LOGGED_IN.foto !== 'default.png') ? AKUN_WARGA_LOGGED_IN.foto : 'default.png';
-        document.getElementById('imgProfilWarga').src = validFoto;
-        document.getElementById('imgProfilWargaBesar').src = validFoto;
+        if (document.getElementById('imgProfilWarga')) document.getElementById('imgProfilWarga').src = validFoto;
+        if (document.getElementById('imgProfilWargaBesar')) document.getElementById('imgProfilWargaBesar').src = validFoto;
 
         const hariIni = new Date();
         const y = hariIni.getFullYear();
         const m = String(hariIni.getMonth() + 1).padStart(2, '0');
-        document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
-        document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
+        
+        if (document.getElementById('filterMulaiWarga')) document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
+        if (document.getElementById('filterSelesaiWarga')) document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
 
         sinkronUlangWarga();
     } else {
-        document.getElementById('scr-login').style.display = 'flex';
+        const scrLogin = document.getElementById('scr-login');
+        if (scrLogin) scrLogin.style.display = 'flex';
     }
 }
 
 async function prosesLoginWargaDirect(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (!supabase) { showNotif('Koneksi database belum siap', 'gagal'); return; }
     
     document.getElementById('loadingOverlay').style.display = 'flex';
     
@@ -108,10 +122,7 @@ async function prosesLoginWargaDirect(e) {
             .eq('password', pass)
             .maybeSingle();
 
-        if (error) {
-            showNotif('Gagal terhubung database Supabase', 'gagal');
-            return;
-        }
+        if (error) { showNotif('Gagal terhubung database', 'gagal'); return; }
 
         if (!data) {
             showNotif('No WhatsApp/password salah', 'gagal');
@@ -133,7 +144,7 @@ async function prosesLoginWargaDirect(e) {
 }
 
 async function sinkronUlangWarga() {
-    if (!KEY_WARGA_LOGGED_IN) return;
+    if (!KEY_WARGA_LOGGED_IN || !supabase) return;
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         await Promise.all([
@@ -143,9 +154,7 @@ async function sinkronUlangWarga() {
             muatBeritaWarga(), 
             jalankanPopupMaklumat()
         ]);
-    } catch(err) {
-        console.error(err);
-    }
+    } catch(err) { console.error(err); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
@@ -164,10 +173,10 @@ function switchWargaTab(id) {
     if (targetBtn) targetBtn.classList.add('active');
 }
 
-// 3. FETCH KAS RT FROM SUPABASE
+// 3. FETCH DATA DENGAN SAFELY CHECK (Mencegah Crash jika Tabel Bermasalah)
 async function muatKasMasyarakat() {
     const list = document.getElementById('listWargaKas');
-    if (!list) return;
+    if (!list || !supabase) return;
     list.innerHTML = "";
     DATA_KAS_TERFILTER = [];
 
@@ -227,16 +236,15 @@ async function muatKasMasyarakat() {
 }
 
 function updateTampilanCardKasWarga(sk, sf, m, k) {
-    document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
-    document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
-    document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
-    document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+    if(document.getElementById('totalSaldoKeseluruhan')) document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
+    if(document.getElementById('totalSaldo')) document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+    if(document.getElementById('textMasuk')) document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+    if(document.getElementById('textKeluar')) document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
 }
 
-// 4. FETCH IURAN
 async function muatIuranSaya() {
     const list = document.getElementById('listIuranSaya');
-    if (!list) return;
+    if (!list || !supabase) return;
     list.innerHTML = "";
 
     try {
@@ -269,10 +277,9 @@ async function muatIuranSaya() {
     } catch(e) { console.error(e); }
 }
 
-// 5. RENDER LOG SAMPAH JUNI 2026
 async function muatSampahSaya() {
     const boxKalender = document.getElementById('boxKalenderSampahWarga');
-    if (!boxKalender) return;
+    if (!boxKalender || !supabase) return;
     boxKalender.innerHTML = "";
     const mapSampahJuni = {};
 
@@ -309,23 +316,23 @@ async function muatSampahSaya() {
 }
 
 function bukaDetailSampahKalender(tanggal, jam, status) {
-    document.getElementById('dtlSampahTgl').innerText = `${String(tanggal).padStart(2, '0')}-06-2026`;
-    document.getElementById('dtlSampahJam').innerText = jam;
+    if(document.getElementById('dtlSampahTgl')) document.getElementById('dtlSampahTgl').innerText = `${String(tanggal).padStart(2, '0')}-06-2026`;
+    if(document.getElementById('dtlSampahJam')) document.getElementById('dtlSampahJam').innerText = jam;
     
     const statusEl = document.getElementById('dtlSampahStatus');
-    statusEl.innerText = status;
-    statusEl.className = "font-black px-2 py-0.5 rounded uppercase text-[10px]";
-    if(status === 'diambil' || status === 'diantar') statusEl.classList.add('bg-emerald-100', 'text-emerald-800');
-    else if(status === 'kosong') statusEl.classList.add('bg-rose-100', 'text-rose-800');
-    else statusEl.classList.add('bg-slate-100', 'text-slate-600');
-
+    if (statusEl) {
+        statusEl.innerText = status;
+        statusEl.className = "font-black px-2 py-0.5 rounded uppercase text-[10px]";
+        if(status === 'diambil' || status === 'diantar') statusEl.classList.add('bg-emerald-100', 'text-emerald-800');
+        else if(status === 'kosong') statusEl.classList.add('bg-rose-100', 'text-rose-800');
+        else statusEl.classList.add('bg-slate-100', 'text-slate-600');
+    }
     openModal('mDetailSampahWarga');
 }
 
-// 6. ANNOUNCEMENT & KOTAK SARAN
 async function muatBeritaWarga() {
     const list = document.getElementById('listBeritaWarga');
-    if (!list) return;
+    if (!list || !supabase) return;
     list.innerHTML = ""; 
     
     try {
@@ -350,6 +357,7 @@ async function muatBeritaWarga() {
 
 async function kirimSaranAspirasi(e) {
     e.preventDefault();
+    if(!supabase) return;
     const input = document.getElementById('isiSaranWarga');
     const { error } = await supabase.from('saran_warga').insert([{ nama_warga: AKUN_WARGA_LOGGED_IN.nama, isi_saran: input.value.trim(), tanggal: new Date().toISOString().split('T')[0] }]);
     if (!error) {
@@ -360,6 +368,7 @@ async function kirimSaranAspirasi(e) {
 
 async function perbaruiPasswordWarga(e) {
     e.preventDefault();
+    if(!supabase) return;
     const newPass = document.getElementById('newPassWarga').value.trim();
     const { error } = await supabase.from('warga_rt04').update({ password: newPass }).eq('id', KEY_WARGA_LOGGED_IN);
     if (!error) {
@@ -372,7 +381,7 @@ async function perbaruiPasswordWarga(e) {
 
 function prosesUnggahFotoWarga(e) {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !supabase) return;
 
     document.getElementById('loadingOverlay').style.display = 'flex';
     const reader = new FileReader();
@@ -406,18 +415,21 @@ function bukaKonfirmasiWa() {
 
 function unduhPdfKasWarga() {
     if (DATA_KAS_TERFILTER.length === 0) return;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text("LAPORAN MUTASI KAS TUNTAS RT 04", 14, 15);
-    const rows = [];
-    DATA_KAS_TERFILTER.forEach(item => {
-        rows.push([formatTanggalIndo(item.tanggal), item.keterangan.toUpperCase(), item.jenis === 'masuk' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-', item.jenis === 'keluar' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-']);
-    });
-    doc.autoTable({ startY: 25, head: [['Tanggal', 'Keterangan', 'Pemasukan', 'Pengeluaran']], body: rows, headStyles: { fillColor: [6, 78, 59] } });
-    doc.save("Kas_RT04.pdf");
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("LAPORAN MUTASI KAS TUNTAS RT 04", 14, 15);
+        const rows = [];
+        DATA_KAS_TERFILTER.forEach(item => {
+            rows.push([formatTanggalIndo(item.tanggal), item.keterangan.toUpperCase(), item.jenis === 'masuk' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-', item.jenis === 'keluar' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-']);
+        });
+        doc.autoTable({ startY: 25, head: [['Tanggal', 'Keterangan', 'Pemasukan', 'Pengeluaran']], body: rows, headStyles: { fillColor: [6, 78, 59] } });
+        doc.save("Kas_RT04.pdf");
+    } catch(err) { console.error("Gagal cetak PDF:", err); }
 }
 
 async function jalankanPopupMaklumat() {
+    if(!supabase) return;
     try {
         const { data } = await supabase.from('informasi_popup').select('*').limit(1).maybeSingle();
         if(data && data.judul) {
@@ -431,7 +443,10 @@ async function jalankanPopupMaklumat() {
 function logoutWarga() {
     localStorage.clear();
     showNotif('Berhasil keluar', 'sukses');
-    setTimeout(() => document.getElementById('scr-login').style.display = 'flex', 600);
+    setTimeout(() => {
+        const scrLogin = document.getElementById('scr-login');
+        if (scrLogin) scrLogin.style.display = 'flex';
+    }, 600);
 }
 
 function openModal(id) { 
