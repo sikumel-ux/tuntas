@@ -127,7 +127,7 @@ async function prosesLoginWargaDirect(e) {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
-window.prosesLoginWargaDirect = prosesLoginWargaDirect; // Pasang ke window browser global
+window.prosesLoginWargaDirect = prosesLoginWargaDirect;
 
 async function sinkronUlangWarga() {
     if (!KEY_WARGA_LOGGED_IN) return;
@@ -205,8 +205,8 @@ async function muatKasMasyarakat() {
                         <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
                         <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatTanggalIndo(v.tanggal)}</p>
                     </div>
-                    <span class="text-xs font-black \${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
-                        \${v.jenis==='masuk'?'+':'-'} \${nom.toLocaleString('id-ID')}
+                    <span class="text-xs font-black ${v.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                        ${v.jenis === 'masuk' ? '+' : '-'} ${nom.toLocaleString('id-ID')}
                     </span>
                 </div>
             `);
@@ -246,12 +246,12 @@ async function muatIuranSaya() {
         list.insertAdjacentHTML('beforeend', `
             <div class="p-4 flex justify-between items-center bg-white">
                 <div>
-                    <h4 class="text-xs font-black text-slate-700 uppercase">IURAN BULAN \${i.bulan}</h4>
-                    <p class="text-[9px] text-slate-400 font-bold mt-0.5">Tgl Bayar: \${formatTanggalIndo(i.tanggal)}</p>
+                    <h4 class="text-xs font-black text-slate-700 uppercase">IURAN BULAN ${i.bulan}</h4>
+                    <p class="text-[9px] text-slate-400 font-bold mt-0.5">Tgl Bayar: ${formatTanggalIndo(i.tanggal)}</p>
                 </div>
                 <div class="flex flex-col items-end gap-1">
-                    <span class="text-xs font-black text-emerald-600">Rp \${parseInt(i.nominal).toLocaleString('id-ID')}</span>
-                    <a href="\${linkKuitansi}" target="_blank" class="text-[9px] bg-slate-100 text-slate-700 font-black px-2 py-1 rounded border border-slate-200 uppercase"><i class="fa-solid fa-file-invoice"></i> Kuitansi</a>
+                    <span class="text-xs font-black text-emerald-600">Rp ${parseInt(i.nominal).toLocaleString('id-ID')}</span>
+                    <a href="${linkKuitansi}" target="_blank" class="text-[9px] bg-slate-100 text-slate-700 font-black px-2 py-1 rounded border border-slate-200 uppercase"><i class="fa-solid fa-file-invoice"></i> Kuitansi</a>
                 </div>
             </div>
         `);
@@ -290,13 +290,13 @@ async function muatSampahSaya() {
         const statusLog = mapSampahJuni[i] ? mapSampahJuni[i].status : "Belum Ada Log";
 
         boxKalender.insertAdjacentHTML('beforeend', `
-            <div class="day-box \${classWarna}" onclick="bukaDetailSampahKalender('\${i}', '\${jamLog}', '\${statusLog}')">\${i}</div>
+            <div class="day-box ${classWarna}" onclick="bukaDetailSampahKalender('${i}', '${jamLog}', '${statusLog}')">${i}</div>
         `);
     }
 }
 
 function bukaDetailSampahKalender(tanggal, jam, status) {
-    document.getElementById('dtlSampahTgl').innerText = `\${String(tanggal).padStart(2, '0')}-06-2026`;
+    document.getElementById('dtlSampahTgl').innerText = `${String(tanggal).padStart(2, '0')}-06-2026`;
     document.getElementById('dtlSampahJam').innerText = jam;
     
     const statusEl = document.getElementById('dtlSampahStatus');
@@ -324,10 +324,10 @@ async function muatBeritaWarga() {
         list.insertAdjacentHTML('beforeend', `
             <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-1">
                 <div class="flex justify-between items-center">
-                    <h4 class="text-xs font-black text-slate-800 uppercase">\${item.judul}</h4>
-                    <span class="text-[8px] font-mono text-slate-400">\${formatTanggalIndo(item.tanggal)}</span>
+                    <h4 class="text-xs font-black text-slate-800 uppercase">${item.judul}</h4>
+                    <span class="text-[8px] font-mono text-slate-400">${formatTanggalIndo(item.tanggal)}</span>
                 </div>
-                <p class="text-xs text-slate-600 font-semibold">\${item.isi}</p>
+                <p class="text-xs text-slate-600 font-semibold">${item.isi}</p>
             </div>
         `);
     });
@@ -385,8 +385,8 @@ function prosesUnggahFotoWarga(e) {
 }
 
 function bukaKonfirmasiWa() {
-    const teks = encodeURIComponent(`Halo Pengurus TUNTAS RT 04, saya \${AKUN_WARGA_LOGGED_IN.nama} ingin konfirmasi pembayaran iuran.`);
-    window.open(`https://wa.me/6285163233482?text=\${teks}`, '_blank'); 
+    const teks = encodeURIComponent(`Halo Pengurus TUNTAS RT 04, saya ${AKUN_WARGA_LOGGED_IN.nama} ingin konfirmasi pembayaran iuran.`);
+    window.open(`https://wa.me/6285163233482?text=${teks}`, '_blank'); 
 }
 
 function unduhPdfKasWarga() {
@@ -396,7 +396,7 @@ function unduhPdfKasWarga() {
     doc.text("LAPORAN MUTASI KAS TUNTAS RT 04", 14, 15);
     const rows = [];
     DATA_KAS_TERFILTER.forEach(item => {
-        rows.push([formatTanggalIndo(item.tanggal), item.keterangan.toUpperCase(), item.jenis === 'masuk' ? `Rp \${parseInt(item.nominal).toLocaleString('id-ID')}` : '-', item.jenis === 'keluar' ? `Rp \${parseInt(item.nominal).toLocaleString('id-ID')}` : '-']);
+        rows.push([formatTanggalIndo(item.tanggal), item.keterangan.toUpperCase(), item.jenis === 'masuk' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-', item.jenis === 'keluar' ? `Rp ${parseInt(item.nominal).toLocaleString('id-ID')}` : '-']);
     });
     doc.autoTable({ startY: 25, head: [['Tanggal', 'Keterangan', 'Pemasukan', 'Pengeluaran']], body: rows, headStyles: { fillColor: [6, 78, 59] } });
     doc.save("Kas_RT04.pdf");
@@ -426,8 +426,8 @@ function showNotif(msg, type) {
     const text = document.getElementById('notifText'); 
     if(!box) return;
     text.innerText = msg;
-    box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[9999999] p-4 rounded-2xl border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 \${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
-    icon.className = `fa-solid \${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'}`;
+    box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[9999999] p-4 rounded-2xl border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type === 'sukses' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`;
+    icon.className = `fa-solid ${type === 'sukses' ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'}`;
     box.classList.remove('hidden'); 
     setTimeout(() => box.classList.add('hidden'), 3000);
 }
