@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kuitansi Digital TUNTAS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #064e3b; }
+        
+        /* Gaya Khusus Cetak Kuitansi */
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .print-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-3">
+        <i class="fa-solid fa-spinner animate-spin text-2xl text-emerald-700"></i>
+        <span>Memvalidasi Kuitansi...</span>
+    </div>
+</div>
+
+<main class="w-full max-w-md mx-auto my-auto">
+    <div id="kuitansiCard" class="print-card bg-white border border-slate-100 rounded-[2.5rem] shadow-xl p-6 space-y-6 relative overflow-hidden hidden">
+        
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full -z-0 opacity-60"></div>
+        
+        <div class="flex justify-between items-start relative z-10">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-xl shadow-sm" onerror="this.src='https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=100'">
+                <div>
+                    <h1 class="text-base font-extrabold text-emerald-950 tracking-tight leading-none">TUNTAS</h1>
+                    <p class="text-[9px] font-bold text-emerald-700 uppercase tracking-wide mt-0.5">RT 04 Sampah Operasional</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="inline-block bg-emerald-50 border border-emerald-100 text-emerald-800 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-xl">LUNAS</span>
+                <p id="txtToken" class="text-[10px] font-mono text-slate-400 font-bold mt-1.5 uppercase tracking-tighter">ID: -</p>
+            </div>
+        </div>
+
+        <hr class="border-dashed border-slate-200">
+
+        <div class="space-y-4 relative z-10">
+            <div>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Telah Diterima Dari</p>
+                <h2 id="txtNama" class="text-base font-extrabold text-slate-800 uppercase tracking-wide mt-0.5">-</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Untuk Pembayaran</p>
+                    <p id="txtBulan" class="text-xs font-bold text-slate-700 mt-0.5 uppercase">-</p>
+                </div>
+                <div>
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Tanggal Transaksi</p>
+                    <p id="txtTanggal" class="text-xs font-bold text-slate-700 mt-0.5">-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-4 rounded-2xl text-center shadow-md shadow-emerald-900/10 relative z-10">
+            <p class="text-[8px] text-emerald-300 font-black uppercase tracking-widest">Jumlah Pembayaran</p>
+            <h3 id="txtNominal" class="text-2xl font-black tracking-tight mt-0.5">Rp 0</h3>
+        </div>
+
+        <div class="flex justify-between items-end pt-2 relative z-10 text-xs">
+            <div class="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[180px]">
+                <p>Simpan kuitansi digital ini sebagai bukti pembayaran yang sah. Terima kasih atas partisipasi Anda.</p>
+            </div>
+            <div class="text-center min-w-[100px]">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-8">Pengurus RT 04</p>
+                <p class="text-[10px] font-extrabold text-emerald-950 uppercase border-b border-slate-800 pb-0.5">Sistem Tuntas</p>
+                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">E-SIGN VERIFIED</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorCard" class="bg-white border border-rose-100 rounded-[2.5rem] shadow-xl p-8 text-center space-y-4 hidden">
+        <div class="w-12 h-12 bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center rounded-full mx-auto">
+            <i class="fa-solid fa-circle-xmark text-lg"></i>
+        </div>
+        <div>
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kuitansi Tidak Valid</h3>
+            <p class="text-[11px] font-semibold text-slate-500 leading-relaxed mt-1">Maaf, token kuitansi tidak ditemukan atau tautan salah. Silakan hubungi pengurus RT 04.</p>
+        </div>
+    </div>
+</main>
+
+<footer class="no-print w-full max-w-md mx-auto mt-6">
+    <button onclick="window.print()" id="btnPrint" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all active:scale-[0.98] hidden">
+        <i class="fa-solid fa-print mr-1.5"></i> Cetak / Simpan PDF
+    </button>
+</footer>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        // Ambil parameter token dari URL (?id=T-XXXXXX)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenKuitansi = urlParams.get('id');
+
+        if (!tokenKuitansi) {
+            tampilkanError();
+            return;
+        }
+
+        try {
+            // Ambil data iuran dari Firebase
+            const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+            const data = await res.json();
+            
+            let dataDitemukan = null;
+
+            if (data) {
+                // Cari data yang token_kuitansi nya cocok
+                Object.keys(data).forEach(key => {
+                    if (data[key].token_kuitansi === tokenKuitansi) {
+                        dataDitemukan = data[key];
+                    }
+                });
+            }
+
+            if (dataDitemukan) {
+                // Terapkan data ke dalam komponen HTML
+                document.getElementById('txtToken').innerText = `ID: ${dataDitemukan.token_kuitansi}`;
+                document.getElementById('txtNama').innerText = dataDitemukan.nama_warga;
+                document.getElementById('txtBulan').innerText = `IURAN SAMPAH - ${dataDitemukan.bulan}`;
+                document.getElementById('txtTanggal').innerText = formatTanggalIndo(dataDitemukan.tanggal);
+                document.getElementById('txtNominal').innerText = "Rp " + dataDitemukan.nominal.toLocaleString('id-ID');
+
+                // Tampilkan card kuitansi dan tombol print
+                document.getElementById('kuitansiCard').classList.remove('hidden');
+                document.getElementById('btnPrint').classList.remove('hidden');
+            } else {
+                tampilkanError();
+            }
+        } catch (error) {
+            console.error("Gagal memuat kuitansi:", error);
+            tampilkanError();
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    });
+
+    function tampilkanError() {
+        document.getElementById('errorCard').classList.remove('hidden');
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function formatTanggalIndo(tanggalString) {
+        if (!tanggalString) return "-";
+        const opsi = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(tanggalString).toLocaleDateString('id-ID', opsi);
+    }
+</script>
+</body>
+</html>
