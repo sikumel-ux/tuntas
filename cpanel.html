@@ -501,7 +501,7 @@
         fetch(`${DB_URL}/iuran_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => {
             const kasKredit = { jenis: 'masuk', nominal: body.nominal, keterangan: formatKeteranganIuran, tanggal: body.tanggal };
             fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasKredit) }).then(() => { muatSistemKas(); muatRiwayatIuran(); });
-            const linkKuitansi = `https://tuntas.web.id/kuitansi.html?id=${token}`;
+            const linkKuitansi = `https://tuntas.web.id/bukti.html?id=${token}`;
             document.getElementById('textKodeKuitansi').innerText = `TOKEN: ${token}\nURL: ${linkKuitansi}`;
             document.getElementById('boxKuitansiLink').classList.remove('hidden');
             document.getElementById('btnSalinKuitansi').onclick = () => { navigator.clipboard.writeText(linkKuitansi); showNotif('Link disalin!', 'sukses'); };
@@ -604,4 +604,70 @@
         const drop = document.getElementById('smphWarga');
         const body = { tanggal: document.getElementById('smphTgl').value, warga_key: drop.value, nama_warga: drop.options[drop.selectedIndex].text, status: STATUS_SAMPAH_TERPILIH, jam_diambil: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB" };
         document.getElementById('loadingOverlay').style.display = 'flex';
-        fetch(`${DB_URL}/laporan_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => {
+        fetch(`${DB_URL}/laporan_sampah.json`, { method: 'POST', body: JSON.stringify(body) }).then(() => { 
+            document.getElementById('formSampah').reset(); STATUS_SAMPAH_TERPILIH = "";
+            document.querySelectorAll('.btn-status-sampah').forEach(el => { el.className = "btn-status-sampah border border-slate-200 p-3 rounded-xl text-slate-600 bg-slate-50 transition-all uppercase flex flex-col items-center gap-1.5"; });
+            showNotif('Log Sampah Tersimpan', 'sukses'); 
+        }).catch(() => showNotif('Gagal mencatat log', 'gagal')).finally(() => document.getElementById('loadingOverlay').style.display = 'none');
+    }
+
+    async function muatRiwayatIuran() {
+        try {
+            const res = await fetch(`${DB_URL}/iuran_sampah.json`); const data = await res.json();
+            const list = document.getElementById('listRiwayatIuranWarga'); list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Kosong.</div>`; return; }
+            Object.keys(data).forEach(key => {
+                const i = data[key];
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 flex justify-between items-center bg-white border border-slate-100/80 rounded-2xl my-2 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-receipt text-xs"></i></div>
+                            <div>
+                                <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wide">${i.nama_warga}</h4>
+                                <div class="flex items-center gap-1.5 mt-0.5"><span class="text-[9px] text-slate-400 font-bold">${i.bulan}</span><span class="inline-block w-1 h-1 bg-slate-300 rounded-full"></span><span class="text-[8px] font-black bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded uppercase tracking-wider">Lunas</span></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3.5">
+                            <div class="text-right"><span class="text-xs font-black text-slate-900 block">Rp ${i.nominal.toLocaleString('id-ID')}</span><span class="text-[8px] font-mono text-slate-400 block tracking-tighter">ID: ${i.token_kuitansi}</span></div>
+                            <button onclick="hapusIuran('${key}')" class="text-slate-300 hover:text-rose-600 p-1.5 rounded-lg"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+                `);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    function hapusIuran(key) {
+        panggilKonfirmasiKustom('Hapus arsip data riwayat iuran sampah ini dari database?', () => {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            fetch(`${DB_URL}/iuran_sampah/${key}.json`, { method: 'DELETE' }).then(() => { showNotif('Riwayat iuran berhasil dihapus', 'sukses'); muatRiwayatIuran(); }).finally(() => document.getElementById('loadingOverlay').style.display = 'none');
+        });
+    }
+
+    function unduhLaporanPDF() {
+        if(DATA_KAS_TERFILTER.length === 0) { showNotif('Tidak ada transaksi pada rentang tanggal ini!', 'gagal'); return; }
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.setFont("Helvetica", "bold"); doc.text("LAPORAN OPERASIONAL KAS TUNTAS RT 04", 14, 15);
+        doc.setFontSize(9); doc.setFont("Helvetica", "normal"); doc.text(`Periode: ${document.getElementById('filterMulai').value} s/d ${document.getElementById('filterSelesai').value}`, 14, 21);
+        const rows = []; DATA_KAS_TERFILTER.forEach((item, idx) => { rows.push([idx + 1, item.tanggal, item.keterangan, item.jenis.toUpperCase(), item.nominal.toLocaleString('id-ID')]); });
+        doc.autoTable({ startY: 26, head: [['No', 'Tanggal', 'Keterangan', 'Jenis', 'Nominal']], body: rows, headStyles: { fillColor: [6, 78, 59] } });
+        doc.save(`Kas_Tuntas_RT04_${document.getElementById('filterMulai').value}.pdf`);
+    }
+
+    function ubahPasswordAdmin(e) {
+        e.preventDefault();
+        fetch(`${DB_URL}/admin_account/password.json`, { method: 'PUT', body: JSON.stringify(document.getElementById('newPass').value.trim()) }).then(() => { document.getElementById('formPass').reset(); showNotif('Password Admin Diperbarui', 'sukses'); });
+    }
+
+    function logoutAdmin() { localStorage.clear(); window.location.href = '../index.html'; }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
