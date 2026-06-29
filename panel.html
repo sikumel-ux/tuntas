@@ -553,7 +553,7 @@
             const kasKredit = { jenis: 'masuk', nominal: body.nominal, keterangan: formatKeteranganIuran, tanggal: body.tanggal };
             fetch(`${DB_URL}/kas_rt04.json`, { method: 'POST', body: JSON.stringify(kasKredit) }).then(() => { muatSistemKas(); muatRiwayatIuran(); });
 
-            const linkKuitansi = `https://tuntas.web.id/kuitansi.html?id=${token}`;
+            const linkKuitansi = `https://tuntas.web.id/bukti.html?id=${token}`;
             document.getElementById('textKodeKuitansi').innerText = `TOKEN: ${token}\nURL: ${linkKuitansi}`;
             document.getElementById('boxKuitansiLink').classList.remove('hidden');
 
