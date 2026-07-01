@@ -18,7 +18,6 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f3f4f6;
         }
-        /* Style kuitansi melengkung mirip gambar */
         .receipt-container {
             background: #ffffff;
             border-radius: 2.5rem;
@@ -28,20 +27,40 @@
         }
         .top-bar {
             height: 12px;
-            background-color: #064e3b; /* Hijau tua pekat */
+            background-color: #064e3b;
+        }
+
+        /* TWEAK KHUSUS BIAR TIDAK KEPOTONG PAS DICETAK */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+                margin: 0;
+            }
+            #print-area {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 bg-[#f7f9fa]">
 
     <!-- Loader -->
-    <div id="loader" class="flex flex-col items-center justify-center min-height-[60vh] mx-auto my-auto text-emerald-900 font-bold gap-2 text-sm">
+    <div id="loader" class="flex flex-col items-center justify-center min-height-[60vh] mx-auto my-auto text-emerald-900 font-bold gap-2 text-sm no-print">
         <div class="w-6 h-6 border-4 border-emerald-800 border-t-transparent rounded-full animate-spin"></div>
         <span>MEMUAT KUITANSI...</span>
     </div>
 
     <!-- Error Box -->
-    <div id="error-box" class="hidden text-center p-8 bg-white rounded-3xl max-w-md mx-auto my-auto shadow-sm space-y-3">
+    <div id="error-box" class="hidden text-center p-8 bg-white rounded-3xl max-w-md mx-auto my-auto shadow-sm space-y-3 no-print">
         <h3 class="font-bold text-red-600">Kuitansi Tidak Ditemukan</h3>
         <p class="text-xs text-slate-500">ID transaksi tidak valid atau belum terdaftar.</p>
     </div>
@@ -50,10 +69,10 @@
     <main id="kuitansi-box" class="hidden w-full max-w-md mx-auto space-y-6">
         
         <!-- Area Cetak -->
-        <div id="print-area" class="receipt-container border border-slate-100">
+        <div id="print-area" class="receipt-container border border-slate-100 bg-white">
             <div class="top-bar"></div>
             
-            <div class="p-8 space-y-8">
+            <div class="p-8 space-y-7">
                 <!-- Header: Logo + Tulisan Tuntas -->
                 <div class="flex flex-col items-center text-center space-y-2 pt-2">
                     <img src="logo.png" alt="Logo TUNTAS" class="h-14 w-auto object-contain mb-1">
@@ -79,8 +98,8 @@
                 </div>
 
                 <!-- QR Code Container -->
-                <div class="flex justify-center py-2">
-                    <div id="qrcode" class="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm"></div>
+                <div class="flex justify-center py-1">
+                    <div id="qrcode" class="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm inline-block"></div>
                 </div>
 
                 <!-- Pesan Terima Kasih -->
@@ -92,12 +111,12 @@
                 <div class="border-t border-dashed border-slate-200"></div>
 
                 <!-- Footer Rincian Bawah -->
-                <div class="flex justify-between items-end text-[11px]">
+                <div class="flex justify-between items-end text-[11px] pt-1">
                     <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 space-y-0.5 text-[10px]">
                         <p class="text-slate-400 font-medium">TANGGAL : <span id="text-tanggal" class="font-bold text-slate-800">...</span></p>
                         <p class="text-slate-400 font-medium">ID : <span id="text-token" class="font-bold text-slate-800">...</span></p>
                     </div>
-                    <div class="text-right space-y-0.5">
+                    <div class="text-right space-y-0.5 pb-1">
                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">PENGURUS TUNTAS</p>
                         <p id="text-admin" class="font-extrabold text-[#054f39] uppercase text-sm">APRIYANTO</p>
                     </div>
@@ -105,8 +124,8 @@
             </div>
         </div>
 
-        <!-- Tombol Cetak & Unduh -->
-        <div class="grid grid-cols-2 gap-3 px-2">
+        <!-- Tombol Cetak & Unduh (Hidden pas dicetak) -->
+        <div class="grid grid-cols-2 gap-3 px-2 no-print">
             <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-slate-50 transition-colors">
                 Cetak Kuitansi
             </button>
@@ -116,7 +135,7 @@
         </div>
     </main>
 
-    <footer class="w-full text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest pt-8 pb-2">
+    <footer class="w-full text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest pt-8 pb-2 no-print">
         GENERATED BY TUNTAS MANAGEMENT
     </footer>
 
@@ -155,7 +174,6 @@
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('kuitansi-box').classList.remove('hidden');
 
-            // Set text kontent
             document.getElementById('text-nama').innerText = item.nama_warga;
             document.getElementById('text-periode').innerText = item.bulan;
             document.getElementById('text-nominal').innerText = "Rp " + item.nominal.toLocaleString('id-ID');
@@ -164,12 +182,11 @@
             document.getElementById('text-token').innerText = item.token_kuitansi;
             if(item.nama_admin) document.getElementById('text-admin').innerText = item.nama_admin;
 
-            // Generate QR Code berdasarkan Tanggal Pembayaran sesuai permintaanmu
-            document.getElementById("qrcode").innerHTML = ""; // Bersihkan
+            document.getElementById("qrcode").innerHTML = "";
             new QRCode(document.getElementById("qrcode"), {
                 text: `Tanggal Bayar: ${formatTanggalIndo(item.tanggal)} | ID: ${item.token_kuitansi}`,
-                width: 130,
-                height: 130,
+                width: 120,
+                height: 120,
                 colorDark : "#0f172a",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
@@ -186,7 +203,7 @@
         function formatTanggalIndo(stringTanggal) {
             if(!stringTanggal) return "-";
             const bulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const part = stringTanggal.split("-"); // YYYY-MM-DD
+            const part = stringTanggal.split("-");
             if(part.length === 3) {
                 const tgl = parseInt(part[2]);
                 const bln = bulanIndo[parseInt(part[1]) - 1];
@@ -212,11 +229,13 @@
         function unduhPDF() {
             const elemen = document.getElementById('print-area');
             const tokenText = document.getElementById('text-token').innerText;
+            
+            // Mengubah format target dokumen agar pas dengan area cetak
             const opsi = {
-                margin:       8,
+                margin:       [10, 5, 10, 5], // Atas, Kiri, Bawah, Kanan
                 filename:     `Bukti_Bayar_TUNTAS_${tokenText}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 3, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opsi).from(elemen).save();
