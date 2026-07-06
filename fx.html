@@ -9,25 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     
-    <!-- Tailwind Standalone CSS Play (Anti-CORS / 404 CDN) -->
+    <!-- Tailwind Standalone CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
         }
+        /* Fix Ukuran Kustom Batasan Tailwind v2 */
+        .text-micro { font-size: 8px !important; }
+        .text-mini { font-size: 10px !important; }
+        .text-semi-xs { font-size: 11px !important; }
+        .rounded-custom-card { border-radius: 1.5rem !important; }
+        .rounded-custom-main { border-radius: 2rem !important; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased min-h-screen">
+<body class="text-gray-800 antialiased min-h-screen pb-8">
 
     <!-- HEADER -->
     <header class="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-40 shadow-sm">
         <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center space-x-3">
                 <img src="logo.png" onerror="this.src='https://via.placeholder.com/90/064e3b/FFFFFF?text=T'" alt="Logo" class="w-8 h-8 object-contain rounded-lg shadow-sm">
                 <div>
-                    <h1 class="text-sm font-extrabold text-gray-950 tracking-tight leading-none" style="margin: 0;">TUNTAS RT 04</h1>
-                    <p class="text-[9px] font-bold text-green-700 uppercase tracking-wider" style="margin: 2px 0 0 0;">Turun Tangan Atasi Sampah</p>
+                    <h1 class="text-sm font-extrabold text-gray-950 tracking-tight" style="margin: 0; line-height: 1.2;">TUNTAS RT 04</h1>
+                    <p class="text-micro font-bold text-green-700 uppercase tracking-wider" style="margin: 1px 0 0 0;">Turun Tangan Atasi Sampah</p>
                 </div>
             </div>
             <div class="flex items-center space-x-1">
@@ -36,94 +43,94 @@
                 </button>
                 <!-- Tombol On/Off Login -->
                 <button id="btnLoginToggle" onclick="toggleLoginStatus()" title="Login Status" class="w-9 h-9 rounded-full text-gray-400 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all focus:outline-none">
-                    <i id="loginIcon" class="fa-solid fa-toggle-off text-base"></i>
+                    <i id="loginIcon" class="fa-solid fa-toggle-off text-lg"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-md mx-auto p-4 space-y-6">
+    <main class="max-w-md mx-auto p-4 space-y-5">
         
-        <!-- CARD UTAMA KAS -->
-        <div class="bg-green-900 text-white p-6 rounded-3xl shadow-xl space-y-5 border border-green-800" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);">
+        <!-- CARD UTAMA KAS (Sudah Fix Teks Meluber & Tabrakan) -->
+        <div class="text-white p-5 rounded-custom-main shadow-xl space-y-4 border border-green-900 shadow-lg" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);">
             <div>
-                <p class="text-[9px] text-green-400 font-bold uppercase tracking-widest" style="margin: 0;">Total Saldo Keseluruhan</p>
-                <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-1" style="margin: 0;">Rp 0</h2>
+                <p class="text-micro text-green-400 font-extrabold uppercase tracking-widest" style="margin: 0;">Total Saldo Keseluruhan</p>
+                <h2 id="totalSaldoKeseluruhan" class="text-2xl font-extrabold tracking-tight" style="margin: 2px 0 0 0;">Rp 0</h2>
             </div>
             
-            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-green-800">
-                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center">
-                    <p class="text-[8px] text-green-300 font-bold uppercase tracking-wide" style="margin:0;">Bulan Ini</p>
-                    <h3 id="saldoBulanIni" class="text-xs font-bold text-white mt-1" style="margin:0;">Rp 0</h3>
+            <div class="grid grid-cols-3 gap-1.5 pt-3.5 border-t border-green-800">
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Bulan Ini</p>
+                    <h3 id="saldoBulanIni" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
                 </div>
-                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center">
-                    <p class="text-[8px] text-green-300 font-bold uppercase tracking-wide" style="margin:0;">Pemasukan</p>
-                    <h3 id="textMasuk" class="text-xs font-bold text-white mt-1" style="margin:0;">Rp 0</h3>
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Pemasukan</p>
+                    <h3 id="textMasuk" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
                 </div>
-                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center">
-                    <p class="text-[8px] text-green-300 font-bold uppercase tracking-wide" style="margin:0;">Pengeluaran</p>
-                    <h3 id="textKeluar" class="text-xs font-bold text-white mt-1" style="margin:0;">Rp 0</h3>
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Pengeluaran</p>
+                    <h3 id="textKeluar" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
                 </div>
             </div>
         </div>
 
         <!-- SEKILAS TUNTAS -->
-        <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm space-y-2">
+        <div class="bg-white border border-gray-100 p-4 rounded-custom-card shadow-sm space-y-1.5">
             <h3 class="text-xs font-extrabold text-green-900 uppercase tracking-wider flex items-center gap-2" style="margin:0;">
                 <i class="fa-solid fa-circle-info text-green-700"></i> Sekilas Tentang TUNTAS
             </h3>
             <p class="text-xs text-gray-600 leading-relaxed font-medium" style="margin: 4px 0 0 0;">
-                TUNTAS (Turun Tangan Atasi Sampah) adalah inisiatif swadaya masyarakat RT 04 untuk mewujudkan lingkungan yang bersih, sehat, dan terkelola dengan baik melalui sistem iuran transparan serta pengelolaan terjadwal.
+                TUNTAS (Turun Tangan Atasi Sampah) adalah inisiatif swadaya masyarakat RT 04 untuk mewujudkan lingkungan yang bersih, sehat, dan terkelola dengan baik melalui sistem iuran transparan serta pengelolaan terjadwal.[span_0](start_span)[span_0](end_span)
             </p>
         </div>
 
         <!-- JADWAL PEMBAKARAN (2 Card Sebaris) -->
         <div class="space-y-2">
-            <h3 class="text-[11px] font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center gap-2" style="margin:0;">
-                <i class="fa-solid fa-calendar-days text-green-700"></i> Jadwal Pembakaran Sampah
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-calendar-days text-green-700 mr-1.5"></i> Jadwal Pembakaran Sampah
             </h3>
-            <div class="grid grid-cols-2 gap-3 mt-2">
+            <div class="grid grid-cols-2 gap-3">
                 <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm text-center">
-                    <span class="text-[10px] font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Minggu</span>
+                    <span class="text-micro font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Minggu</span>
                     <p class="text-xs text-gray-500 font-bold mt-2" style="margin-bottom:0;">Pukul 09:00 WIB</p>
-                    <p class="text-[9px] text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Pagi</p>
+                    <p class="text-micro text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Pagi</p>
                 </div>
                 <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm text-center">
-                    <span class="text-[10px] font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Kamis</span>
+                    <span class="text-micro font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Kamis</span>
                     <p class="text-xs text-gray-500 font-bold mt-2" style="margin-bottom:0;">Pukul 16:00 WIB</p>
-                    <p class="text-[9px] text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Sore</p>
+                    <p class="text-micro text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Sore</p>
                 </div>
             </div>
         </div>
 
         <!-- FAQ ACCORDION -->
         <div class="space-y-2">
-            <h3 class="text-[11px] font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center gap-2" style="margin:0;">
-                <i class="fa-solid fa-circle-question text-green-700"></i> FAQ / Pertanyaan Umum
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-circle-question text-green-700 mr-1.5"></i> FAQ / Pertanyaan Umum
             </h3>
-            <div class="space-y-2 mt-2">
+            <div class="space-y-2">
                 <!-- FAQ 1 -->
                 <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(this)" class="w-full p-4 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
+                    <button onclick="toggleFaq(this)" class="w-full p-3.5 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
                         <span class="text-xs font-bold text-gray-700">Bagaimana cara membayar iuran bulanan?</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform"></i>
+                        <i class="fa-solid fa-chevron-down text-micro text-gray-400 transition-transform"></i>
                     </button>
                     <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50">
-                        <p class="p-4 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
-                            Pembayaran bisa langsung ditransfer ke rekening pengurus yang tertera di menu profil aplikasi atau diserahkan tunai saat pertemuan warga.
+                        <p class="p-3.5 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
+                            Pembayaran bisa langsung ditransfer ke rekening pengurus yang tertera di menu profil aplikasi atau diserahkan tunai saat pertemuan warga.[span_1](start_span)[span_1](end_span)
                         </p>
                     </div>
                 </div>
                 <!-- FAQ 2 -->
                 <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(this)" class="w-full p-4 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
+                    <button onclick="toggleFaq(this)" class="w-full p-3.5 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
                         <span class="text-xs font-bold text-gray-700">Apakah ada denda keterlambatan iuran?</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform"></i>
+                        <i class="fa-solid fa-chevron-down text-micro text-gray-400 transition-transform"></i>
                     </button>
                     <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50">
-                        <p class="p-4 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
-                            Tidak ada denda, namun keaktifan warga sangat membantu operasional petugas kebersihan di lapangan agar tetap berjalan lancar.
+                        <p class="p-3.5 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
+                            Tidak ada denda, namun keaktifan warga sangat membantu operasional petugas kebersihan di lapangan agar tetap berjalan lancar.[span_2](start_span)[span_2](end_span)
                         </p>
                     </div>
                 </div>
@@ -132,26 +139,26 @@
 
         <!-- BERITA & PENGUMUMAN -->
         <div class="space-y-2">
-            <h3 class="text-[11px] font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center gap-2" style="margin:0;">
-                <i class="fa-solid fa-bullhorn text-green-700"></i> Berita & Kegiatan Terbaru
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-bullhorn text-green-700 mr-1.5"></i> Berita & Kegiatan Terbaru
             </h3>
-            <div id="listBeritaWarga" class="space-y-3 mt-2">
-                <div class="p-6 text-center text-xs text-gray-400 font-bold uppercase bg-white rounded-2xl border border-gray-100 shadow-sm">Memuat berita komunitas...</div>
+            <div id="listBeritaWarga" class="space-y-2.5">
+                <div class="p-6 text-center text-mini text-gray-400 font-bold uppercase bg-white rounded-custom-card border border-gray-100 shadow-sm">Memuat berita komunitas...</div>
             </div>
         </div>
 
         <!-- TOMBOL BERGABUNG WHATSAPP -->
-        <div class="pt-2">
-            <a href="https://wa.me/6285163233482?text=Halo%20Pengurus%20TUNTAS%20RT%2004%2C%20saya%20ingin%20bergabung%20ke%20komunitas." target="_blank" class="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center shadow-lg transition-all text-center block" style="text-decoration:none;">
-                <i class="fa-brands fa-whatsapp text-sm mr-1"></i> Gabung Grup WhatsApp Warga
+        <div class="pt-1">
+            <a href="https://wa.me/6285163233482?text=Halo%20Pengurus%20TUNTAS%20RT%2004%2C%20saya%20ingin%20bergabung%20ke%20komunitas." target="_blank" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center shadow-md transition-all text-center block focus:outline-none" style="text-decoration:none;">
+                <i class="fa-brands fa-whatsapp text-sm mr-1.5"></i> Gabung Grup WhatsApp Warga
             </a>
         </div>
 
     </main>
 
     <!-- FOOTER COPYRIGHT -->
-    <footer class="max-w-md mx-auto px-4 py-8 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider border-t border-gray-100 mt-6">
-        &copy; 2026 TUNTAS RT 04 Dongkelan. All Rights Reserved.[span_0](start_span)[span_0](end_span)
+    <footer class="max-w-md mx-auto px-4 py-6 text-center text-micro font-bold text-gray-400 uppercase tracking-wider border-t border-gray-100 mt-5">
+        &copy; 2026 TUNTAS RT 04 Dongkelan. All Rights Reserved.[span_3](start_span)[span_3](end_span)
     </footer>
 
     <!-- CORE SCRIPT LOGIC -->
@@ -184,13 +191,12 @@
         function toggleLoginStatus() {
             isLoggedIn = !isLoggedIn;
             const icon = document.getElementById('loginIcon');
-            const btn = document.getElementById('btnLoginToggle');
             
             if (isLoggedIn) {
-                icon.className = "fa-solid fa-toggle-on text-base text-green-600";
+                icon.className = "fa-solid fa-toggle-on text-lg text-green-600";
                 alert("Simulasi Admin Status: ON");
             } else {
-                icon.className = "fa-solid fa-toggle-off text-base text-gray-400";
+                icon.className = "fa-solid fa-toggle-off text-lg text-gray-400";
                 alert("Simulasi Admin Status: OFF");
             }
         }
@@ -267,7 +273,7 @@
                             <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
                                 <div class="flex justify-between items-center border-b pb-2 border-gray-100 shadow-none">
                                     <h4 class="text-xs font-extrabold text-gray-800 uppercase tracking-tight" style="margin:0;">${item.judul || 'Info Warga'}</h4>
-                                    <span class="text-[9px] font-mono text-gray-400 font-bold">${formatTanggalIndo(item.tanggal)}</span>
+                                    <span class="text-micro font-mono text-gray-400 font-bold">${formatTanggalIndo(item.tanggal)}</span>
                                 </div>
                                 <p class="text-xs text-gray-600 leading-relaxed font-medium mt-2" style="margin-bottom:0;">${item.isi || ''}</p>
                             </div>
