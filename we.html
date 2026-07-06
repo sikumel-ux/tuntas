@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Control Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <style>
+        .modern-in {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #E2E8F0;
+            background-color: #F8FAFC;
+            font-size: 0.875rem;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .modern-in:focus {
+            border-color: #047857;
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #047857; }
+        .grid-kalender {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+
+    <!-- LOGIN SCREEN -->
+    <div id="scr-login" class="fixed inset-0 bg-gradient-to-tr from-slate-900 via-emerald-950 to-slate-900 z-[9999] flex flex-col justify-center p-6">
+        <div class="max-w-sm w-full mx-auto space-y-6 bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] shadow-2xl border border-white/20">
+            
+            <div class="text-center space-y-2">
+                <img src="logo.png" onerror="this.src='https://via.placeholder.com/90/064e3b/FFFFFF?text=T'" alt="Logo" class="w-16 h-16 mx-auto object-contain rounded-2xl shadow-md">
+                <div class="space-y-0.5">
+                    <h2 class="text-lg font-extrabold text-emerald-950 tracking-tight">TUNTAS</h2>
+                    <p class="text-[9px] font-bold text-emerald-700/70 uppercase tracking-widest">Turun Tangan Atasi Sampah</p>
+                </div>
+            </div>
+
+            <form id="formLoginWarga" class="space-y-3 pt-2">
+                <input type="tel" id="loginHp" placeholder="No. WhatsApp" class="modern-in" required>
+                
+                <div class="relative">
+                    <input type="password" id="loginPass" placeholder="Password" class="modern-in pr-12" required>
+                    <button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-700 transition-colors">
+                        <i id="eyeIconLogin" class="fa-solid fa-eye text-sm"></i>
+                    </button>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-800 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-emerald-900/20 active:scale-[0.98] transition-all mt-2">
+                    Masuk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/40 z-[99999] flex items-center justify-center" style="display:none;">
+        <div class="flex flex-col items-center gap-3 bg-slate-900/80 px-6 py-4 rounded-2xl backdrop-blur-sm text-white">
+            <i class="fa-solid fa-circle-notch animate-spin text-2xl text-emerald-400"></i>
+            <span class="text-xs tracking-wider">Memuat Data...</span>
+        </div>
+    </div>
+
+    <!-- ALERT NOTIFICATION -->
+    <div id="notificationAlert" class="fixed top-6 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-xl border text-xs font-black uppercase tracking-wide flex items-center gap-3 transition-all duration-300 hidden">
+        <i id="notifIcon" class="fa-solid text-lg"></i>
+        <span id="notifText" class="flex-1"></span>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-100/80 px-4 py-3 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <img src="logo.png" onerror="this.src='https://via.placeholder.com/90/064e3b/FFFFFF?text=T'" alt="Logo" class="w-7 h-7 object-contain rounded-lg shadow-sm">
+            <div>
+                <h1 class="text-xs font-extrabold text-slate-900 tracking-tight leading-none">TUNTAS</h1>
+                <p class="text-[8px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5">Turun Tangan Atasi Sampah</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1">
+            <button id="btnRefresh" onclick="refreshSemuaData()" title="Refresh Data" class="w-8 h-8 rounded-full text-slate-500 flex items-center justify-center hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all">
+                <i class="fa-solid fa-rotate text-xs"></i>
+            </button>
+            <button id="btnLogout" onclick="logoutWarga()" title="Keluar" class="w-8 h-8 rounded-full text-rose-500 flex items-center justify-center hover:bg-rose-50 active:scale-95 transition-all">
+                <i class="fa-solid fa-power-off text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto">
+        
+        <!-- SCREEN KAS (TAB ACTIVE) -->
+        <div id="scr-w-kas" class="tab-content active p-4 space-y-4">
+            <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-6 rounded-[2.5rem] shadow-xl space-y-5 border border-emerald-800/20">
+                <div>
+                    <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Total Saldo Keseluruhan</p>
+                    <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">Rp 0</h2>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2 pt-3 border-t border-emerald-800/40">
+                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                        <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Saldo Filter</p>
+                        <h3 id="totalSaldo" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                    </div>
+                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                        <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Pemasukan</p>
+                        <h3 id="textMasuk" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                    </div>
+                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                        <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Pengeluaran</p>
+                        <h3 id="textKeluar" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-emerald-800/20 flex justify-between items-center text-[9px] font-bold text-emerald-200">
+                    <span>Status: <span class="text-white font-black uppercase bg-emerald-800 px-1.5 py-0.5 rounded">Aktif Realtime</span></span>
+                    <span id="labelNamaWarga" class="uppercase tracking-wide text-white">Warga RT 04</span>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="date" id="filterMulaiWarga" class="modern-in !p-2 text-center">
+                    <input type="date" id="filterSelesaiWarga" class="modern-in !p-2 text-center">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="text-[10px] font-black text-slate-400 tracking-widest px-1 uppercase">Histori Mutasi Kas</h3>
+                <div id="listWargaKas" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[280px] shadow-sm">
+                    <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat mutasi...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PEMBAYARAN -->
+        <div id="scr-w-iuran" class="tab-content p-4 space-y-4">
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Riwayat Pembayaran</h2>
+            <div id="listIuranSaya" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden p-6 text-center text-xs text-slate-400 font-bold uppercase">
+                Fitur Pencatatan Swadaya Mandiri Warga RT 04.
+            </div>
+        </div>
+
+        <!-- TAB PENGAMBILAN SAMPAH -->
+        <div id="scr-w-sampah" class="tab-content p-4 space-y-4">
+            <div class="bg-white border border-slate-100 p-4 rounded-[2rem] shadow-sm space-y-3">
+                <div class="text-center pb-2 border-b">
+                    <h3 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Log Pengambilan Sampah</h3>
+                    <p class="text-sm font-black text-emerald-700 uppercase tracking-tight">Juli 2026</p>
+                </div>
+                <div class="grid-kalender font-black text-[9px] text-slate-400 uppercase tracking-wider border-b pb-1">
+                    <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
+                </div>
+                <div id="boxKalenderSampahWarga" class="grid-kalender py-2">
+                    <!-- Placeholder Kalender -->
+                    <div class="p-1 text-xs text-slate-300 font-bold">1</div><div class="p-1 text-xs text-slate-300 font-bold">2</div><div class="p-1 text-xs text-slate-300 font-bold">3</div><div class="p-1 text-xs text-white bg-emerald-600 rounded-md font-bold">4</div><div class="p-1 text-xs text-slate-300 font-bold">5</div><div class="p-1 text-xs text-slate-300 font-bold">6</div><div class="p-1 text-xs text-slate-300 font-bold">7</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB BERITA & RILIS -->
+        <div id="scr-w-berita" class="tab-content p-4 space-y-4">
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide px-1">Rilis Berita & Kegiatan</h2>
+            <div id="listBeritaWarga" class="space-y-3">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Memuat rilis berita komunitas...</div>
+            </div>
+        </div>
+
+        <!-- TAB PROFIL & KONFIRMASI -->
+        <div id="scr-w-profil" class="tab-content p-4 space-y-5">
+            <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-building-columns text-emerald-700"></i> Rekening Pembayaran</h3>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-2 font-semibold text-slate-700 relative">
+                    <p>Bank: <span class="font-black text-slate-900">Bank Central Asia (BCA) </span></p>
+                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200/60 mt-1">
+                        <p class="m-0">No. Rek: <span id="norekSaku" class="font-mono font-black text-emerald-800 select-all">4452284387</span></p>
+                        <button type="button" onclick="salinNorekKeClipboard()" class="bg-emerald-50 text-emerald-800 text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-200 active:scale-95 transition-all">
+                            <i class="fa-solid fa-copy"></i> Salin
+                        </button>
+                    </div>
+                    <p class="pt-1">Atas Nama: <span class="font-black text-slate-900">APRIYANTO</span></p>
+                </div>
+                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20TUNTAS%2C%20saya%20mau%20konfirmasi%20pembayaran%20iuran%20sampah." target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Konfirmasi Pembayaran
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- NAVIGATION SYSTEM FOOTER -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
+        <button onclick="switchTab(this, 'scr-w-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
+        <button onclick="switchTab(this, 'scr-w-iuran')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-receipt text-base mb-0.5"></i>PEMBAYARAN</button>
+        <button onclick="switchTab(this, 'scr-w-sampah')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-trash-can text-base mb-0.5"></i>PENGAMBILAN</button>
+        <button onclick="switchTab(this, 'scr-w-berita')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-bullhorn text-base mb-0.5"></i>BERITA</button>
+        <button onclick="switchTab(this, 'scr-w-profil')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user text-base mb-0.5"></i>PROFIL</button>
+    </nav>
+
+    <!-- APPLICATION SCRIPTS CORE INTEGRATION -->
+    <script>
+        const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+        let masterKasData = null; // Menyimpan data kas asli untuk keperluan filtering tanggal
+
+        // Helper Tanggal Indonesia
+        function formatTanggalIndo(tglStr) {
+            if (!tglStr) return "-";
+            if (tglStr.includes('-') && tglStr.split('-')[0].length === 2) return tglStr;
+            const parts = tglStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return tglStr;
+        }
+
+        // Tampilkan Notifikasi Sistem Custom
+        function showNotif(pesan, jenis = 'sukses') {
+            const alertBox = document.getElementById('notificationAlert');
+            const icon = document.getElementById('notifIcon');
+            const text = document.getElementById('notifText');
+            
+            text.innerText = pesan;
+            alertBox.className = "fixed top-6 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-xl border text-xs font-black uppercase tracking-wide flex items-center gap-3 transition-all duration-300";
+            
+            if (jenis === 'sukses') {
+                alertBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+                icon.className = "fa-solid fa-circle-check text-emerald-600 text-lg";
+            } else {
+                alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+                icon.className = "fa-solid fa-circle-exclamation text-rose-600 text-lg";
+            }
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('hidden'), 3000);
+        }
+
+        // Switch Tab Navigation
+        function switchTab(btn, targetId) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const targetElement = document.getElementById(targetId);
+            if(targetElement) targetElement.classList.add('active');
+        }
+
+        // Toggle Tampilan Password Box Login
+        function togglePasswordLogin() {
+            const field = document.getElementById('loginPass');
+            const icon = document.getElementById('eyeIconLogin');
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                field.type = "password";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Salin Norek
+        function salinNorekKeClipboard() {
+            const text = document.getElementById('norekSaku').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotif('Nomor Rekening Berhasil Disalin!', 'sukses');
+            }).catch(() => {
+                showNotif('Gagal menyalin nomor rekening', 'gagal');
+            });
+        }
+
+        // Form Login Simpel Warga
+        document.getElementById('formLoginWarga').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('scr-login').style.display = 'none';
+            showNotif('Berhasil Masuk Panel Kendali!', 'sukses');
+            refreshSemuaData();
+        });
+
+        // Logout
+        function logoutWarga() {
+            document.getElementById('scr-login').style.display = 'flex';
+            showNotif('Berhasil Keluar Akun', 'sukses');
+        }
+
+        // FETCH DATA KAS UTAMA
+        async function muatKasMasyarakat() {
+            try {
+                const res = await fetch(`${DB_URL}/kas.json`);
+                const data = await res.json();
+                masterKasData = data; 
+                
+                renderDataKas(data);
+            } catch (err) {
+                console.error("Gagal Fetch Kas:", err);
+                showNotif("Gagal memperbarui info kas", "gagal");
+            }
+        }
+
+        // RENDER DAN KONDISI DATA KAS
+        function renderDataKas(data) {
+            const list = document.getElementById('listWargaKas');
+            if (!list) return;
+
+            if (!data) {
+                document.getElementById('totalSaldoKeseluruhan').innerText = "Rp 0";
+                document.getElementById('totalSaldo').innerText = "Rp 0";
+                document.getElementById('textMasuk').innerText = "Rp 0";
+                document.getElementById('textKeluar').innerText = "Rp 0";
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada mutasi terdaftar.</div>`;
+                return;
+            }
+
+            const totalSaldoGlobal = data.saldo !== undefined ? data.saldo : 0;
+            document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + totalSaldoGlobal.toLocaleString('id-ID');
+
+            list.innerHTML = "";
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+            let adaMutasi = false;
+
+            const filterMulai = document.getElementById('filterMulaiWarga').value;
+            const filterSelesai = document.getElementById('filterSelesaiWarga').value;
+
+            const targetLoop = data.mutasi || data;
+
+            if (typeof targetLoop === 'object') {
+                // Sorting agar transaksi terbaru muncul paling atas (afterbegin)
+                Object.keys(targetLoop).forEach(key => {
+                    const v = targetLoop[key];
+                    if (v && typeof v === 'object' && v.keterangan && v.nominal) {
+                        
+                        // Handler Filter Tanggal (jika diisi)
+                        if (filterMulai && v.tanggal && v.tanggal < filterMulai) return;
+                        if (filterSelesai && v.tanggal && v.tanggal > filterSelesai) return;
+
+                        adaMutasi = true;
+                        const nominalNumeric = parseInt(v.nominal) || 0;
+                        const isPemasukan = v.jenis === 'masuk' || v.jenis === 'pemasukan';
+
+                        if (isPemasukan) totalMasuk += nominalNumeric;
+                        else totalKeluar += nominalNumeric;
+
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="flex justify-between items-center p-3.5 hover:bg-slate-50 transition-colors">
+                                <div class="space-y-0.5">
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                                    <p class="text-[9px] font-mono text-slate-400 font-bold">${formatTanggalIndo(v.tanggal)}</p>
+                                </div>
+                                <span class="text-xs font-extrabold ${isPemasukan ? 'text-emerald-600' : 'text-rose-600'}">
+                                    ${isPemasukan ? '+' : '-'} Rp ${nominalNumeric.toLocaleString('id-ID')}
+                                </span>
+                            </div>
+                        `);
+                    }
+                });
+            }
+
+            if (!adaMutasi) {
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Tidak ada transaksi di rentang tanggal ini.</div>`;
+            }
+
+            // Hitung nilai saldo terfilter
+            const totalSaldoTerfilter = totalMasuk - totalKeluar;
+            document.getElementById('totalSaldo').innerText = "Rp " + totalSaldoTerfilter.toLocaleString('id-ID');
+            document.getElementById('textMasuk').innerText = "Rp " + totalMasuk.toLocaleString('id-ID');
+            document.getElementById('textKeluar').innerText = "Rp " + totalKeluar.toLocaleString('id-ID');
+        }
+
+        // FETCH DATA BERITA KOMUNITAS
+        async function muatBeritaWarga() {
+            try {
+                const res = await fetch(`${DB_URL}/berita.json`);
+                const data = await res.json();
+                const list = document.getElementById('listBeritaWarga');
+                if (!list) return;
+
+                if (!data) {
+                    list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100">Belum ada rilis berita komunitas.</div>`;
+                    return;
+                }
+
+                list.innerHTML = "";
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    if (item && typeof item === 'object') {
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-2">
+                                <div class="flex justify-between items-center border-b pb-1.5 border-slate-100">
+                                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-tight">${item.judul || 'Info Warga'}</h4>
+                                    <span class="text-[9px] font-mono font-bold text-slate-400">${formatTanggalIndo(item.tanggal)}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed font-medium">${item.deskripsi || item.isi || ''}</p>
+                            </div>
+                        `);
+                    }
+                });
+            } catch (err) {
+                console.error("Gagal Fetch Berita:", err);
+            }
+        }
+
+        // Global Refresh Trigger
+        async function refreshSemuaData() {
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.style.display = 'flex';
+            
+            await muatKasMasyarakat();
+            await muatBeritaWarga();
+            
+            if(overlay) overlay.style.display = 'none';
+        }
+
+        // Event Listener untuk Trigger Input Filter Tanggal
+        document.getElementById('filterMulaiWarga').addEventListener('change', () => { if(masterKasData) renderDataKas(masterKasData); });
+        document.getElementById('filterSelesaiWarga').addEventListener('change', () => { if(masterKasData) renderDataKas(masterKasData); });
+
+        // Auto Load saat awal halaman dibuka
+        window.addEventListener('DOMContentLoaded', () => {
+            // Kita biarkan user masuk lewat form login terlebih dahulu baru trigger sinkronisasi realtime
+        });
+    </script>
+</body>
+</html>
