@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page TUNTAS RT 04</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Fix Layout & Custom Utilities */
+        .text-micro { font-size: 8px !important; }
+        .text-mini { font-size: 10px !important; }
+        .text-semi-xs { font-size: 11px !important; }
+        .rounded-custom-card { border-radius: 1.5rem !important; }
+        .rounded-custom-main { border-radius: 2rem !important; }
+        
+        /* Background Pattern SVG Organik Hijau */
+        .bg-svg-organic {
+            position: relative;
+            overflow: hidden;
+        }
+        .bg-svg-organic::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 100px;
+            height: 100px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2310b981' fill-opacity='0.12'%3E%3Cpath d='M30,90 C45,85 55,60 70,65 C85,70 85,40 95,20 C80,25 65,15 50,35 C35,55 15,65 30,90 Z'/%3E%3Cpath d='M10,70 C25,75 40,50 60,60 C75,70 80,45 90,35 C75,35 60,20 45,40 C30,60 5,55 10,70 Z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen pb-8">
+
+    <header class="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="logo.png" onerror="this.src='https://via.placeholder.com/90/064e3b/FFFFFF?text=T'" alt="Logo" class="w-8 h-8 object-contain rounded-lg shadow-sm">
+                <div>
+                    <h1 class="text-sm font-extrabold text-gray-950 tracking-tight" style="margin: 0; line-height: 1.2;">TUNTAS RT 04</h1>
+                    <p class="text-micro font-bold text-green-700 uppercase tracking-wider" style="margin: 1px 0 0 0;">Turun Tangan Atasi Sampah</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-1">
+                <button onclick="refreshData()" title="Refresh Data" class="w-9 h-9 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all focus:outline-none">
+                    <i class="fa-solid fa-rotate text-sm"></i>
+                </button>
+                <a href="login/" title="Masuk ke Panel Login" class="w-9 h-9 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all focus:outline-none" style="text-decoration: none;">
+                    <i class="fa-solid fa-right-to-bracket text-base text-gray-600"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-5">
+        
+        <div class="text-white p-5 rounded-custom-main shadow-xl space-y-4 border border-green-900 shadow-lg" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);">
+            <div>
+                <p class="text-micro text-green-400 font-extrabold uppercase tracking-widest" style="margin: 0;">Total Saldo Keseluruhan</p>
+                <h2 id="totalSaldoKeseluruhan" class="text-2xl font-extrabold tracking-tight" style="margin: 2px 0 0 0;">Rp 0</h2>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-1.5 pt-3.5 border-t border-green-800">
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Bulan Ini</p>
+                    <h3 id="saldoBulanIni" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
+                </div>
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Pemasukan</p>
+                    <h3 id="textMasuk" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
+                </div>
+                <div class="bg-white bg-opacity-5 p-2 rounded-xl text-center border border-white border-opacity-5">
+                    <p class="text-micro text-green-300 font-bold uppercase tracking-wide" style="margin:0; white-space: nowrap;">Pengeluaran</p>
+                    <h3 id="textKeluar" class="text-xs font-black text-white mt-1" style="margin:0;">Rp 0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 p-5 rounded-custom-card shadow-sm bg-svg-organic relative z-10">
+            <div class="relative z-10 space-y-1.5">
+                <h3 class="text-xs font-extrabold text-green-900 uppercase tracking-wider flex items-center gap-2" style="margin:0;">
+                    <i class="fa-solid fa-circle-info text-green-700"></i> Sekilas Tentang TUNTAS
+                </h3>
+                <p class="text-xs text-gray-600 leading-relaxed font-medium" style="margin: 4px 0 0 0;">
+                    TUNTAS (Turun Tangan Atasi Sampah) adalah inisiatif swadaya masyarakat RT 04 untuk mewujudkan lingkungan yang bersih, sehat, dan terkelola dengan baik melalui sistem iuran transparan serta pengelolaan terjadwal.
+                </p>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-calendar-days text-green-700 mr-1.5"></i> Jadwal Pembakaran Sampah
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm text-center">
+                    <span class="text-micro font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Minggu</span>
+                    <p class="text-xs text-gray-500 font-bold mt-2" style="margin-bottom:0;">Pukul 09:00 WIB</p>
+                    <p class="text-micro text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Pagi</p>
+                </div>
+                <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm text-center">
+                    <span class="text-micro font-extrabold text-green-800 uppercase tracking-wider bg-green-50 px-2 py-1 rounded-md">Hari Kamis</span>
+                    <p class="text-xs text-gray-500 font-bold mt-2" style="margin-bottom:0;">Pukul 16:00 WIB</p>
+                    <p class="text-micro text-green-700 font-extrabold uppercase mt-0.5" style="margin-bottom:0;">Sesi Sre</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-circle-question text-green-700 mr-1.5"></i> FAQ / Pertanyaan Umum
+            </h3>
+            <div class="space-y-2">
+                <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                    <button onclick="toggleFaq(this)" class="w-full p-3.5 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
+                        <span class="text-xs font-bold text-gray-700">Bagaimana cara membayar iuran bulanan?</span>
+                        <i class="fa-solid fa-chevron-down text-micro text-gray-400 transition-transform"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50">
+                        <p class="p-3.5 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
+                            Pembayaran bisa langsung ditransfer ke rekening pengurus yang tertera di menu profil aplikasi atau diserahkan tunai saat pertemuan warga.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                    <button onclick="toggleFaq(this)" class="w-full p-3.5 text-left flex justify-between items-center focus:outline-none bg-white active:bg-gray-50">
+                        <span class="text-xs font-bold text-gray-700">Apakah ada denda keterlambatan iuran?</span>
+                        <i class="fa-solid fa-chevron-down text-micro text-gray-400 transition-transform"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50">
+                        <p class="p-3.5 text-xs text-gray-600 leading-relaxed border-t border-gray-100 font-medium" style="margin:0;">
+                            Tidak ada denda, namun keaktifan warga sangat membantu operasional petugas kebersihan di lapangan agar tetap berjalan lancar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-semi-xs font-extrabold text-gray-400 tracking-widest px-1 uppercase flex items-center" style="margin:0;">
+                <i class="fa-solid fa-bullhorn text-green-700 mr-1.5"></i> Berita & Kegiatan Terbaru
+            </h3>
+            <div id="listBeritaWarga" class="space-y-2.5">
+                <div class="p-6 text-center text-mini text-gray-400 font-bold uppercase bg-white rounded-custom-card border border-gray-100 shadow-sm">Memuat berita komunitas...</div>
+            </div>
+        </div>
+
+        <div class="pt-1">
+            <a href="https://wa.me/6285163233482?text=Halo%20Pengurus%20TUNTAS%20RT%2004%2C%20saya%20ingin%20bergabung%20ke%20komunitas." target="_blank" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center shadow-md transition-all text-center block focus:outline-none" style="text-decoration:none;">
+                <i class="fa-brands fa-whatsapp text-sm mr-1.5"></i> Gabung Grup WhatsApp Warga
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="max-w-md mx-auto px-4 py-6 text-center text-micro font-bold text-gray-400 uppercase tracking-wider border-t border-gray-100 mt-5">
+        &copy; 2026 TUNTAS RT 04 Dongkelan. All Rights Reserved.
+    </footer>
+
+    <script>
+        const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        function formatTanggalIndo(tglStr) {
+            if (!tglStr) return "-";
+            if (tglStr.includes('-') && tglStr.split('-')[0].length === 2) return tglStr;
+            const parts = tglStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return tglStr;
+        }
+
+        // Fungsi Accordion FAQ
+        function toggleFaq(btn) {
+            const container = btn.nextElementSibling;
+            const icon = btn.querySelector('i');
+            if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+                container.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                container.style.maxHeight = container.scrollHeight + "px";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 1. FETCH DATA KAS
+        async function muatKasMasyarakat() {
+            try {
+                const res = await fetch(`${DB_URL}/kas_rt04.json`);
+                const data = await res.json();
+                
+                let totalSaldo = 0;
+                let mskTotal = 0;
+                let klrTotal = 0;
+                let saldoBulanIni = 0;
+
+                const hariIni = new Date();
+                const tahunSekarang = hariIni.getFullYear();
+                const bulanSekarang = hariIni.getMonth();
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const v = data[key];
+                        if (v && typeof v === 'object' && v.nominal) {
+                            const nom = parseInt(v.nominal) || 0;
+                            const tglItem = new Date(v.tanggal);
+
+                            if (v.jenis === 'masuk') {
+                                mskTotal += nom;
+                                totalSaldo += nom;
+                            } else {
+                                klrTotal += nom;
+                                totalSaldo -= nom;
+                            }
+
+                            if (tglItem.getFullYear() === tahunSekarang && tglItem.getMonth() === bulanSekarang) {
+                                if (v.jenis === 'masuk') {
+                                    saldoBulanIni += nom;
+                                } else {
+                                    saldoBulanIni -= nom;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + totalSaldo.toLocaleString('id-ID');
+                document.getElementById('saldoBulanIni').innerText = "Rp " + saldoBulanIni.toLocaleString('id-ID');
+                document.getElementById('textMasuk').innerText = "Rp " + mskTotal.toLocaleString('id-ID');
+                document.getElementById('textKeluar').innerText = "Rp " + klrTotal.toLocaleString('id-ID');
+
+            } catch (err) {
+                console.error("Gagal memuat data kas:", err);
+            }
+        }
+
+        // 2. FETCH DATA PENGUMUMAN
+        async function muatBeritaWarga() {
+            try {
+                const res = await fetch(`${DB_URL}/pengumuman.json`);
+                const data = await res.json();
+                const list = document.getElementById('listBeritaWarga');
+                if (!list) return;
+
+                if (!data) {
+                    list.innerHTML = `<div class="p-6 text-center text-xs text-gray-400 font-bold uppercase bg-white rounded-xl border border-gray-100 shadow-sm">Belum ada berita terbaru.</div>`;
+                    return;
+                }
+
+                list.innerHTML = "";
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    if (item && typeof item === 'object') {
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <div class="flex justify-between items-center border-b pb-2 border-gray-100 shadow-none">
+                                    <h4 class="text-xs font-extrabold text-gray-800 uppercase tracking-tight" style="margin:0;">${item.judul || 'Info Warga'}</h4>
+                                    <span class="text-micro font-mono text-gray-400 font-bold">${formatTanggalIndo(item.tanggal)}</span>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed font-medium mt-2" style="margin-bottom:0;">${item.isi || ''}</p>
+                            </div>
+                        `);
+                    }
+                });
+            } catch (err) {
+                console.error("Gagal memuat berita:", err);
+            }
+        }
+
+        async function refreshData() {
+            await muatKasMasyarakat();
+            await muatBeritaWarga();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshData();
+        });
+    </script>
+</body>
+</html>
