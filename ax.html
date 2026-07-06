@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page TUNTAS RT 04</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .modern-in {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #E2E8F0;
+            background-color: #F8FAFC;
+            font-size: 0.875rem;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .modern-in:focus {
+            border-color: #047857;
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
+
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 py-4 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <img src="logo.png" onerror="this.src='https://via.placeholder.com/90/064e3b/FFFFFF?text=T'" alt="Logo" class="w-8 h-8 object-contain rounded-lg shadow-sm">
+                <div>
+                    <h1 class="text-sm font-extrabold text-slate-900 tracking-tight leading-none">TUNTAS RT 04</h1>
+                    <p class="text-[9px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5">Turun Tangan Atasi Sampah</p>
+                </div>
+            </div>
+            <button onclick="refreshData()" title="Refresh Data" class="w-9 h-9 rounded-full text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
+                <i class="fa-solid fa-rotate text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        
+        <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-6 rounded-[2rem] shadow-xl space-y-5 border border-emerald-800/20">
+            <div>
+                <p class="text-[9px] text-emerald-400 font-black uppercase tracking-widest">Total Saldo Keseluruhan</p>
+                <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight mt-0.5">Rp 0</h2>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-emerald-800/40">
+                <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                    <p class="text-[8px] text-emerald-300 font-black uppercase tracking-wide">Saldo Filter</p>
+                    <h3 id="totalSaldo" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                </div>
+                <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                    <p class="text-[8px] text-emerald-300 font-black uppercase tracking-wide">Pemasukan</p>
+                    <h3 id="textMasuk" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                </div>
+                <div class="bg-white/5 p-2.5 rounded-xl border border-white/5 text-center">
+                    <p class="text-[8px] text-emerald-300 font-black uppercase tracking-wide">Pengeluaran</p>
+                    <h3 id="textKeluar" class="text-xs font-extrabold text-white mt-0.5">Rp 0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Rentang Tanggal Kas</p>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[9px] text-slate-400 font-bold uppercase pl-1">Mulai</label>
+                    <input type="date" id="filterMulaiWarga" class="modern-in !p-2 text-center mt-1">
+                </div>
+                <div>
+                    <label class="text-[9px] text-slate-400 font-bold uppercase pl-1">Selesai</label>
+                    <input type="date" id="filterSelesaiWarga" class="modern-in !p-2 text-center mt-1">
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-2.5">
+            <h3 class="text-[11px] font-black text-slate-400 tracking-widest px-1 uppercase flex items-center gap-1.5">
+                <i class="fa-solid fa-wallet text-emerald-700"></i> Histori Mutasi Kas
+            </h3>
+            <div id="listWargaKas" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[320px] shadow-sm">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat mutasi kas...</div>
+            </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            <h3 class="text-[11px] font-black text-slate-400 tracking-widest px-1 uppercase flex items-center gap-1.5">
+                <i class="fa-solid fa-bullhorn text-emerald-700"></i> Berita & Berita Kegiatan
+            </h3>
+            <div id="listBeritaWarga" class="space-y-3">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100 shadow-sm">Memuat berita komunitas...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+        let masterKasData = null;
+
+        // Helper Merubah format YYYY-MM-DD menjadi DD-MM-YYYY sesuai berkas asli
+        function formatTanggalIndo(tglStr) {
+            if (!tglStr) return "-";
+            if (tglStr.includes('-') && tglStr.split('-')[0].length === 2) return tglStr;
+            const parts = tglStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return tglStr;
+        }
+
+        // Set Default Rentang Tanggal Saat Halaman Diakses (Awal Bulan s/d Hari Ini)
+        function initTanggalFilter() {
+            const hariIni = new Date();
+            const y = hariIni.getFullYear();
+            const m = String(hariIni.getMonth() + 1).padStart(2, '0');
+            document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
+            document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
+        }
+
+        // 1. AMBIL DATA KAS (Menggunakan path /kas_rt04.json dan kalkulasi saldo kumulatif asli)
+        async function muatKasMasyarakat() {
+            try {
+                const res = await fetch(`${DB_URL}/kas_rt04.json`);
+                const data = await res.json();
+                masterKasData = data;
+                renderDataKas(data);
+            } catch (err) {
+                console.error("Gagal memuat data kas:", err);
+            }
+        }
+
+        function renderDataKas(data) {
+            const list = document.getElementById('listWargaKas');
+            if (!list) return;
+
+            list.innerHTML = "";
+
+            let start = new Date(document.getElementById('filterMulaiWarga').value);
+            let end = new Date(document.getElementById('filterSelesaiWarga').value);
+            end.setHours(23, 59, 59, 999);
+
+            let saldoKeseluruhan = 0;
+            let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
+
+            if (!data) {
+                updateTampilanCardKasWarga(0, 0, 0, 0);
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada catatan kas.</div>`;
+                return;
+            }
+
+            let adaMutasi = false;
+
+            Object.keys(data).forEach(key => {
+                const v = data[key];
+                if (v && typeof v === 'object' && v.keterangan && v.nominal) {
+                    const nom = parseInt(v.nominal) || 0;
+                    const tglItem = new Date(v.tanggal);
+
+                    // Hitung total saldo global real-time
+                    if (v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
+
+                    // Filter Berdasarkan Rentang Tanggal Terapit
+                    if (tglItem >= start && tglItem <= end) {
+                        adaMutasi = true;
+                        if (v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
+                        sldTerapit = mskTerapit - klrTerapit;
+
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="flex justify-between items-center p-4 hover:bg-slate-50 transition-colors bg-white">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                                    <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatTanggalIndo(v.tanggal)}</p>
+                                </div>
+                                <span class="text-xs font-black ${v.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                                    ${v.jenis === 'masuk' ? '+' : '-'} Rp ${nom.toLocaleString('id-ID')}
+                                </span>
+                            </div>
+                        `);
+                    }
+                }
+            });
+
+            if (!adaMutasi) {
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Tidak ada transaksi di rentang tanggal ini.</div>`;
+            }
+
+            updateTampilanCardKasWarga(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+        }
+
+        function updateTampilanCardKasWarga(sk, sf, m, k) {
+            document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + sk.toLocaleString('id-ID');
+            document.getElementById('totalSaldo').innerText = "Rp " + sf.toLocaleString('id-ID');
+            document.getElementById('textMasuk').innerText = "Rp " + m.toLocaleString('id-ID');
+            document.getElementById('textKeluar').innerText = "Rp " + k.toLocaleString('id-ID');
+        }
+
+        // 2. AMBIL BERITA & PENGUMUMAN (Menggunakan path /pengumuman.json asli)
+        async function muatBeritaWarga() {
+            try {
+                const res = await fetch(`${DB_URL}/pengumuman.json`);
+                const data = await res.json();
+                const list = document.getElementById('listBeritaWarga');
+                if (!list) return;
+
+                if (!data) {
+                    list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-100 shadow-sm">Belum ada berita terbaru.</div>`;
+                    return;
+                }
+
+                list.innerHTML = "";
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    if (item && typeof item === 'object') {
+                        list.insertAdjacentHTML('afterbegin', `
+                            <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-1.5">
+                                <div class="flex justify-between items-center border-b pb-1.5 border-slate-100">
+                                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-tight">${item.judul || 'Info Warga'}</h4>
+                                    <span class="text-[9px] font-mono text-slate-400 font-bold">${formatTanggalIndo(item.tanggal)}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed font-semibold">${item.isi || ''}</p>
+                            </div>
+                        `);
+                    }
+                });
+            } catch (err) {
+                console.error("Gagal memuat berita:", err);
+            }
+        }
+
+        // Fungsi Global Refresh data
+        async function refreshData() {
+            await muatKasMasyarakat();
+            await muatBeritaWarga();
+        }
+
+        // Event Listener & Inisialisasi saat DOM Selesai Dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            initTanggalFilter();
+            refreshData();
+
+            // Pasang event penanganan filter tanggal langsung render ulang
+            document.getElementById('filterMulaiWarga').addEventListener('change', () => { if (masterKasData) renderDataKas(masterKasData); });
+            document.getElementById('filterSelesaiWarga').addEventListener('change', () => { if (masterKasData) renderDataKas(masterKasData); });
+        });
+    </script>
+</body>
+</html>
