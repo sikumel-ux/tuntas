@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUNTAS RT 04 - Sistem Informasi & Transparansi Sampah</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-slate-800">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+                    <i class="fas fa-fire-alt text-base animate-pulse"></i>
+                </div>
+                <div>
+                    <span class="font-black text-sm tracking-wide text-slate-800 block uppercase">TUNTAS RT 04</span>
+                    <span class="text-[9px] font-bold text-emerald-600 block -mt-1 uppercase tracking-wider">Dongkelan</span>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-slate-500">
+                <a href="#tentang" class="hover:text-emerald-600 transition">Tentang</a>
+                <a href="#kas-transparansi" class="hover:text-emerald-600 transition">Kas Live</a>
+                <a href="#regulasi-jadwal" class="hover:text-emerald-600 transition">Jadwal & Aturan</a>
+                <a href="#berita-warga" class="hover:text-emerald-600 transition">Berita</a>
+            </div>
+            <a href="#gabung" class="text-[10px] font-black text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 rounded-xl uppercase tracking-wider transition shadow-sm">Gabung Program</a>
+        </div>
+    </nav>
+
+    <header id="tentang" class="max-w-5xl mx-auto px-4 pt-12 pb-6 grid sm:grid-cols-5 gap-8 items-center">
+        <div class="sm:col-span-3 space-y-4">
+            <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black rounded-full uppercase tracking-wider inline-block">Turun Tangan Atasi Sampah</span>
+            <h1 class="text-3xl sm:text-4xl font-black text-slate-800 leading-tight uppercase">Mewujudkan RT 04 Bersih <br><span class="text-emerald-600">Bebas Residu Sampah</span></h1>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">TUNTAS adalah inisiatif pengelolaan residu lingkungan berbasis sistem insinerator pembakaran suhu tinggi terkontrol di RT 04 Dongkelan. Menekan tumpukan sampah domestik secara cepat, higienis, terbuka, dan dikelola secara mandiri oleh warga.</p>
+            <div class="pt-2 flex flex-wrap gap-3">
+                <a href="#kas-transparansi" class="text-[10px] font-black text-white bg-slate-900 hover:bg-slate-800 px-5 py-3 rounded-xl uppercase tracking-wider transition">Pantau Kas Realtime</a>
+                <a href="#regulasi-jadwal" class="text-[10px] font-black text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-5 py-3 rounded-xl uppercase tracking-wider transition">Lihat Aturan Main</a>
+            </div>
+        </div>
+        <div class="sm:col-span-2 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-6 space-y-4 shadow-sm">
+            <div class="w-10 h-10 bg-emerald-600 text-white rounded-2xl flex items-center justify-center text-lg shadow-md"><i class="fa-solid fa-leaf"></i></div>
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Target Operasional</h3>
+            <p class="text-xs text-slate-500 leading-relaxed font-semibold">Mengurangi potensi penumpukan sampah liar pemukiman, mengoptimalkan proses termal ramah lingkungan, serta menjaga akuntabilitas pendanaan iuran warga.</p>
+        </div>
+    </header>
+
+    <section id="kas-transparansi" class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200 pb-3">
+            <div>
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide">Transparansi Keuangan Live</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Data sinkron langsung dari database kas utama</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div>
+                    <label class="text-[8px] font-black text-slate-400 uppercase block mb-0.5">Mulai</label>
+                    <input type="date" id="filterMulaiWarga" class="text-[10px] font-bold p-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[8px] font-black text-slate-400 uppercase block mb-0.5">Selesai</label>
+                    <input type="date" id="filterSelesaiWarga" class="text-[10px] font-bold p-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white p-5 rounded-2xl shadow-md space-y-1">
+                <span class="text-[9px] font-bold text-emerald-300 uppercase tracking-wider block">Saldo Terfilter Saat Ini</span>
+                <div class="text-xl font-black font-mono">Rp <span id="totalSaldo">0</span></div>
+                <span class="text-[8px] text-emerald-400 font-medium block pt-1">Total Kumulatif RT: Rp <span id="totalSaldoKeseluruhan">0</span></span>
+            </div>
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-1">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Aliran Pemasukan</span>
+                <div class="text-xl font-black font-mono text-emerald-600">Rp <span id="textMasuk">0</span></div>
+            </div>
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-1">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Aliran Pengeluaran</span>
+                <div class="text-xl font-black font-mono text-rose-600">Rp <span id="textKeluar">0</span></div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div class="p-3.5 bg-slate-50 border-b border-slate-200">
+                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1.5"></i> Jurnal Mutasi Anggaran</h4>
+            </div>
+            <div id="listWargaKas" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                </div>
+        </div>
+    </section>
+
+    <section id="regulasi-jadwal" class="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
+        
+        <div class="space-y-4">
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2"><i class="fa-solid fa-calendar-clock text-emerald-600 mr-2"></i> Jadwal Operasional</h3>
+            
+            <div class="space-y-3">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                    <div>
+                        <h4 class="text-xs font-black text-slate-700 uppercase">Jadwal Pengambilan Sampah</h4>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Setiap Hari **Senin, Rabu, dan Jumat** malam hari mulai pukul **19:30 WIB**. Petugas akan menyisir wadah depan pagar rumah.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0"><i class="fa-solid fa-fire text-base"></i></div>
+                    <div>
+                        <h4 class="text-xs font-black text-slate-700 uppercase">Jadwal Pembakaran Insinerator</h4>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Dilaksanakan berkala seminggu dua kali setiap hari **Selasa dan Sabtu** pagi hari pukul **08:00 WIB** guna menjaga stabilitas volume residu lingkungan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2"><i class="fa-solid fa-circle-exclamation text-emerald-600 mr-2"></i> Kriteria Bahan Bakar</h3>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                <p class="text-xs font-semibold text-slate-500 leading-relaxed">Guna meminimalisir emisi zat kimia berbahaya berlebih, mohon perhatikan kriteria pemilahan sampah berikut:</p>
+                
+                <div class="space-y-2 pt-1">
+                    <div class="flex items-start gap-2.5 text-xs font-bold text-slate-700">
+                        <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                        <span>BOLEH DIBAKAR: <span class="font-medium text-slate-500 block text-[11px] mt-0.5">Daun kering, ranting pohon kecil, limbah kertas/kardus hancur, sisa pembalut kantong kain, residu plastik tipis rumah tangga kering.</span></span>
+                    </div>
+                    <div class="flex items-start gap-2.5 text-xs font-bold text-rose-700 pt-2 border-t border-slate-50">
+                        <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                        <span>DILARANG KERAS: <span class="font-medium text-slate-500 block text-[11px] mt-0.5">Limbah kaca/beling, kaleng besi/aluminium kosong, batre bekas, sisa kabel tembaga, cairan bahan kimia pekat, komponen elektronik.</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="berita-warga" class="max-w-5xl mx-auto px-4 py-8 space-y-4">
+        <div>
+            <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide">Papan Informasi & Berita</h2>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Maklumat resmi pengurus RT 04 terkait pengelolaan sampah</p>
+        </div>
+        <div id="listBeritaWarga" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            </div>
+    </section>
+
+    <section id="gabung" class="max-w-5xl mx-auto px-4 py-12">
+        <div class="bg-gradient-to-br from-slate-900 to-emerald-950 text-white rounded-3xl p-8 text-center space-y-4 shadow-xl">
+            <h2 class="text-xl sm:text-2xl font-black uppercase tracking-wide">Ingin Berkontribusi Menjaga Kebersihan?</h2>
+            <p class="text-xs text-slate-300 max-w-lg mx-auto leading-relaxed font-medium">Bagi warga baru atau simpatisan lingkungan RT 04 Dongkelan yang ingin mendaftarkan alamat rumahnya ke dalam alur rute penjemputan sampah rutin bulanan, silakan klik tombol di bawah ini untuk terhubung langsung dengan WhatsApp pengurus.</p>
+            <div class="pt-2">
+                <a href="https://wa.me/6285163233482?text=Halo%20Pengurus%20TUNTAS%20RT%2004%2C%20saya%20tertarik%20untuk%20bergabung%20ke%20dalam%20program%20pengelolaan%20sampah." target="_blank" class="inline-flex items-center gap-2 text-xs font-black text-slate-900 bg-white hover:bg-slate-100 px-6 py-3 rounded-xl uppercase tracking-wider transition shadow-lg">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> Hubungi Pengurus Sekarang
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-slate-200 bg-white py-6 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+        <p>&copy; 2026 TUNTAS RT 04 Dongkelan, Yogyakarta. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+        let DATA_KAS_MASTER = []; // Penampung database kas awal
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initFilters();
+            muatDataLandingPage();
+        });
+
+        function initFilters() {
+            // Atur setelan default tanggal muatan (Awal bulan s/d hari ini)
+            const hariIni = new Date();
+            const y = hariIni.getFullYear();
+            const m = String(hariIni.getMonth() + 1).padStart(2, '0');
+            
+            document.getElementById('filterMulaiWarga').value = `${y}-${m}-01`;
+            document.getElementById('filterSelesaiWarga').value = hariIni.toISOString().split('T')[0];
+
+            // Tambah event listener pemicu kalkulasi ulang jika input tanggal berubah
+            document.getElementById('filterMulaiWarga').addEventListener('change', kalkulasiDanTampilkanKas);
+            document.getElementById('filterSelesaiWarga').addEventListener('change', kalkulasiDanTampilkanKas);
+        }
+
+        function formatTanggalIndo(tglStr) {
+            if (!tglStr) return "-";
+            if (tglStr.includes('-') && tglStr.split('-')[0].length === 2) return tglStr;
+            const parts = tglStr.split('-');
+            if (parts.length === 3) { return `${parts[2]}-${parts[1]}-${parts[0]}`; }
+            return tglStr;
+        }
+
+        async function muatDataLandingPage() {
+            // Ambil data Kas dan Pengumuman secara paralel
+            try {
+                await Promise.all([
+                    fetchKasUtama(),
+                    muatBeritaPublik()
+                ]);
+            } catch (err) {
+                console.error("Gagal sinkron data utama:", err);
+            }
+        }
+
+        async function fetchKasUtama() {
+            const res = await fetch(`${DB_URL}/kas_rt04.json`);
+            const data = await res.json();
+            DATA_KAS_MASTER = data ? Object.values(data) : [];
+            kalkulasiDanTampilkanKas();
+        }
+
+        function kalkulasiDanTampilkanKas() {
+            const list = document.getElementById('listWargaKas');
+            list.innerHTML = "";
+
+            let start = new Date(document.getElementById('filterMulaiWarga').value);
+            let end = new Date(document.getElementById('filterSelesaiWarga').value);
+            end.setHours(23, 59, 59, 999);
+
+            let saldoKeseluruhan = 0;
+            let sldTerapit = 0, mskTerapit = 0, klrTerapit = 0;
+
+            if (DATA_KAS_MASTER.length === 0) {
+                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase bg-white">Belum ada catatan mutasi kas.</div>`;
+                updateTampilanCardKasWarga(0, 0, 0, 0);
+                return;
+            }
+
+            // Urutkan data berdasarkan tanggal terbaru
+            const sortedData = [...DATA_KAS_MASTER].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            sortedData.forEach(v => {
+                const nom = parseInt(v.nominal) || 0;
+                const tglItem = new Date(v.tanggal);
+
+                // Hitung kumulatif total saldo keseluruhan tanpa terpengaruh filter tanggal
+                if(v.jenis === 'masuk') { saldoKeseluruhan += nom; } else { saldoKeseluruhan -= nom; }
+
+                // Hitung yang masuk kriteria filter terapit tanggal
+                if(tglItem >= start && tglItem <= end) {
+                    if(v.jenis === 'masuk') { mskTerapit += nom; } else { klrTerapit += nom; }
+                    sldTerapit = mskTerapit - klrTerapit;
+
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="p-3.5 flex justify-between items-center bg-white hover:bg-slate-50 transition-colors">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
+                                <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatTanggalIndo(v.tanggal)}</p>
+                            </div>
+                            <span class="text-xs font-black ${v.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                                ${v.jenis === 'masuk' ? '+' : '-'} ${nom.toLocaleString('id-ID')}
+                            </span>
+                        </div>
+                    `);
+                }
+            });
+
+            if (list.innerHTML === "") {
+                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase bg-white">Tidak ada transaksi di periode ini.</div>`;
+            }
+
+            updateTampilanCardKasWarga(saldoKeseluruhan, sldTerapit, mskTerapit, klrTerapit);
+        }
+
+        function updateTampilanCardKasWarga(sk, sf, m, k) {
+            document.getElementById('totalSaldoKeseluruhan').innerText = sk.toLocaleString('id-ID');
+            document.getElementById('totalSaldo').innerText = sf.toLocaleString('id-ID');
+            document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+            document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+        }
+
+        async function muatBeritaPublik() {
+            const res = await fetch(`${DB_URL}/pengumuman.json`);
+            const data = await res.json();
+            const list = document.getElementById('listBeritaWarga');
+            list.innerHTML = ""; 
+            
+            if(!data) {
+                list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase bg-white rounded-2xl border border-slate-200 col-span-2">Belum ada maklumat atau berita terbaru.</div>`;
+                return;
+            }
+            
+            Object.keys(data).forEach(key => {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm space-y-1">
+                        <div class="flex justify-between items-center border-b border-slate-50 pb-1.5">
+                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wide">${data[key].judul}</h4>
+                            <span class="text-[8px] font-mono text-slate-400 font-bold">${formatTanggalIndo(data[key].tanggal)}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed font-medium pt-1">${data[key].isi}</p>
+                    </div>
+                `);
+            });
+        }
+    </script>
+</body>
+</html>
