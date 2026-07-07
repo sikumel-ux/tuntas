@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TUNTAS - Control Panel</title>
+    <title>TUNTAS - Members Area</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- PWA KONFIGURASI & SPLASH SCREEN LAUNCHER -->
+    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#064e3b">
     
@@ -21,7 +21,7 @@
     <meta name="apple-mobile-web-app-title" content="TUNTAS">
     <link rel="apple-touch-icon" href="logo-192.png">
 
-    <!-- Gambar Sambutan / Splash Screen iOS -->
+    
     <link rel="apple-touch-startup-image" href="logo-512.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
     <link class="apple-touch-startup-image" href="logo-512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
     <link class="apple-touch-startup-image" href="logo-512.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
@@ -72,11 +72,11 @@
         </div>
         <div class="bg-white p-6 rounded-[2.5rem] shadow-2xl space-y-4 max-w-sm mx-auto w-full border border-emerald-900/10">
             <div class="space-y-1 text-center">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Portal Warga Masuk</h3>
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Members Area</h3>
                 <p class="text-[10px] font-semibold text-slate-400">Gunakan No. WhatsApp & Sandi terdaftar</p>
             </div>
             <form id="formLoginWarga" class="space-y-3">
-                <input type="tel" id="loginHp" placeholder="No WhatsApp Warga (Contoh: 0812...)" class="modern-in" required>
+                <input type="tel" id="loginHp" placeholder="0812" class="modern-in" required>
                 <div class="relative w-full">
                     <input type="password" id="loginPass" placeholder="Kata Sandi Akun" class="modern-in pr-12" required>
                     <button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
@@ -86,7 +86,7 @@
                 <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-950 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-wider shadow-md shadow-emerald-900/20 active:scale-[0.98] transition-all">Masuk Sekarang</button>
             </form>
         </div>
-        <p class="text-center text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">v2.1 © Paguyuban Sepeda Dongkelan</p>
+        <p class="text-center text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">v2.1 © Tuntas 04</p>
     </div>
 
     <!-- HEADER DASHBOARD (BRAND UTAMA FIX) -->
