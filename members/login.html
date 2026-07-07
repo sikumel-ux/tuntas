@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Login Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; display: none; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-center p-4">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+        <span>Memverifikasi Akun...</span>
+    </div>
+</div>
+
+<div class="w-full max-w-sm mx-auto bg-white border border-slate-100 p-6 rounded-[2.5rem] shadow-xl space-y-6">
+    <!-- LOGO & JUDUL -->
+    <div class="text-center space-y-2">
+        <img src="logo.png" alt="Logo" class="w-14 h-14 object-contain rounded-2xl mx-auto shadow-sm">
+        <div>
+            <h1 class="text-lg font-extrabold text-emerald-950 tracking-tight leading-none">PORTAL WARGA TUNTAS</h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-1">Turun Tangan Atasi Sampah RT 04</p>
+        </div>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <form id="formLoginWarga" onsubmit="prosesLoginWarga(event)" class="space-y-4">
+        <div class="space-y-1">
+            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-1">No. WhatsApp (Username)</label>
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" id="loginUsername" placeholder="Contoh: 08123456xxx" class="modern-in !pl-10 text-xs" required>
+            </div>
+        </div>
+
+        <div class="space-y-1">
+            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-1">Password</label>
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" id="loginPassword" placeholder="Masukkan password" class="modern-in !pl-10 !pr-10 text-xs" required>
+                <button type="button" onclick="toggleIntipPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                    <i id="iconMata" class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-950 hover:bg-emerald-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-wider shadow-md shadow-emerald-900/10 active:scale-[0.98] transition-all pt-3.5">
+            Masuk ke Portal
+        </button>
+    </form>
+
+    <!-- FOOTER LOGIN -->
+    <div class="text-center">
+        <p class="text-[10px] text-slate-400 font-semibold italic">Bagi warga non-anggota (PON), silakan hubungi admin RT 04 untuk mendapatkan akun akses.</p>
+    </div>
+</div>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+    // Cek jika sudah login, langsung lempar ke dashboard biar gak bolak-balik login
+    if(localStorage.getItem("warga_session")) {
+        window.location.href = "warga.html"; // Sesuaikan nama file dashboard client-mu
+    }
+
+    function toggleIntipPassword() {
+        const inputPass = document.getElementById('loginPassword');
+        const iconMata = document.getElementById('iconMata');
+        if (inputPass.type === "password") {
+            inputPass.type = "text";
+            iconMata.className = "fa-solid fa-eye-slash";
+        } else {
+            inputPass.type = "password";
+            iconMata.className = "fa-solid fa-eye";
+        }
+    }
+
+    async function prosesLoginWarga(e) {
+        e.preventDefault();
+        
+        const usernameInput = document.getElementById('loginUsername').value.trim();
+        const passwordInput = document.getElementById('loginPassword').value.trim();
+        const overlay = document.getElementById('loadingOverlay');
+
+        overlay.style.display = 'flex';
+
+        try {
+            // Ambil seluruh data warga dari database
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const dataWarga = await res.json();
+
+            if (!dataWarga) {
+                alert("Database warga masih kosong. Hubungi admin!");
+                overlay.style.display = 'none';
+                return;
+            }
+
+            let userDitemukan = null;
+            let userKey = null;
+
+            // Loop untuk mencari username yang cocok
+            Object.keys(dataWarga).forEach(key => {
+                if (dataWarga[key].username === usernameInput) {
+                    userDitemukan = dataWarga[key];
+                    userKey = key;
+                }
+            });
+
+            // Validasi kecocokan username dan password
+            if (userDitemukan && userDitemukan.password === passwordInput) {
+                // Siapkan objek session untuk disimpan ke localStorage
+                const sesiWarga = {
+                    key: userKey,
+                    nama: userDitemukan.nama,
+                    username: userDitemukan.username,
+                    tipe: userDitemukan.tipe || "TETAP" // Default TETAP kalau properti tipe belum ada
+                };
+
+                // Simpan ke localStorage
+                localStorage.setItem("warga_session", JSON.stringify(sesiWarga));
+                
+                // Redirect ke halaman dashboard utama warga
+                window.location.href = "pon.html"; // Ubah ke nama file dashboard client kamu (misal index.html)
+            } else {
+                alert("Nomor WhatsApp atau Password salah, bro! Periksa kembali.");
+            }
+
+        } catch (err) {
+            console.error("Terjadi kendala saat login:", err);
+            alert("Gagal terhubung ke database. Periksa koneksi internet!");
+        } finally {
+            overlay.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
