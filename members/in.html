@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Control Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TUNTAS">
+    <link rel="apple-touch-icon" href="logo-192.png">
+
+    <link rel="apple-touch-startup-image" href="logo-512.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="logo-512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="logo-512.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="logo-512.png" media="(orientation: portrait)">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .modal { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 2.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #f1f5f9; transform: scale(0.9); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .modal.active .modal-content { transform: scale(1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #064e3b; font-weight: 800; }
+        .day-box { aspect-ratio: 1; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: all 0.15s ease; }
+        .day-box:active { transform: scale(0.9); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="flex flex-col items-center gap-2">
+            <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+            <span>Menghubungkan Database...</span>
+        </div>
+    </div>
+
+    <div id="notificationAlert" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 hidden">
+        <i id="notifIcon" class="fa-solid text-base"></i>
+        <span id="notifText" class="flex-1"></span>
+    </div>
+
+    <div id="scr-login" class="fixed inset-0 bg-emerald-950 z-[999] flex flex-col justify-center p-6 space-y-6" style="display: none;">
+        <div class="text-center space-y-2">
+            <img src="logo-512.png" alt="Logo" class="w-20 h-20 mx-auto object-contain rounded-2xl shadow-md">
+            <div>
+                <h1 class="text-white text-lg font-extrabold tracking-tight">TUNTAS MOBILE</h1>
+                <p class="text-emerald-300 text-[10px] font-bold uppercase tracking-widest">Sistem Keuangan & Operasional RT 04</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-2xl space-y-4 max-w-sm mx-auto w-full border border-emerald-900/10">
+            <div class="space-y-1 text-center">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Portal Warga Masuk</h3>
+                <p class="text-[10px] font-semibold text-slate-400">Gunakan No. WhatsApp & Sandi terdaftar</p>
+            </div>
+            <form id="formLoginWarga" class="space-y-3">
+                <input type="tel" id="loginHp" placeholder="No WhatsApp Warga (Contoh: 0812...)" class="modern-in" required>
+                <div class="relative w-full">
+                    <input type="password" id="loginPass" placeholder="Kata Sandi Akun" class="modern-in pr-12" required>
+                    <button type="button" onclick="togglePasswordLogin()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+                        <i id="eyeIconLogin" class="fa-solid fa-eye text-xs"></i>
+                    </button>
+                </div>
+                <button type="submit" class="w-full bg-emerald-900 hover:bg-emerald-950 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-wider shadow-md shadow-emerald-900/20 active:scale-[0.98] transition-all">Masuk Sekarang</button>
+            </form>
+        </div>
+        <p class="text-center text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">v2.1 © Paguyuban Sepeda Dongkelan</p>
+    </div>
+
+    <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <img src="logo-192.png" alt="Logo" class="w-9 h-9 object-contain rounded-xl">
+            <div>
+                <h1 id="labelNamaWarga" class="text-sm font-extrabold text-emerald-950 tracking-tight leading-none">WARGA RT 04</h1>
+                <p id="labelBulanBergabung" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Memuat...</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button id="btnRefresh" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 active:scale-95 transition-all">
+                <i class="fa-solid fa-rotate text-xs"></i>
+            </button>
+            <button id="btnLogout" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 active:scale-95 transition-all">
+                <i class="fa-solid fa-power-off text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <div id="mInfoWargaPopup" class="modal">
+        <div class="modal-content space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <span class="text-[10px] font-black bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-bullhorn"></i> Pengumuman Penting</span>
+                <button class="btn-close-modal text-slate-400" data-target="mInfoWargaPopup"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-1">
+                <h4 id="popupWargaJudul" class="text-xs font-black text-slate-800 uppercase">MEMUAT...</h4>
+                <p id="popupWargaIsi" class="text-xs text-slate-600 leading-relaxed font-semibold italic"></p>
+            </div>
+            <button class="btn-close-modal w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase" data-target="mInfoWargaPopup">Saya Paham</button>
+        </div>
+    </div>
+
+    <div id="mDetailSampahWarga" class="modal">
+        <div class="modal-content space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-800 flex items-center justify-center mx-auto border border-emerald-100">
+                <i class="fa-solid fa-truck-garbage text-base"></i>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Detail Operasional Sampah</h3>
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-left space-y-1.5 text-xs font-semibold">
+                    <div class="flex justify-between"><span class="text-slate-400">Tanggal Log:</span><span id="dtlSampahTgl" class="text-slate-800 font-bold"></span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Jam Operasi:</span><span id="dtlSampahJam" class="text-slate-800 font-bold"></span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Status Gerobak:</span><span id="dtlSampahStatus"></span></div>
+                </div>
+            </div>
+            <button class="btn-close-modal w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase" data-target="mDetailSampahWarga">Tutup Detail</button>
+        </div>
+    </div>
+
+    <div id="scr-w-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-emerald-800/40">
+            <div>
+                <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo Keseluruhan RT 04</p>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                    <span class="text-sm font-bold text-emerald-400">Rp</span>
+                    <h2 id="totalSaldoKeseluruhan" class="text-3xl font-extrabold tracking-tight">0</h2>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 pt-3 border-t border-emerald-800/60">
+                <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                    <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Saldo Filter</p>
+                    <h3 id="totalSaldo" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+                </div>
+                <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                    <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Masuk</p>
+                    <h3 id="textMasuk" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+                </div>
+                <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-700/30 text-center">
+                    <p class="text-[7px] text-emerald-300 font-black uppercase tracking-wide">Keluar</p>
+                    <h3 id="textKeluar" class="text-xs font-extrabold text-white mt-0.5">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide px-1">Filter Buku Transaksi Kas</p>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="date" id="filterMulaiWarga" class="modern-in !p-2 text-center">
+                <input type="date" id="filterSelesaiWarga" class="modern-in !p-2 text-center">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <button id="btnCetakPdf" class="bg-slate-800 text-white py-3.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center justify-center gap-2"><i class="fa-solid fa-file-pdf text-xs text-rose-400"></i> Unduh Berkas PDF</button>
+            <button id="btnKonfirmasiWa" class="bg-emerald-700 text-white py-3.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-xs text-emerald-300"></i> Konfirmasi Transfer</button>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Histori Pembukuan Kas Umum</h3>
+            <div id="listWargaKas" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-y-auto max-h-[280px] shadow-sm">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat histori mutasi...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-w-iuran" class="tab-content p-4 space-y-4 animate-fade-in">
+        <div class="bg-white border border-slate-200/60 p-4 rounded-3xl shadow-sm space-y-3 relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 text-slate-100/60 text-6xl font-black pointer-events-none"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="space-y-0.5">
+                <span class="text-[8px] font-black bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-lg uppercase tracking-wide">Metode Transfer Kas</span>
+                <h3 class="text-xs font-black text-slate-800 uppercase pt-1">BANK MANDIRI (KAS RT 04)</h3>
+                <p id="norekSaku" class="text-base font-mono font-black text-emerald-950 tracking-wide pt-0.5">1370024479905</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Atas Nama: GALIH RAKASIWI (PENGURUS)</p>
+            </div>
+            <button onclick="salinNorekKeClipboard()" class="w-full bg-slate-900 hover:bg-slate-950 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-copy"></i> Salin Nomor Rekening
+            </button>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Kartu Iuran Sampah Saya</h3>
+            <div id="listIuranSaya" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat arsip iuran...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-w-sampah" class="tab-content p-4 space-y-4 animate-fade-in">
+        <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+            <div class="text-center space-y-1 border-b pb-3">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Kalender Gerobak Sampah</h3>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Periode Aktif Berjalan: Juni 2026</p>
+            </div>
+            <div class="grid grid-cols-7 gap-1.5 text-center text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                <div>Sn</div><div>Sl</div><div>Rb</div><div>Km</div><div>Jm</div><div>Sb</div><div>Mg</div>
+            </div>
+            <div id="boxKalenderSampahWarga" class="grid grid-cols-7 gap-1.5"></div>
+            
+            <div class="border-t pt-3 flex items-center justify-center gap-4 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-600 block"></span> Diambil/Diantar</div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-100 border border-rose-200 block"></span> Rumah Kosong</div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-100 block"></span> Belum Ada Log</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-w-berita" class="tab-content p-4 space-y-3 animate-fade-in">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Rilis Publikasi & Berita RT</h3>
+        <div id="listBeritaWarga" class="space-y-3">
+            <div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Memuat rilis berita...</div>
+        </div>
+    </div>
+
+    <div id="scr-w-profil" class="tab-content p-4 space-y-4 animate-fade-in">
+        <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
+            <div class="flex items-center gap-4 border-b pb-4">
+                <div class="relative w-16 h-16 flex-shrink-0">
+                    <img id="imgProfilWarga" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200" alt="Avatar Warga" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-600 shadow-sm">
+                    <input type="file" id="inputFotoWarga" accept="image/*" class="hidden">
+                    <button onclick="document.getElementById('inputFotoWarga').click()" class="absolute bottom-0 right-0 bg-emerald-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] shadow shadow-emerald-900/40"><i class="fa-solid fa-camera"></i></button>
+                </div>
+                <div>
+                    <h3 id="namaWargaProfil" class="text-xs font-black text-slate-800 uppercase">MEMUAT...</h3>
+                    <p id="hpWargaProfil" class="text-[9px] font-mono text-slate-400 mt-0.5">WA: -</p>
+                </div>
+            </div>
+            
+            <form id="formPassWarga" class="space-y-2">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider px-1">Ganti Kata Sandi Akun</p>
+                <div class="flex gap-2">
+                    <input type="text" id="newPassWarga" placeholder="Ketik Sandi Baru Warga" class="modern-in !p-2.5 text-xs" required>
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-4 rounded-xl text-[10px] font-black uppercase transition-colors shadow-sm">Update</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Tampung Aspirasi & Kotak Saran</h3>
+            <form id="formSaranWarga" class="space-y-2">
+                <textarea id="isiSaranWarga" rows="3" placeholder="Tulis masukan, aspirasi lingkungan, atau aduan fasilitas umum di sini..." class="modern-in !p-3 text-xs h-auto" required></textarea>
+                <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm">Kirim Ke Pengurus</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
+        <button id="nav-btn-w-kas" data-target="scr-w-kas" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>KAS</button>
+        <button id="nav-btn-w-iuran" data-target="scr-w-iuran" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-hand-holding-dollar text-base mb-0.5"></i>IURAN</button>
+        <button id="nav-btn-w-sampah" data-target="scr-w-sampah" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-calendar-check text-base mb-0.5"></i>SAMPAH</button>
+        <button id="nav-btn-w-berita" data-target="scr-w-berita" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-bullhorn text-base mb-0.5"></i>BERITA</button>
+        <button id="nav-btn-w-profil" data-target="scr-w-profil" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-circle-user text-base mb-0.5"></i>PROFIL</button>
+    </nav>
+
+    <script>
+        function togglePasswordLogin() {
+            const field = document.getElementById('loginPass');
+            const icon = document.getElementById('eyeIconLogin');
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                field.type = "password";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // ==========================================
+        // REGISTRASI PWA SERVICE WORKER (SW.JS)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA Service Worker Aktif!', reg))
+                    .catch(err => console.error('PWA SW Gagal:', err));
+            });
+        }
+    </script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
