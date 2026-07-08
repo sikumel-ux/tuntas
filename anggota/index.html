@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Portal Anggota Tetap</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='%252310b981' fill-opacity='0.03'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43 -7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56 -76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66 3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-40 -43c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #334155; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #047857; font-weight: 800; }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-28">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl text-emerald-600"></i>
+        <span class="text-slate-500 tracking-wider">Sinkronisasi Data Anggota...</span>
+    </div>
+</div>
+
+<div id="notificationAlert" class="hidden">
+    <i id="notifIcon"></i>
+    <span id="notifText"></span>
+</div>
+
+<header class="bg-white/80 backdrop-blur-md border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3">
+        <img src="../logo.png" alt="Logo TUNTAS" class="w-10 h-10 object-cover rounded-xl border border-slate-100" onerror="this.src='logo.png'">
+        <div>
+            <h1 class="text-base font-extrabold text-slate-800 tracking-tight leading-none">TUNTAS</h1>
+            <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-wide mt-1">Portal Anggota Tetap</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-1.5">
+        <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 border border-slate-100"><i class="fa-solid fa-rotate text-xs"></i></button>
+        <button onclick="logoutSession()" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 border border-rose-100"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+    </div>
+</header>
+
+<main class="max-w-md mx-auto">
+    <div class="p-4 bg-white/50 border-b border-slate-100 flex justify-between items-center">
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Warga: <span id="textNamaSesi" class="font-black text-slate-800">Memuat...</span></div>
+        <div class="text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-emerald-700 text-white">Anggota Tetap</div>
+    </div>
+
+    <!-- TAB 1: KAS -->
+    <div id="scr-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden text-center">
+            <p class="text-[8px] text-emerald-100/80 font-black uppercase tracking-widest">Saldo Buku Kas Umum RT 04</p>
+            <h2 id="totalSaldoKeseluruhan" class="text-2xl font-extrabold tracking-tight mt-0.5">Rp 0</h2>
+            <div class="absolute right-4 bottom-4 text-3xl text-emerald-500/20"><i class="fa-solid fa-vault"></i></div>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-4 rounded-[2rem] shadow-sm space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Dari</label>
+                    <input type="date" id="filterMulai" onchange="muatSistemKas()" class="modern-in !p-2 text-[11px]">
+                </div>
+                <div>
+                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Sampai</label>
+                    <input type="date" id="filterSelesai" onchange="muatSistemKas()" class="modern-in !p-2 text-[11px]">
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-2.5 grid grid-cols-3 gap-2 text-center">
+                <div><span class="text-[8px] font-bold text-slate-400 block uppercase">Filter Saldo</span><span id="totalSaldo" class="text-xs font-black text-slate-700">0</span></div>
+                <div><span class="text-[8px] font-bold text-slate-400 block uppercase text-emerald-600">Masuk</span><span id="textMasuk" class="text-xs font-black text-emerald-600">0</span></div>
+                <div><span class="text-[8px] font-bold text-slate-400 block uppercase text-rose-600">Keluar</span><span id="textKeluar" class="text-xs font-black text-rose-600">0</span></div>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Aliran Kas Transparansi RT</h3>
+            <div id="listMutasiKasMasyarakat" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-50 shadow-sm overflow-hidden"></div>
+        </div>
+    </div>
+
+    <!-- TAB 2: RIWAYAT KONTRIBUSI -->
+    <div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Arsip Pembayaran Iuran Bulanan</h3>
+        <div id="listRiwayatIuranWarga" class="space-y-2"></div>
+    </div>
+
+    <!-- TAB 3: BERITA -->
+    <div id="scr-berita" class="tab-content p-4 space-y-4 animate-fade-in">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Papan Informasi Lingkungan</h3>
+        <div id="listBeritaAdmin" class="space-y-2"></div>
+    </div>
+
+    <!-- TAB 4: PROFILE -->
+    <div id="scr-profile" class="tab-content p-4 space-y-4 animate-fade-in">
+        <div class="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm flex flex-col items-center justify-center text-center">
+            <div class="relative w-32 h-32 cursor-pointer group" onclick="document.getElementById('inputFotoProfil').click()">
+                <img id="profFoto" src="../default-avatar.png" alt="Foto Profil" class="w-32 h-32 object-cover rounded-[2rem] border-4 border-slate-50 shadow-md group-hover:opacity-80 transition-all duration-300" onerror="this.src='../default-avatar.png'">
+                <input type="file" id="inputFotoProfil" accept="image/*" onchange="prosesUploadFoto(this)" class="hidden">
+            </div>
+            <h4 class="text-[10px] font-black text-slate-700 uppercase tracking-widest mt-4">Foto Profil Anggota</h4>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-2"><i class="fa-solid fa-user-gear text-emerald-600 mr-2"></i>Pengaturan Keamanan</h3>
+            <form id="formPass" onsubmit="ubahPasswordWarga(event)" class="space-y-4">
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nama Warga</label>
+                    <input type="text" id="profNamaDisplay" class="w-full bg-slate-50 border border-slate-100 text-slate-400 rounded-xl p-3 text-xs font-bold cursor-not-allowed outline-none" readonly>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">ID WhatsApp (Username)</label>
+                    <input type="text" id="profWaDisplay" class="w-full bg-slate-50 border border-slate-100 text-slate-400 rounded-xl p-3 text-xs font-bold cursor-not-allowed outline-none" readonly>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Ganti Password Baru</label>
+                    <input type="password" id="newPass" placeholder="Masukkan Password Baru Anda" class="w-full bg-white border border-slate-200 text-slate-700 rounded-xl p-3 text-xs font-medium focus:border-emerald-600 outline-none" required>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm">Simpan Password Baru</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 p-2 flex justify-between items-center shadow-md z-50">
+    <button id="nav-btn-kas" onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-wallet text-base mb-0.5"></i>Kas</button>
+    <button id="nav-btn-riwayat" onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>Iuran</button>
+    <button id="nav-btn-berita" onclick="switchTab('scr-berita')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-bullhorn text-base mb-0.5"></i>Berita</button>
+    <button id="nav-btn-profile" onclick="switchTab('scr-profile')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-gear text-base mb-0.5"></i>Profil</button>
+</nav>
+
+<div id="mInfoLoginPopup" class="fixed inset-0 bg-slate-900/40 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
+    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 space-y-3 text-center">
+        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl flex items-center justify-center mx-auto"><i class="fa-solid fa-bullhorn"></i></div>
+        <div><h4 id="popupInfoJudul" class="text-xs font-black text-slate-800 uppercase">PENGUMUMAN</h4><p id="popupInfoIsi" class="text-[11px] text-slate-600 font-semibold leading-relaxed text-left max-h-[150px] overflow-y-auto p-2 bg-slate-50 rounded-xl border mt-2"></p></div>
+        <button onclick="closeModal('mInfoLoginPopup')" class="w-full bg-emerald-700 text-white py-2.5 rounded-xl text-[10px] font-black uppercase">Selesai Membaca</button>
+    </div>
+</div>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+    let SESI_WARGA = JSON.parse(localStorage.getItem("warga_session"));
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!SESI_WARGA || SESI_WARGA.tipe === "PON") {
+            alert("Akses ditolak. Sesi Anggota Tetap tidak valid."); window.location.href = "../cp/"; return;
+        }
+        document.getElementById('textNamaSesi').innerText = SESI_WARGA.nama;
+        document.getElementById('profNamaDisplay').value = SESI_WARGA.nama.toUpperCase();
+        document.getElementById('profWaDisplay').value = SESI_WARGA.username;
+
+        const hariIni = new Date();
+        document.getElementById('filterMulai').value = `${hariIni.getFullYear()}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-01`;
+        document.getElementById('filterSelesai').value = hariIni.toISOString().split('T')[0];
+
+        sinkronUlangData().then(() => { jalankanPopupInfoOtotmatis(); muatFotoProfilDinamis(); });
+    });
+
+    async function sinkronUlangData() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        try { await Promise.all([muatSistemKas(), muatRiwayatIuran(), muatBeritaAdmin()]); } catch(e){}
+        finally { document.getElementById('loadingOverlay').style.display = 'none'; }
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('nav-btn-' + id.split('-')[1]).classList.add('active');
+    }
+
+    async function muatFotoProfilDinamis() {
+        try {
+            const res = await fetch(`${DB_URL}/warga_rt04/${SESI_WARGA.key}/foto.json`);
+            const b64 = await res.json();
+            document.getElementById('profFoto').src = (b64 && b64 !== "default.png") ? b64 : "../default-avatar.png";
+        } catch(e) { document.getElementById('profFoto').src = "../default-avatar.png"; }
+    }
+
+    function prosesUploadFoto(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400; canvas.height = img.height * (400 / img.width);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const stringBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    try {
+                        await fetch(`${DB_URL}/warga_rt04/${SESI_WARGA.key}/foto.json`, { method: 'PUT', body: JSON.stringify(stringBase64) });
+                        document.getElementById('profFoto').src = stringBase64;
+                        showNotif('Foto Profil Diperbarui!', 'sukses');
+                    } catch(e) { showNotif('Gagal upload', 'gagal'); }
+                    finally { document.getElementById('loadingOverlay').style.display = 'none'; }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function muatSistemKas() {
+        try {
+            const res = await fetch(`${DB_URL}/kas_rt04.json`);
+            const data = await res.json();
+            const list = document.getElementById('listMutasiKasMasyarakat'); list.innerHTML = "";
+            if(!data) return;
+
+            let start = new Date(document.getElementById('filterMulai').value);
+            let end = new Date(document.getElementById('filterSelesai').value); end.setHours(23,59,59,999);
+            let sk = 0, sf = 0, m = 0, k = 0;
+
+            Object.keys(data).forEach(key => {
+                const v = data[key]; const nom = parseInt(v.nominal)||0; const tgl = new Date(v.tanggal);
+                if(v.jenis === 'masuk') sk += nom; else sk -= nom;
+                if(tgl >= start && tgl <= end) {
+                    if(v.jenis === 'masuk') m += nom; else k += nom;
+                    list.insertAdjacentHTML('afterbegin', `
+                        <div class="p-4 flex justify-between items-center">
+                            <div><h4 class="text-xs font-bold text-slate-700 uppercase">${v.keterangan}</h4><p class="text-[9px] font-mono text-slate-400">${v.tanggal}</p></div>
+                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">${v.jenis==='masuk'?'+':'-'} ${nom.toLocaleString('id-ID')}</span>
+                        </div>
+                    `);
+                }
+            });
+            document.getElementById('totalSaldoKeseluruhan').innerText = "Rp " + sk.toLocaleString('id-ID');
+            document.getElementById('totalSaldo').innerText = (m-k).toLocaleString('id-ID');
+            document.getElementById('textMasuk').innerText = m.toLocaleString('id-ID');
+            document.getElementById('textKeluar').innerText = k.toLocaleString('id-ID');
+        } catch(e){}
+    }
+
+    async function muatRiwayatIuran() {
+        try {
+            const res = await fetch(`${DB_URL}/iuran_sampah.json`);
+            const data = await res.json();
+            const list = document.getElementById('listRiwayatIuranWarga'); list.innerHTML = "";
+            if(!data) return;
+            Object.keys(data).forEach(key => {
+                const i = data[key];
+                if(i.warga_key === SESI_WARGA.key && i.tipe_user !== "PON") {
+                    list.insertAdjacentHTML('afterbegin', `
+                        <div class="p-4 flex justify-between items-center bg-white border border-slate-100 rounded-2xl shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100"><i class="fa-solid fa-receipt text-xs"></i></div>
+                                <div><h4 class="text-xs font-extrabold text-slate-800 uppercase">${i.bulan}</h4><p class="text-[9px] text-slate-400 font-medium">${i.tanggal}</p></div>
+                            </div>
+                            <div class="text-right"><span class="text-xs font-black text-slate-800">Rp ${i.nominal.toLocaleString('id-ID')}</span><span class="text-[8px] font-mono text-slate-400 block">ID: ${i.token_kuitansi}</span></div>
+                        </div>
+                    `);
+                }
+            });
+        } catch(e){}
+    }
+
+    async function muatBeritaAdmin() {
+        try {
+            const res = await fetch(`${DB_URL}/pengumuman.json`);
+            const data = await res.json();
+            const list = document.getElementById('listBeritaAdmin'); list.innerHTML = ""; if(!data) return;
+            Object.keys(data).forEach(key => {
+                list.insertAdjacentHTML('afterbegin', `
+                    <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <h5 class="text-xs font-black text-slate-800 mb-1">${data[key].judul}</h5>
+                        <p class="text-[11px] text-slate-600 leading-normal">${data[key].isi}</p>
+                        <span class="text-[8px] text-slate-400 font-mono block mt-2 text-right">${data[key].tanggal}</span>
+                    </div>
+                `);
+            });
+        } catch(e){}
+    }
+
+    function ubahPasswordWarga(e) {
+        e.preventDefault();
+        fetch(`${DB_URL}/warga_rt04/${SESI_WARGA.key}/password.json`, { method: 'PUT', body: JSON.stringify(document.getElementById('newPass').value.trim()) }).then(() => { document.getElementById('formPass').reset(); showNotif('Password Berhasil Diubah', 'sukses'); });
+    }
+
+    async function jalankanPopupInfoOtotmatis() {
+        try {
+            const res = await fetch(`${DB_URL}/informasi_popup.json`); const data = await res.json();
+            if(data && data.judul) { document.getElementById('popupInfoJudul').innerText = data.judul; document.getElementById('popupInfoIsi').innerText = data.isi; openModal('mInfoLoginPopup'); }
+        } catch(e){}
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function logoutSession() { localStorage.clear(); window.location.href = '../cp/'; }
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl bg-white border text-xs font-black uppercase flex items-center gap-2 ${type==='sukses'?'text-emerald-600':'text-rose-600'}`;
+        document.getElementById('notifIcon').className = `fa-solid ${type==='sukses'?'fa-circle-check':'fa-circle-xmark'}`;
+        document.getElementById('notifText').innerText = msg; box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
