@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Masuk Sistem</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 13px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex items-center justify-center p-4">
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
+        <span>Memverifikasi Akun TUNTAS...</span>
+    </div>
+</div>
+
+<!-- NOTIFICATION ALERT -->
+<div id="notificationAlert" class="hidden">
+    <i id="notifIcon"></i>
+    <span id="notifText"></span>
+</div>
+
+<main class="w-full max-w-sm bg-white border border-slate-100 p-6 rounded-[2.5rem] shadow-xl space-y-6">
+    
+    <!-- BRANDING LOGO -->
+    <div class="flex flex-col items-center text-center space-y-2">
+        <img src="../logo.png" alt="Logo TUNTAS" class="w-16 h-16 object-cover rounded-2xl border border-slate-100 shadow-sm" onerror="this.src='logo.png'">
+        <div>
+            <h1 class="text-xl font-extrabold text-emerald-950 tracking-tight">Sistem TUNTAS</h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Turun Tangan Atasi Sampah RT 04</p>
+        </div>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <form id="formLogin" onsubmit="prosesLoginSistem(event)" class="space-y-4">
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider pl-1 block mb-1">Nomor WhatsApp / Username</label>
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><i class="fa-solid fa-user"></i></span>
+                <input type="text" id="loginUser" placeholder="Contoh: 081234567" class="modern-in pl-10" required>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider pl-1 block mb-1">Kata Sandi (Password)</label>
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" id="loginPass" placeholder="••••••••" class="modern-in pl-10" required>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-950 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:bg-emerald-900 transition-all">
+            Masuk ke Dashboard
+        </button>
+    </form>
+
+    <div class="text-center">
+        <p class="text-[10px] text-slate-400 font-semibold">Ganti password atau kendala login? Hubungi Pengurus RT</p>
+    </div>
+</main>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if(localStorage.getItem("admin_session") || localStorage.getItem("warga_session")) {
+            window.location.href = "../members/";
+        }
+    });
+
+    async function prosesLoginSistem(e) {
+        e.preventDefault();
+        
+        const userInput = document.getElementById('loginUser').value.trim();
+        const passInput = document.getElementById('loginPass').value.trim();
+        const overlay = document.getElementById('loadingOverlay');
+
+        overlay.style.display = 'flex';
+        localStorage.clear();
+
+        try {
+            const resAdmin = await fetch(`${DB_URL}/admin_account.json`);
+            const dataAdmin = await resAdmin.json();
+
+            if (dataAdmin && dataAdmin.username === userInput && dataAdmin.password === passInput) {
+                localStorage.setItem("admin_session", JSON.stringify({
+                    role: "ADMIN",
+                    username: dataAdmin.username
+                }));
+                showNotif('Login Admin Berhasil!', 'sukses');
+                setTimeout(() => window.location.href = "../members/", 1000);
+                return;
+            }
+
+            const resWarga = await fetch(`${DB_URL}/warga_rt04.json`);
+            const dataWarga = await resWarga.json();
+
+            if (dataWarga) {
+                let wargaDitemukan = null;
+                let wargaKey = null;
+
+                Object.keys(dataWarga).forEach(key => {
+                    if (dataWarga[key].username === userInput && dataWarga[key].password === passInput) {
+                        wargaDitemukan = dataWarga[key];
+                        wargaKey = key;
+                    }
+                });
+
+                if (wargaDitemukan) {
+                    localStorage.setItem("warga_session", JSON.stringify({
+                        key: wargaKey,
+                        nama: wargaDitemukan.nama,
+                        username: wargaDitemukan.username,
+                        tipe: wargaDitemukan.tipe || "TETAP"
+                    }));
+
+                    showNotif(`Login Berhasil! Halo ${wargaDitemukan.nama}`, 'sukses');
+                    setTimeout(() => window.location.href = "../members/", 1000);
+                    return;
+                }
+            }
+
+            showNotif('Username atau Password Salah!', 'gagal');
+
+        } catch (error) {
+            console.error(error);
+            showNotif('Koneksi Gagal / Masalah Sistem', 'gagal');
+        } finally {
+            overlay.style.display = 'none';
+        }
+    }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert'); 
+        const icon = document.getElementById('notifIcon'); 
+        const text = document.getElementById('notifText'); 
+        text.innerText = msg;
+        
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.classList.remove('hidden'); 
+        setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
