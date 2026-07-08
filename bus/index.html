@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiketMu - Pesan Tiket Bus & Kapal Cepat</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1714">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <!-- Header / Navigation -->
+    <header class="navbar">
+        <div class="logo">Tiket<span>Mu</span></div>
+        <nav class="nav-links">
+            <a href="#cari" class="active">Cari Tiket</a>
+            <a href="#jadwal">Jadwal</a>
+            <a href="#promo">Promo</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="animate-fade-in">Perjalanan Aman, Pesan Nyaman</h1>
+            <p class="animate-fade-in delay-1">Temukan tiket bus dan kapal laut dengan harga terbaik.</p>
+            
+            <!-- Form Pencarian Tiket -->
+            <div class="search-card animate-slide-up">
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab('bus')">🚌 Bus</button>
+                    <button class="tab-btn" onclick="switchTab('kapal')">🚢 Kapal</button>
+                </div>
+                
+                <form class="search-form" onsubmit="event.preventDefault();">
+                    <div class="input-group">
+                        <label>Asal</label>
+                        <input type="text" placeholder="Kota Asal / Pelabuhan" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Tujuan</label>
+                        <input type="text" placeholder="Kota Tujuan / Pelabuhan" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Tanggal Pergi</label>
+                        <input type="date" required>
+                    </div>
+                    <button type="submit" class="btn-search">Cari Jadwal</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Fleet / Gallery Section dengan Native Lazy Load -->
+        <section class="fleet-section" id="promo">
+            <h2>Rute Populer & Armada</h2>
+            <div class="grid-container">
+                <div class="card">
+                    <!-- Native Lazy Loading menggunakan loading="lazy" -->
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=500&q=80" alt="Bus Eksekutif" loading="lazy" width="100%" height="200">
+                    <div class="card-body">
+                        <h3>Bus Eksekutif Jawa - Sumatera</h3>
+                        <p>Fasilitas lengkap, AC, toilet, dan legrest super nyaman.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=500&q=80" alt="Kapal Cepat" loading="lazy" width="100%" height="200">
+                    <div class="card-body">
+                        <h3>Kapal Cepat Antar Pulau</h3>
+                        <p>Menyeberang lebih cepat dengan armada kapal modern & aman.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Register Service Worker untuk PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker terdaftar!', reg))
+                    .catch(err => console.log('Gagal daftar SW:', err));
+            });
+        }
+
+        function switchTab(type) {
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            // Logika ganti placeholder atau data integrasi db bisa masuk sini nanti
+        }
+    </script>
+</body>
+</html>
