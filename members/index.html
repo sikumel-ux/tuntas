@@ -12,51 +12,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(6, 78, 59, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
-        .modern-in { width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #1e293b; transition: all 0.2s ease; }
-        .modern-in:focus { outline: none; background-color: #ffffff; border-color: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #09090b; color: #f4f4f5; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(9, 9, 11, 0.95); color: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .modern-in { width: 100%; background-color: #09090b; border: 1px solid #27272a; padding: 14px 16px; border-radius: 1rem; font-size: 12px; font-weight: 600; color: #f4f4f5; transition: all 0.2s ease; }
+        .modern-in:focus { outline: none; background-color: #09090b; border-color: #52525b; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nav-btn.active { color: #064e3b; font-weight: 800; }
+        .nav-btn.active { color: #f4f4f5; font-weight: 800; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-28">
+<body class="antialiased min-h-screen pb-28">
 
-<!-- LOADING OVERLAY -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="flex flex-col items-center gap-2">
-        <i class="fa-solid fa-spinner animate-spin text-xl"></i>
-        <span>Sinkronisasi Data TUNTAS...</span>
+        <i class="fa-solid fa-spinner animate-spin text-xl text-zinc-400"></i>
+        <span class="text-zinc-400">Sinkronisasi Data TUNTAS...</span>
     </div>
 </div>
 
-<!-- NOTIFICATION ALERT -->
 <div id="notificationAlert" class="hidden">
     <i id="notifIcon"></i>
     <span id="notifText"></span>
 </div>
 
-<!-- HEADER DASHBOARD -->
-<header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
+<header class="bg-[#1A1714] border-b border-zinc-800 p-4 sticky top-0 z-40 flex justify-between items-center shadow-sm">
     <div class="flex items-center gap-3">
         <div class="w-10 h-10 shrink-0">
-            <img src="../logo.png" alt="Logo TUNTAS" class="w-10 h-10 object-cover rounded-xl border border-slate-100" onerror="this.src='logo.png'">
+            <img src="../logo.png" alt="Logo TUNTAS" class="w-10 h-10 object-cover rounded-xl border border-zinc-800" onerror="this.src='logo.png'">
         </div>
         <div>
-            <h1 class="text-base font-extrabold text-emerald-950 tracking-tight leading-none">TUNTAS</h1>
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-1">Turun Tangan Atasi Sampah</p>
+            <h1 class="text-base font-extrabold text-zinc-100 tracking-tight leading-none">TUNTAS</h1>
+            <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-wide mt-1">Turun Tangan Atasi Sampah</p>
         </div>
     </div>
     
     <div class="flex items-center gap-1.5">
-        <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center hover:bg-slate-100 transition-all border border-slate-100" title="Reload Data">
+        <button onclick="sinkronUlangData()" class="w-8 h-8 rounded-xl bg-zinc-900 text-zinc-400 flex items-center justify-center hover:bg-zinc-800 transition-all border border-zinc-800" title="Reload Data">
             <i class="fa-solid fa-rotate text-xs"></i>
         </button>
-        <button onclick="logoutAdmin()" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100 transition-all border border-rose-100" title="Keluar Sesi">
+        <button onclick="logoutAdmin()" class="w-8 h-8 rounded-xl bg-rose-950/40 text-rose-400 flex items-center justify-center hover:bg-rose-900/50 transition-all border border-rose-900/30" title="Keluar Sesi">
             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
         </button>
     </div>
@@ -64,124 +61,121 @@
 
 <main class="max-w-md mx-auto">
 
-    <!-- SUB-HEADER INFO AKUN -->
-    <div class="p-4 bg-emerald-50/50 border-b border-emerald-100/40 flex justify-between items-center">
-        <div class="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">
-            Sesi: <span id="textNamaSesi" class="font-black">Memuat...</span>
+    <div class="p-4 bg-zinc-900/50 border-b border-zinc-800/60 flex justify-between items-center">
+        <div class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            Sesi: <span id="textNamaSesi" class="font-black text-zinc-200">Memuat...</span>
         </div>
         <div id="badgeRoleSesi" class="text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest">
             -
         </div>
     </div>
 
-    <!-- TAB 1: KAS -->
     <div id="scr-kas" class="tab-content active p-4 space-y-4 animate-fade-in">
-        <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-5 rounded-[2.5rem] shadow-xl space-y-4 border border-emerald-800/40 text-center relative overflow-hidden">
-            <p class="text-[8px] text-emerald-400 font-black uppercase tracking-widest">Saldo Buku Kas Umum RT 04</p>
-            <h2 id="totalSaldoKeseluruhan" class="text-2xl font-extrabold tracking-tight mt-0.5">Rp 0</h2>
-            <div class="absolute right-4 bottom-4 text-3xl text-emerald-800/30"><i class="fa-solid fa-vault"></i></div>
+        <div class="bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-6 rounded-[2.5rem] shadow-xl space-y-4 border border-zinc-800 text-center relative overflow-hidden">
+            <p class="text-[8px] text-zinc-500 font-black uppercase tracking-widest">Saldo Buku Kas Umum RT 04</p>
+            <h2 id="totalSaldoKeseluruhan" class="text-2xl font-extrabold tracking-tight mt-0.5 text-zinc-100">Rp 0</h2>
+            <div class="absolute right-4 bottom-4 text-3xl text-zinc-800/30"><i class="fa-solid fa-vault"></i></div>
         </div>
 
-        <div class="bg-white border border-slate-100 p-4 rounded-[2rem] shadow-sm space-y-3">
+        <div class="bg-[#1A1714] border border-zinc-800 p-4 rounded-[2rem] shadow-sm space-y-3">
             <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Dari</label>
+                    <label class="text-[8px] font-black text-zinc-500 uppercase tracking-wider pl-1">Dari</label>
                     <input type="date" id="filterMulai" onchange="muatSistemKas()" class="modern-in !p-2 text-[11px]">
                 </div>
                 <div>
-                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Sampai</label>
+                    <label class="text-[8px] font-black text-zinc-500 uppercase tracking-wider pl-1">Sampai</label>
                     <input type="date" id="filterSelesai" onchange="muatSistemKas()" class="modern-in !p-2 text-[11px]">
                 </div>
             </div>
             
-            <div class="border-t border-slate-50 pt-2.5 grid grid-cols-3 gap-2 text-center">
+            <div class="border-t border-zinc-800 pt-2.5 grid grid-cols-3 gap-2 text-center">
                 <div>
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase">Filter Saldo</span>
-                    <span id="totalSaldo" class="text-xs font-black text-slate-800">0</span>
+                    <span class="text-[8px] font-bold text-zinc-500 block uppercase">Filter Saldo</span>
+                    <span id="totalSaldo" class="text-xs font-black text-zinc-300">0</span>
                 </div>
                 <div>
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase text-emerald-600">Masuk</span>
-                    <span id="textMasuk" class="text-xs font-black text-emerald-600">0</span>
+                    <span class="text-[8px] font-bold text-zinc-500 block uppercase text-emerald-500">Masuk</span>
+                    <span id="textMasuk" class="text-xs font-black text-emerald-500">0</span>
                 </div>
                 <div>
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase text-rose-600">Keluar</span>
-                    <span id="textKeluar" class="text-xs font-black text-rose-600">0</span>
+                    <span class="text-[8px] font-bold text-zinc-500 block uppercase text-rose-500">Keluar</span>
+                    <span id="textKeluar" class="text-xs font-black text-rose-500">0</span>
                 </div>
             </div>
 
             <div id="boxAksiAdminKas" class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="openModal('mInputKas')" class="bg-emerald-950 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wide"><i class="fa-solid fa-plus-circle mr-1"></i> Catat Kas</button>
-                <button onclick="unduhLaporanPDF()" class="bg-slate-100 text-slate-700 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wide"><i class="fa-solid fa-file-pdf mr-1"></i> Cetak PDF</button>
+                <button onclick="openModal('mInputKas')" class="bg-zinc-200 text-zinc-950 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wide hover:bg-white transition-all"><i class="fa-solid fa-plus-circle mr-1"></i> Catat Kas</button>
+                <button onclick="unduhLaporanPDF()" class="bg-zinc-800 text-zinc-300 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wide hover:bg-zinc-700 transition-all"><i class="fa-solid fa-file-pdf mr-1"></i> Cetak PDF</button>
             </div>
         </div>
 
         <div class="space-y-2">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Aliran Kas Transparansi</h3>
-            <div id="listMutasiKasMasyarakat" class="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-100 shadow-sm overflow-hidden"></div>
+            <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-1">Aliran Kas Transparansi</h3>
+            <div id="listMutasiKasMasyarakat" class="bg-[#1A1714] border border-zinc-800 rounded-2xl divide-y divide-zinc-900 shadow-sm overflow-hidden"></div>
         </div>
     </div>
 
-    <!-- TAB 2: RIWAYAT PEMBAYARAN -->
     <div id="scr-riwayat" class="tab-content p-4 space-y-4 animate-fade-in">
         <div class="flex justify-between items-center px-1">
-            <h3 id="textJudulRiwayat" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arsip Buku Setoran</h3>
-            <button id="btnTambahIuranHistori" onclick="openModal('mInputIuran')" class="bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wide"><i class="fa-solid fa-plus-circle"></i> Tambah</button>
+            <h3 id="textJudulRiwayat" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Arsip Buku Setoran</h3>
+            <button id="btnTambahIuranHistori" onclick="openModal('mInputIuran')" class="bg-zinc-800 text-zinc-200 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wide hover:bg-zinc-700 transition-all"><i class="fa-solid fa-plus-circle"></i> Tambah</button>
         </div>
         <div id="listRiwayatIuranWarga" class="space-y-2"></div>
     </div>
 
-    <!-- TAB 3: BERITA -->
     <div id="scr-berita" class="tab-content p-4 space-y-4 animate-fade-in">
-        <div id="boxInputBeritaAdmin" class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3">
-            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-bullhorn text-emerald-700 mr-1"></i> Siarkan Maklumat / Berita</h3>
+        <div id="boxInputBeritaAdmin" class="bg-[#1A1714] border border-zinc-800 p-5 rounded-[2rem] shadow-sm space-y-3">
+            <h3 class="text-xs font-black text-zinc-200 uppercase tracking-wide"><i class="fa-solid fa-bullhorn text-zinc-400 mr-1"></i> Siarkan Maklumat / Berita</h3>
             <form id="formBerita" onsubmit="simpanBerita(event)" class="space-y-2">
                 <input type="text" id="newsJudul" placeholder="JUDUL MAKLUMAT" class="modern-in" required>
                 <textarea id="newsIsi" placeholder="Tulis isi pengumuman lingkungan di sini..." rows="2" class="modern-in h-auto" required></textarea>
-                <button type="submit" class="w-full bg-emerald-950 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wide">Siarkan Pengumuman</button>
+                <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wide hover:bg-white transition-all">Siarkan Pengumuman</button>
             </form>
         </div>
 
         <div class="space-y-2">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Papan Informasi Warga</h3>
+            <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-1">Papan Informasi Warga</h3>
             <div id="listBeritaAdmin" class="space-y-2"></div>
         </div>
     </div>
 
-    <!-- TAB 4: PROFILE & MANAGEMENT -->
     <div id="scr-profile" class="tab-content p-4 space-y-4 animate-fade-in">
-        <div class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-4">
-            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-user-gear text-emerald-700 mr-1"></i> Informasi Profil Akun</h3>
-            
-            <div class="flex flex-col items-center justify-center pt-2 pb-4 border-b border-slate-50">
-                <div class="relative w-20 h-20">
-                    <img id="profFoto" src="../default-avatar.png" alt="Foto Profil" class="w-20 h-20 object-cover rounded-2xl border-2 border-slate-100 shadow-sm" onerror="this.src='default-avatar.png'">
-                    <label class="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-950 text-white rounded-full flex items-center justify-center cursor-pointer border-2 border-white shadow-md">
-                        <i class="fa-solid fa-camera text-[10px]"></i>
-                        <input type="file" accept="image/*" onchange="prosesUploadFoto(this)" class="hidden">
-                    </label>
-                </div>
-                <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-wide">Ketuk kamera untuk ganti foto</p>
+        
+        <div class="bg-[#1A1714] border border-zinc-800 p-8 rounded-[2rem] shadow-xl flex flex-col items-center justify-center text-center">
+            <div class="relative w-32 h-32 cursor-pointer group" onclick="document.getElementById('inputFotoProfil').click()">
+                <img id="profFoto" src="../default-avatar.png" alt="Foto Profil" class="w-32 h-32 object-cover rounded-[2rem] border-2 border-zinc-800 shadow-md group-hover:opacity-70 transition-all duration-300" onerror="this.src='../default-avatar.png'">
+                <input type="file" id="inputFotoProfil" accept="image/*" onchange="prosesUploadFoto(this)" class="hidden">
             </div>
+            <h4 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-4">Foto Profil</h4>
+        </div>
 
-            <form id="formPass" onsubmit="ubahPasswordAdmin(event)" class="space-y-3">
+        <div class="bg-[#1A1714] border border-zinc-800 p-6 rounded-[2rem] shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-zinc-200 uppercase tracking-wider mb-2">
+                <i class="fa-solid fa-user-gear text-zinc-500 mr-2"></i>Pengaturan Akun
+            </h3>
+            
+            <form id="formPass" onsubmit="ubahPasswordAdmin(event)" class="space-y-4">
                 <div>
-                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Nama Pengguna</label>
-                    <input type="text" id="profNamaDisplay" class="modern-in bg-slate-50 border-slate-100 text-slate-400 cursor-not-allowed font-bold" readonly>
+                    <label class="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-1 block mb-1">Nama Pengguna</label>
+                    <input type="text" id="profNamaDisplay" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-500 rounded-xl p-3 text-xs font-bold cursor-not-allowed outline-none" readonly>
                 </div>
                 <div>
-                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Nomor WhatsApp</label>
-                    <input type="text" id="profWaDisplay" class="modern-in bg-slate-50 border-slate-100 text-slate-400 cursor-not-allowed font-bold" readonly>
+                    <label class="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-1 block mb-1">Nomor WhatsApp</label>
+                    <input type="text" id="profWaDisplay" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-500 rounded-xl p-3 text-xs font-bold cursor-not-allowed outline-none" readonly>
                 </div>
                 <div>
-                    <label class="text-[8px] font-black text-slate-400 uppercase tracking-wider pl-1">Perbarui Password Baru</label>
-                    <input type="password" id="newPass" placeholder="Ketik Password Baru Sesi Anda" class="modern-in" required>
+                    <label class="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1 block mb-1">Perbarui Password Baru</label>
+                    <input type="password" id="newPass" placeholder="Ketik Password Baru Sesi Anda" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-200 rounded-xl p-3 text-xs font-medium focus:border-zinc-600 outline-none transition-all" required>
                 </div>
-                <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Simpan Perubahan Akun</button>
+                <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-3.5 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-white active:scale-[0.98] transition-all mt-2">
+                    Simpan Perubahan Akun
+                </button>
             </form>
         </div>
 
-        <div id="boxManajemenWargaAdmin" class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3 hidden">
-            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-user-plus text-emerald-700 mr-1"></i> Registrasi Akun Baru</h3>
+        <div id="boxManajemenWargaAdmin" class="hidden bg-[#1A1714] border border-zinc-800 p-6 rounded-[2rem] shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-zinc-200 uppercase tracking-wider mb-2"><i class="fa-solid fa-user-plus text-zinc-500 mr-1"></i> Registrasi Akun Baru</h3>
             <form id="formWarga" onsubmit="simpanWarga(event)" class="space-y-2.5">
                 <input type="text" id="addNama" placeholder="NAMA LENGKAP WARGA" class="modern-in" required>
                 <input type="number" id="addHp" placeholder="NO WHATSAPP (CONTOH: 081234567)" class="modern-in" required>
@@ -191,65 +185,63 @@
                     <option value="PON">NON-ANGGOTA (PON)</option>
                 </select>
                 <input type="text" id="addBulan" value="JULI 2026" class="modern-in" required>
-                <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Daftarkan Warga</button>
+                <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-3 rounded-xl text-[10px] font-black uppercase tracking-wide hover:bg-white transition-all">Daftarkan Warga</button>
             </form>
 
-            <div class="border-t border-slate-100 pt-4 space-y-2">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Database Manajemen Akun</h3>
+            <div class="border-t border-zinc-900 pt-4 space-y-2">
+                <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Database Manajemen Akun</h3>
                 <div id="listWarga" class="space-y-1 max-h-[200px] overflow-y-auto"></div>
             </div>
         </div>
 
-        <div id="boxManajemenSampahAdmin" class="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm space-y-3 hidden">
-            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-truck-garbage text-emerald-700 mr-1"></i> Log Angkutan Sampah</h3>
+        <div id="boxManajemenSampahAdmin" class="hidden bg-[#1A1714] border border-zinc-800 p-6 rounded-[2rem] shadow-sm space-y-3">
+            <h3 class="text-xs font-black text-zinc-200 uppercase tracking-wider mb-2"><i class="fa-solid fa-truck-garbage text-zinc-500 mr-1"></i> Log Angkutan Sampah</h3>
             <form id="formSampah" onsubmit="simpanSampah(event)" class="space-y-3">
                 <input type="date" id="smphTgl" class="modern-in">
                 <select id="smphWarga" class="modern-in" required></select>
                 <input type="hidden" id="smphStatus" value="diambil">
                 <div class="grid grid-cols-3 gap-2">
-                    <div id="status-diambil" onclick="pilihStatusSampah('diambil')" class="status-card border p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-slate-50">Diambil</div>
-                    <div id="status-penuh" onclick="pilihStatusSampah('penuh')" class="status-card border p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-slate-50">Penuh</div>
-                    <div id="status-lewat" onclick="pilihStatusSampah('lewat')" class="status-card border p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-slate-50">Lewat</div>
+                    <div id="status-diambil" onclick="pilihStatusSampah('diambil')" class="status-card border border-zinc-800 p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-zinc-950 text-zinc-400">Diambil</div>
+                    <div id="status-penuh" onclick="pillsStatusSampah('penuh')" class="status-card border border-zinc-800 p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-zinc-950 text-zinc-400">Penuh</div>
+                    <div id="status-lewat" onclick="pilihStatusSampah('lewat')" class="status-card border border-zinc-800 p-3 rounded-xl text-center cursor-pointer font-bold text-xs bg-zinc-950 text-zinc-400">Lewat</div>
                 </div>
-                <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Simpan Log Truk</button>
+                <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-3 rounded-xl text-[10px] font-black uppercase tracking-wide hover:bg-white transition-all">Simpan Log Truk</button>
             </form>
         </div>
     </div>
 
 </main>
 
-<!-- BOTTOM NAVIGATION BAR -->
-<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.03)] z-50">
-    <button id="nav-btn-kas" onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold">
+<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-[#1A1714] border-t border-zinc-800 p-2 flex justify-between items-center shadow-[0_-4px_14px_rgba(0,0,0,0.3)] z-50">
+    <button id="nav-btn-kas" onclick="switchTab('scr-kas')" class="nav-btn active flex flex-col items-center flex-1 text-zinc-500 text-[9px] font-bold">
         <i class="fa-solid fa-wallet text-base mb-0.5"></i>Kas
     </button>
-    <button id="nav-btn-riwayat" onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold">
+    <button id="nav-btn-riwayat" onclick="switchTab('scr-riwayat')" class="nav-btn flex flex-col items-center flex-1 text-zinc-500 text-[9px] font-bold">
         <i class="fa-solid fa-clock-rotate-left text-base mb-0.5"></i>Riwayat
     </button>
-    <button id="nav-btn-berita" onclick="switchTab('scr-berita')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold">
+    <button id="nav-btn-berita" onclick="switchTab('scr-berita')" class="nav-btn flex flex-col items-center flex-1 text-zinc-500 text-[9px] font-bold">
         <i class="fa-solid fa-bullhorn text-base mb-0.5"></i>Berita
     </button>
-    <button id="nav-btn-profile" onclick="switchTab('scr-profile')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold">
+    <button id="nav-btn-profile" onclick="switchTab('scr-profile')" class="nav-btn flex flex-col items-center flex-1 text-zinc-500 text-[9px] font-bold">
         <i class="fa-solid fa-user-gear text-base mb-0.5"></i>Profile
     </button>
 </nav>
 
-<!-- MODAL POPUPS -->
-<div id="mInputKas" class="fixed inset-0 bg-emerald-950/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 transition-all [&.active]:flex">
-    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-xl">
-        <div class="flex justify-between items-center border-b border-slate-50 pb-2"><h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Pencatatan Buku Kas</h3><button onclick="closeModal('mInputKas')" class="text-slate-400"><i class="fa-solid fa-circle-xmark"></i></button></div>
+<div id="mInputKas" class="fixed inset-0 bg-black/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 transition-all [&.active]:flex">
+    <div class="bg-[#1A1714] w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-xl border border-zinc-800">
+        <div class="flex justify-between items-center border-b border-zinc-900 pb-2"><h3 class="text-xs font-black text-zinc-200 uppercase tracking-wide">Pencatatan Buku Kas</h3><button onclick="closeModal('mInputKas')" class="text-zinc-500"><i class="fa-solid fa-circle-xmark"></i></button></div>
         <form id="formKasUmum" onsubmit="simpanKasUmum(event)" class="space-y-3">
             <select id="kasJenis" class="modern-in"><option value="masuk">UANG MASUK / DEBIT</option><option value="keluar">UANG KELUAR / KREDIT</option></select>
             <input type="number" id="kasNominal" placeholder="NOMINAL (RP)" class="modern-in" required>
             <input type="text" id="kasKet" placeholder="KETERANGAN TRANSAKSI" class="modern-in" required>
-            <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Posting Transaksi</button>
+            <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Posting Transaksi</button>
         </form>
     </div>
 </div>
 
-<div id="mInputIuran" class="fixed inset-0 bg-emerald-950/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 transition-all [&.active]:flex">
-    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-xl">
-        <div class="flex justify-between items-center border-b border-slate-50 pb-2"><h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Penerimaan Setoran Warga</h3><button onclick="closeModal('mInputIuran'); resetPilihanBulan();" class="text-slate-400"><i class="fa-solid fa-circle-xmark"></i></button></div>
+<div id="mInputIuran" class="fixed inset-0 bg-black/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 transition-all [&.active]:flex">
+    <div class="bg-[#1A1714] w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-xl border border-zinc-800">
+        <div class="flex justify-between items-center border-b border-zinc-900 pb-2"><h3 class="text-xs font-black text-zinc-200 uppercase tracking-wide">Penerimaan Setoran Warga</h3><button onclick="closeModal('mInputIuran'); resetPilihanBulan();" class="text-zinc-500"><i class="fa-solid fa-circle-xmark"></i></button></div>
         <form id="formIuran" onsubmit="simpanIuran(event)" class="space-y-3">
             <input type="date" id="iuranTgl" class="modern-in">
             <select id="iuranWarga" class="modern-in" required></select>
@@ -257,46 +249,46 @@
             <input type="text" id="iuranBulan" placeholder="Klik Pilihan Bulan di Bawah" class="modern-in" readonly required>
             
             <div class="grid grid-cols-4 gap-1.5 pt-1">
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="JAN">Jan</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="FEB">Feb</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="MAR">Mar</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="APR">Apr</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="MEI">Mei</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="JUN">Jun</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="JUL">Jul</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="AGT">Agt</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="SEP">Sep</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="OKT">Okt</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="NOV">Nov</div>
-                <div class="month-chip border p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-slate-50" data-month="DES">Des</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="JAN">Jan</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="FEB">Feb</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="MAR">Mar</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="APR">Apr</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="MEI">Mei</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="JUN">Jun</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="JUL">Jul</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="AGT">Agt</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="SEP">Sep</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="OKT">Okt</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="NOV">Nov</div>
+                <div class="month-chip border border-zinc-800 p-2 rounded-lg text-center text-[10px] font-bold cursor-pointer bg-zinc-950 text-zinc-400" data-month="DES">Des</div>
             </div>
             
-            <button type="submit" class="w-full bg-emerald-950 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Cetak & Simpan Setoran</button>
+            <button type="submit" class="w-full bg-zinc-200 text-zinc-950 py-3 rounded-xl text-[10px] font-black uppercase tracking-wide">Cetak & Simpan Setoran</button>
         </form>
         
-        <div id="boxKuitansiLink" class="hidden bg-slate-50 border border-slate-100 p-3 rounded-xl space-y-2 text-center">
-            <p id="textKodeKuitansi" class="text-[9px] font-mono font-bold text-slate-600 select-all whitespace-pre-line"></p>
+        <div id="boxKuitansiLink" class="hidden bg-zinc-950 border border-zinc-800 p-3 rounded-xl space-y-2 text-center">
+            <p id="textKodeKuitansi" class="text-[9px] font-mono font-bold text-zinc-400 select-all whitespace-pre-line"></p>
             <div class="grid grid-cols-3 gap-1">
-                <button id="btnSalinKuitansi" class="bg-slate-200 text-slate-800 py-1.5 rounded-lg text-[9px] font-extrabold uppercase">Salin</button>
+                <button id="btnSalinKuitansi" class="bg-zinc-800 text-zinc-200 py-1.5 rounded-lg text-[9px] font-extrabold uppercase">Salin</button>
                 <button id="btnKirimWA" class="bg-emerald-600 text-white py-1.5 rounded-lg text-[9px] font-extrabold uppercase col-span-2"><i class="fa-brands fa-whatsapp mr-1"></i>Kirim WA</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="mKonfirmasiHapus" class="fixed inset-0 bg-rose-950/70 z-[10000] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
-    <div class="bg-white w-full max-w-xs rounded-3xl p-5 text-center space-y-4 shadow-2xl">
-        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <div class="space-y-1"><h4 class="text-xs font-black text-slate-800 uppercase">Konfirmasi Tindakan</h4><p id="textKonfirmasiHapus" class="text-[11px] font-semibold text-slate-500 leading-normal">Apakah anda yakin ingin menghapus data ini?</p></div>
-        <div class="grid grid-cols-2 gap-2"><button id="btnBatalHapus" class="bg-slate-100 text-slate-600 py-2 rounded-xl text-[10px] font-black uppercase">Batal</button><button id="btnYakinHapus" class="bg-rose-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-sm">Ya, Hapus</button></div>
+<div id="mKonfirmasiHapus" class="fixed inset-0 bg-black/90 z-[10000] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
+    <div class="bg-[#1A1714] w-full max-w-xs rounded-3xl p-5 text-center space-y-4 shadow-2xl border border-zinc-800">
+        <div class="w-12 h-12 bg-rose-950/50 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl border border-rose-900/40"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="space-y-1"><h4 class="text-xs font-black text-zinc-200 uppercase">Konfirmasi Tindakan</h4><p id="textKonfirmasiHapus" class="text-[11px] font-semibold text-zinc-500 leading-normal">Apakah anda yakin ingin menghapus data ini?</p></div>
+        <div class="grid grid-cols-2 gap-2"><button id="btnBatalHapus" class="bg-zinc-900 text-zinc-400 py-2 rounded-xl text-[10px] font-black uppercase">Batal</button><button id="btnYakinHapus" class="bg-rose-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-sm">Ya, Hapus</button></div>
     </div>
 </div>
 
-<div id="mInfoLoginPopup" class="fixed inset-0 bg-emerald-950/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
-    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 space-y-3 shadow-xl border border-emerald-50 text-center">
-        <div class="w-10 h-10 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-center justify-center mx-auto text-base"><i class="fa-solid fa-bullhorn"></i></div>
-        <div class="space-y-1"><h4 id="popupInfoJudul" class="text-xs font-black text-slate-800 uppercase tracking-tight">PENGUMUMAN RT 04</h4><p id="popupInfoIsi" class="text-[11px] text-slate-500 font-semibold leading-relaxed text-left max-h-[150px] overflow-y-auto p-1 bg-slate-50 rounded-xl"></p></div>
-        <button onclick="closeModal('mInfoLoginPopup')" class="w-full bg-emerald-950 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wide">Selesai Membaca</button>
+<div id="mInfoLoginPopup" class="fixed inset-0 bg-black/80 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
+    <div class="bg-[#1A1714] w-full max-w-sm rounded-[2.5rem] p-6 space-y-3 shadow-xl border border-zinc-800 text-center">
+        <div class="w-10 h-10 bg-zinc-900 text-zinc-300 border border-zinc-800 rounded-xl flex items-center justify-center mx-auto text-base"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="space-y-1"><h4 id="popupInfoJudul" class="text-xs font-black text-zinc-200 uppercase tracking-tight">PENGUMUMAN RT 04</h4><p id="popupInfoIsi" class="text-[11px] text-zinc-400 font-semibold leading-relaxed text-left max-h-[150px] overflow-y-auto p-2 bg-zinc-950 rounded-xl border border-zinc-900"></p></div>
+        <button onclick="closeModal('mInfoLoginPopup')" class="w-full bg-zinc-200 text-zinc-950 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wide">Selesai Membaca</button>
     </div>
 </div>
 
@@ -346,18 +338,18 @@
         if (SESI_ADMIN) {
             textNamaSesi.innerText = "ADMIN UTAMA";
             badgeRoleSesi.innerText = "ADMIN";
-            badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-emerald-950 text-white";
+            badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-zinc-200 text-zinc-950";
             document.getElementById('boxManajemenWargaAdmin').classList.remove('hidden');
             document.getElementById('boxManajemenSampahAdmin').classList.remove('hidden');
         } else if (SESI_WARGA) {
             textNamaSesi.innerText = SESI_WARGA.nama;
             if(SESI_WARGA.tipe === "PON") {
                 badgeRoleSesi.innerText = "PON";
-                badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-amber-500 text-white";
+                badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-amber-600 text-white";
                 document.getElementById('textJudulRiwayat').innerText = "Riwayat Pembayaran Bakar Sampah";
             } else {
                 badgeRoleSesi.innerText = "ANGGOTA TETAP";
-                badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-emerald-600 text-white";
+                badgeRoleSesi.className = "text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-zinc-700 text-white";
                 document.getElementById('textJudulRiwayat').innerText = "Riwayat Kontribusi Iuran";
             }
             document.getElementById('btnTambahIuranHistori').classList.add('hidden'); 
@@ -399,10 +391,12 @@
         const index = BULAN_TERPILIH_ARRAY.indexOf(bulanCode);
         if (index > -1) {
             BULAN_TERPILIH_ARRAY.splice(index, 1);
-            el.classList.remove('selected', 'bg-emerald-950', 'text-white');
+            el.classList.remove('selected', 'bg-zinc-200', 'text-zinc-950');
+            el.classList.add('bg-zinc-950', 'text-zinc-400');
         } else {
             BULAN_TERPILIH_ARRAY.push(bulanCode);
-            el.classList.add('selected', 'bg-emerald-950', 'text-white');
+            el.classList.remove('bg-zinc-950', 'text-zinc-400');
+            el.classList.add('selected', 'bg-zinc-200', 'text-zinc-950');
         }
         const tahunAktif = new Date(document.getElementById('iuranTgl').value).getFullYear() || 2026;
         if(BULAN_TERPILIH_ARRAY.length > 0) {
@@ -414,13 +408,21 @@
 
     function resetPilihanBulan() {
         BULAN_TERPILIH_ARRAY = [];
-        document.querySelectorAll('.month-chip').forEach(el => el.classList.remove('selected', 'bg-emerald-950', 'text-white'));
+        document.querySelectorAll('.month-chip').forEach(el => {
+            el.classList.remove('selected', 'bg-zinc-200', 'text-zinc-950');
+            el.classList.add('bg-zinc-950', 'text-zinc-400');
+        });
         document.getElementById('iuranBulan').value = "";
     }
 
     function pilihStatusSampah(statusCode) {
-        document.querySelectorAll('.status-card').forEach(card => card.classList.remove('selected', 'bg-emerald-50', 'border-emerald-600', 'text-emerald-950'));
-        document.getElementById(`status-${statusCode}`).classList.add('selected', 'bg-emerald-50', 'border-emerald-600', 'text-emerald-950');
+        document.querySelectorAll('.status-card').forEach(card => {
+            card.classList.remove('selected', 'bg-zinc-200', 'border-zinc-500', 'text-zinc-950');
+            card.classList.add('bg-zinc-950', 'text-zinc-400');
+        });
+        const activeCard = document.getElementById(`status-${statusCode}`);
+        activeCard.classList.remove('bg-zinc-950', 'text-zinc-400');
+        activeCard.classList.add('selected', 'bg-zinc-200', 'border-zinc-500', 'text-zinc-950');
         document.getElementById('smphStatus').value = statusCode;
     }
 
@@ -497,7 +499,7 @@
             DATA_KAS_TERFILTER = [];
 
             if(!data) {
-                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-bold uppercase">Buku Kas Kosong.</div>`;
+                list.innerHTML = `<div class="p-4 text-center text-xs text-zinc-500 font-bold uppercase">Buku Kas Kosong.</div>`;
                 updateTampilanCardKas(0, 0, 0, 0); return;
             }
 
@@ -518,15 +520,15 @@
             DATA_KAS_TERFILTER = rawDataList.map(item => ({ tanggal: item.tanggal, keterangan: item.keterangan, jenis: item.jenis, nominal: item.nominal }));
 
             rawDataList.forEach(v => {
-                const tombolHapusAkses = SESI_ADMIN ? `<button onclick="hapusKas('${v.key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>` : '';
+                const tombolHapusAkses = SESI_ADMIN ? `<button onclick="hapusKas('${v.key}')" class="text-zinc-600 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>` : '';
                 list.insertAdjacentHTML('beforeend', `
-                    <div class="p-4 flex justify-between items-center bg-white">
+                    <div class="p-4 flex justify-between items-center bg-transparent">
                         <div>
-                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">${v.keterangan}</h4>
-                            <p class="text-[9px] font-mono text-slate-400 mt-0.5">${v.tanggal}</p>
+                            <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wide">${v.keterangan}</h4>
+                            <p class="text-[9px] font-mono text-zinc-500 mt-0.5">${v.tanggal}</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-600':'text-rose-600'}">
+                            <span class="text-xs font-black ${v.jenis==='masuk'?'text-emerald-500':'text-rose-500'}">
                                 ${v.jenis==='masuk'?'+':'-'} ${v.nominal.toLocaleString('id-ID')}
                             </span>
                             ${tombolHapusAkses}
@@ -598,15 +600,15 @@
             const list = document.getElementById('listBeritaAdmin');
             list.innerHTML = ""; if(!data) return;
             Object.keys(data).forEach(key => {
-                const tombolHapusBerita = SESI_ADMIN ? `<button onclick="hapusBerita('${key}')" class="text-slate-300 hover:text-rose-500 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>` : '';
+                const tombolHapusBerita = SESI_ADMIN ? `<button onclick="hapusBerita('${key}')" class="text-zinc-600 hover:text-rose-500 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>` : '';
                 list.insertAdjacentHTML('afterbegin', `
-                    <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="p-4 bg-[#1A1714] rounded-2xl border border-zinc-800 shadow-sm">
                         <div class="flex justify-between items-center mb-1">
-                            <h5 class="text-xs font-black text-slate-800">${data[key].judul}</h5>
+                            <h5 class="text-xs font-black text-zinc-200">${data[key].judul}</h5>
                             ${tombolHapusBerita}
                         </div>
-                        <p class="text-[11px] text-slate-500 leading-normal">${data[key].isi}</p>
-                        <span class="text-[8px] text-slate-400 font-mono block mt-2 text-right">${data[key].tanggal}</span>
+                        <p class="text-[11px] text-zinc-400 leading-normal">${data[key].isi}</p>
+                        <span class="text-[8px] text-zinc-500 font-mono block mt-2 text-right">${data[key].tanggal}</span>
                     </div>
                 `);
             });
@@ -631,20 +633,20 @@
             if(!data) return;
             Object.keys(data).forEach(key => {
                 const w = data[key];
-                const badgeTipe = w.tipe === "PON" ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-emerald-50 text-emerald-800 border-emerald-200";
+                const badgeTipe = w.tipe === "PON" ? "bg-amber-950/40 text-amber-400 border-amber-900/40" : "bg-zinc-800 text-zinc-300 border-zinc-700";
                 d1.insertAdjacentHTML('beforeend', `<option value="${key}" data-tipe="${w.tipe || 'TETAP'}">${w.nama.toUpperCase()}</option>`);
                 d2.insertAdjacentHTML('beforeend', `<option value="${key}">${w.nama.toUpperCase()}</option>`);
                 
                 list.insertAdjacentHTML('beforeend', `
-                    <div class="p-3 flex justify-between items-center bg-white border border-slate-100 rounded-xl my-1 shadow-sm">
+                    <div class="p-3 flex justify-between items-center bg-transparent border border-zinc-800 rounded-xl my-1 shadow-sm">
                         <div>
                             <div class="flex items-center gap-1.5">
-                                <p class="font-extrabold text-slate-700 uppercase tracking-wide text-xs">${w.nama}</p>
+                                <p class="font-extrabold text-zinc-200 uppercase tracking-wide text-xs">${w.nama}</p>
                                 <span class="text-[7px] font-black border px-1 rounded uppercase ${badgeTipe}">${w.tipe || 'TETAP'}</span>
                             </div>
-                            <p class="text-[9px] text-slate-400 font-mono mt-0.5">WA: ${w.username} | Joined: ${w.bulan_bergabung}</p>
+                            <p class="text-[9px] text-zinc-500 font-mono mt-0.5">WA: ${w.username} | Joined: ${w.bulan_bergabung}</p>
                         </div>
-                        <button onclick="hapusWarga('${key}')" class="text-slate-200 hover:text-rose-600 p-1"><i class="fa-solid fa-user-xmark text-xs"></i></button>
+                        <button onclick="hapusWarga('${key}')" class="text-zinc-600 hover:text-rose-500 p-1"><i class="fa-solid fa-user-xmark text-xs"></i></button>
                     </div>
                 `);
             });
@@ -675,45 +677,45 @@
             const res = await fetch(`${DB_URL}/iuran_sampah.json`);
             const data = await res.json();
             const list = document.getElementById('listRiwayatIuranWarga');
-            list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Riwayat Setoran Kosong.</div>`; return; }
+            list.innerHTML = ""; if(!data) { list.innerHTML = `<div class="p-6 text-center text-xs text-zinc-500 font-bold uppercase">Riwayat Setoran Kosong.</div>`; return; }
             
             Object.keys(data).forEach(key => {
                 const i = data[key];
                 if (!SESI_ADMIN && i.warga_key !== SESI_WARGA.key) return;
 
                 const tombolHapusIuranAkses = SESI_ADMIN ? `
-                    <button onclick="hapusIuran('${key}')" class="text-slate-300 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
+                    <button onclick="hapusIuran('${key}')" class="text-zinc-600 hover:text-rose-500 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors">
                         <i class="fa-solid fa-trash-can text-xs"></i>
                     </button>` : '';
 
                 const labelTipeUser = i.tipe_user === "PON" ? "NON-ANGGOTA (PON)" : "ANGGOTA TETAP";
 
                 list.insertAdjacentHTML('afterbegin', `
-                    <div class="p-4 flex justify-between items-center bg-white border border-slate-100 rounded-2xl my-2 shadow-sm">
+                    <div class="p-4 flex justify-between items-center bg-[#1A1714] border border-zinc-800 rounded-2xl my-2 shadow-sm">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-100">
-                                <i class="fa-solid ${i.tipe_user === 'PON' ? 'fa-fire text-amber-600' : 'fa-receipt text-emerald-700'} text-xs"></i>
+                            <div class="w-8 h-8 rounded-xl bg-zinc-950 text-zinc-400 flex items-center justify-center border border-zinc-800">
+                                <i class="fa-solid ${i.tipe_user === 'PON' ? 'fa-fire text-amber-500' : 'fa-receipt text-zinc-300'} text-xs"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wide">${i.nama_warga}</h4>
+                                <h4 class="text-xs font-extrabold text-zinc-200 uppercase tracking-wide">${i.nama_warga}</h4>
                                 <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-[9px] text-slate-400 font-bold">${i.bulan}</span>
-                                    <span class="inline-block w-1 h-1 bg-slate-300 rounded-full"></span>
-                                    <span class="text-[7px] font-black bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded uppercase tracking-wider">${labelTipeUser}</span>
+                                    <span class="text-[9px] text-zinc-500 font-bold">${i.bulan}</span>
+                                    <span class="inline-block w-1 h-1 bg-zinc-700 rounded-full"></span>
+                                    <span class="text-[7px] font-black bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded uppercase tracking-wider">${labelTipeUser}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="text-right">
-                                <span class="text-xs font-black text-slate-900 block">Rp ${i.nominal.toLocaleString('id-ID')}</span>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-tighter">ID: ${i.token_kuitansi}</span>
+                                <span class="text-xs font-black text-zinc-100 block">Rp ${i.nominal.toLocaleString('id-ID')}</span>
+                                <span class="text-[8px] font-mono text-zinc-500 block tracking-tighter">ID: ${i.token_kuitansi}</span>
                             </div>
                             ${tombolHapusIuranAkses}
                         </div>
                     </div>
                 `);
             });
-            if(list.innerHTML === "") { list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold uppercase">Belum ada riwayat transaksi.</div>`; }
+            if(list.innerHTML === "") { list.innerHTML = `<div class="p-6 text-center text-xs text-zinc-500 font-bold uppercase">Belum ada riwayat transaksi.</div>`; }
         } catch (e) { console.error(e); }
     }
 
@@ -730,7 +732,7 @@
         doc.setFont("Helvetica", "bold"); doc.setFontSize(14); doc.text("LAPORAN OPERASIONAL KAS TUNTAS RT 04", 14, 15);
         doc.setFontSize(9); doc.setFont("Helvetica", "normal"); doc.text(`Periode: ${document.getElementById('filterMulai').value} s/d ${document.getElementById('filterSelesai').value}`, 14, 21);
         const rows = []; DATA_KAS_TERFILTER.forEach((item, idx) => { rows.push([idx + 1, item.tanggal, item.keterangan, item.jenis.toUpperCase(), item.nominal.toLocaleString('id-ID')]); });
-        doc.autoTable({ startY: 26, head: [['No', 'Tanggal', 'Keterangan', 'Jenis', 'Nominal']], body: rows, headStyles: { fillColor: [6, 78, 59] }, margin: { left: 14, right: 14 } });
+        doc.autoTable({ startY: 26, head: [['No', 'Tanggal', 'Keterangan', 'Jenis', 'Nominal']], body: rows, headStyles: { fillColor: [26, 23, 20] }, margin: { left: 14, right: 14 } });
         doc.save(`Kas_Tuntas_RT04_${document.getElementById('filterMulai').value}.pdf`);
     }
 
@@ -758,8 +760,8 @@
 
     function showNotif(msg, type) {
         const box = document.getElementById('notificationAlert'); const icon = document.getElementById('notifIcon'); const text = document.getElementById('notifText'); text.innerText = msg;
-        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`;
-        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-600':'fa-circle-xmark text-rose-600'} text-base`;
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl shadow-lg border text-xs font-black uppercase tracking-wide flex items-center gap-2.5 transition-all duration-300 ${type==='sukses'?'bg-zinc-900 border-zinc-800 text-emerald-400':'bg-zinc-900 border-zinc-800 text-rose-400'}`;
+        icon.className = `fa-solid ${type==='sukses'?'fa-circle-check text-emerald-500':'fa-circle-xmark text-rose-500'} text-base`;
         box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000);
     }
 </script>
