@@ -34,9 +34,9 @@
 
 <main class="w-full max-w-sm bg-white border border-slate-100 p-6 rounded-[2.5rem] shadow-xl space-y-6">
     
-    <!-- BRANDING LOGO (STATIS) -->
+    <!-- BRANDING LOGO -->
     <div class="flex flex-col items-center text-center space-y-2">
-        <img src="logo.png" alt="Logo TUNTAS" class="w-16 h-16 object-cover rounded-2xl border border-slate-100 shadow-sm">
+        <img src="../logo.png" alt="Logo TUNTAS" class="w-16 h-16 object-cover rounded-2xl border border-slate-100 shadow-sm" onerror="this.src='logo.png'">
         <div>
             <h1 class="text-xl font-extrabold text-emerald-950 tracking-tight">Sistem TUNTAS</h1>
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Turun Tangan Atasi Sampah RT 04</p>
@@ -74,10 +74,9 @@
 <script>
     const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-    // Cek dulu apakah user sudah punya sesi aktif, kalau ada langsung lempar ke dashboard
     window.addEventListener('DOMContentLoaded', () => {
         if(localStorage.getItem("admin_session") || localStorage.getItem("warga_session")) {
-            window.location.href = "dashboard.html";
+            window.location.href = "../members/";
         }
     });
 
@@ -89,10 +88,9 @@
         const overlay = document.getElementById('loadingOverlay');
 
         overlay.style.display = 'flex';
-        localStorage.clear(); // Bersihkan sisa sesi lama
+        localStorage.clear();
 
         try {
-            // 1. CEK AKUN ADMIN UTAMA TERLEBIH DAHULU
             const resAdmin = await fetch(`${DB_URL}/admin_account.json`);
             const dataAdmin = await resAdmin.json();
 
@@ -102,11 +100,10 @@
                     username: dataAdmin.username
                 }));
                 showNotif('Login Admin Berhasil!', 'sukses');
-                setTimeout(() => window.location.href = "dashboard.html", 1000);
+                setTimeout(() => window.location.href = "../members/", 1000);
                 return;
             }
 
-            // 2. JIKA BUKAN ADMIN, CEK DATABASE WARGA (ANGGOTA TETAP ATAU PON)
             const resWarga = await fetch(`${DB_URL}/warga_rt04.json`);
             const dataWarga = await resWarga.json();
 
@@ -114,7 +111,6 @@
                 let wargaDitemukan = null;
                 let wargaKey = null;
 
-                // Cari yang username (No WA) dan password-nya cocok
                 Object.keys(dataWarga).forEach(key => {
                     if (dataWarga[key].username === userInput && dataWarga[key].password === passInput) {
                         wargaDitemukan = dataWarga[key];
@@ -123,21 +119,19 @@
                 });
 
                 if (wargaDitemukan) {
-                    // Simpan sesi warga beserta tipe akunnya (TETAP / PON)
                     localStorage.setItem("warga_session", JSON.stringify({
                         key: wargaKey,
                         nama: wargaDitemukan.nama,
                         username: wargaDitemukan.username,
-                        tipe: wargaDitemukan.tipe || "TETAP" // Default TETAP kalau ga diset
+                        tipe: wargaDitemukan.tipe || "TETAP"
                     }));
 
                     showNotif(`Login Berhasil! Halo ${wargaDitemukan.nama}`, 'sukses');
-                    setTimeout(() => window.location.href = "dashboard.html", 1000);
+                    setTimeout(() => window.location.href = "../members/", 1000);
                     return;
                 }
             }
 
-            // JIKA TIDAK COCOK SEMUA
             showNotif('Username atau Password Salah!', 'gagal');
 
         } catch (error) {
