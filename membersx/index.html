@@ -368,7 +368,7 @@
 
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function logoutSession() { localStorage.clear(); window.location.href = '../cp/'; }
+    function logoutSession() { localStorage.clear(); window.location.href = '../masuknya/'; }
     function showNotif(msg, type) {
         const box = document.getElementById('notificationAlert'); box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl bg-white border text-xs font-black uppercase flex items-center gap-2 shadow-md ${type==='sukses'?'text-emerald-600 border-emerald-100':'text-rose-600 border-rose-100'}`;
         document.getElementById('notifIcon').className = `fa-solid ${type==='sukses'?'fa-circle-check':'fa-circle-xmark'}`;
