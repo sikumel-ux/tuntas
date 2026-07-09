@@ -160,7 +160,7 @@
     let SESI_WARGA = JSON.parse(localStorage.getItem("warga_session"));
 
     window.addEventListener('DOMContentLoaded', () => {
-        if (!SESI_WARGA || SESI_WARGA.tipe !== "PON") { window.location.href = "../cp/"; return; }
+        if (!SESI_WARGA || SESI_WARGA.tipe !== "PON") { window.location.href = "../masuknya/"; return; }
         
         document.getElementById('displayProfilNama').innerText = SESI_WARGA.nama.toUpperCase();
         document.getElementById('displayProfilWa').innerText = "+62 " + SESI_WARGA.username;
