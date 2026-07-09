@@ -119,7 +119,7 @@
                     localStorage.setItem("warga_session", JSON.stringify(payloadSesi));
                     
                     const sapaan = dapatkanSapaanWaktu();
-                    showNotif(`Login berhasil.\n${sapaan} Bpk/Ibu ${akunDitemukan.nama}!`, 'sukses');
+                    showNotif(`Login berhasil.\n${sapaan} pak ${akunDitemukan.nama}!`, 'sukses');
                     
                     setTimeout(() => { redirectSesuaiTipe(akunDitemukan.tipe); }, 2500);
                 } else {
@@ -135,7 +135,7 @@
 
     function redirectSesuaiTipe(tipe) {
         if (tipe === "PON") { window.location.href = "../pone/"; } 
-        else { window.location.href = "../tetap/"; }
+        else { window.location.href = "../tetaps/"; }
     }
 
     function showNotif(msg, type) {
