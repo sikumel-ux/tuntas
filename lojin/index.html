@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUNTAS - Login Portal Warga</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='%252310b981' fill-opacity='0.03'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43 -7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56 -76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66 3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-40 -43c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: none; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center p-4">
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="flex flex-col items-center gap-2">
+        <i class="fa-solid fa-circle-notch animate-spin text-xl text-emerald-600"></i>
+        <span class="text-slate-500 tracking-wider">Memverifikasi Akun...</span>
+    </div>
+</div>
+
+<div id="notificationAlert" class="hidden">
+    <i id="notifIcon"></i>
+    <span id="notifText" class="whitespace-pre-line"></span>
+</div>
+
+<main class="w-full max-w-sm bg-white border border-slate-100 rounded-[2.5rem] shadow-sm p-6 space-y-6">
+    <div class="text-center space-y-2">
+        <img src="../logo.png" alt="Logo TUNTAS" class="w-16 h-16 object-cover rounded-2xl border border-slate-100 mx-auto shadow-sm" onerror="this.src='logo.png'">
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Portal Warga RT 04</h1>
+            <p class="text-[11px] font-semibold text-slate-400">Silakan masuk untuk mengakses sistem informasi warga</p>
+        </div>
+    </div>
+
+    <form id="formLoginWarga" onsubmit="prosesLoginSistem(event)" class="space-y-4">
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 pl-1">No. WhatsApp (Username)</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 text-xs"><i class="fa-solid fa-user"></i></span>
+                <input type="text" id="logUsername" placeholder="Contoh: 08123456xxx" class="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-xl py-3.5 pl-10 pr-4 text-xs font-bold focus:border-emerald-600 focus:bg-white outline-none transition-all" required>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 pl-1">Password</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 text-xs"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" id="logPassword" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-xl py-3.5 pl-10 pr-4 text-xs font-bold focus:border-emerald-600 focus:bg-white outline-none transition-all" required>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:opacity-95 transition-opacity pt-4">
+            Masuk ke Dashboard
+        </button>
+    </form>
+
+    <div class="text-center">
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">TUNTAS &copy; 2026 • Lingkungan Bersih Transparan</p>
+    </div>
+</main>
+
+<script>
+    const DB_URL = "https://tuntas-04-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let sessionTerbaca = JSON.parse(localStorage.getItem("warga_session"));
+        if (sessionTerbaca) { redirectSesuaiTipe(sessionTerbaca.tipe); }
+    });
+
+    function dapatkanSapaanWaktu() {
+        const jam = new Date().getHours();
+        if (jam >= 4 && jam < 11) return "Selamat pagi";
+        if (jam >= 11 && jam < 15) return "Selamat siang";
+        if (jam >= 15 && jam < 18) return "Selamat sore";
+        return "Selamat malam";
+    }
+
+    async function prosesLoginSistem(e) {
+        e.preventDefault();
+        const usernameInput = document.getElementById('logUsername').value.trim();
+        const passwordInput = document.getElementById('logPassword').value.trim();
+        const loader = document.getElementById('loadingOverlay');
+
+        loader.style.display = 'flex';
+
+        try {
+            const res = await fetch(`${DB_URL}/warga_rt04.json`);
+            const data = await res.json();
+            
+            if (!data) {
+                showNotif('Data basis warga kosong.', 'gagal'); loader.style.display = 'none'; return;
+            }
+
+            let akunDitemukan = null; let keyWarga = null;
+            Object.keys(data).forEach(key => {
+                if (data[key].username === usernameInput) { akunDitemukan = data[key]; keyWarga = key; }
+            });
+
+            if (akunDitemukan) {
+                if (akunDitemukan.password === passwordInput) {
+                    const payloadSesi = {
+                        key: keyWarga,
+                        nama: akunDitemukan.nama,
+                        username: akunDitemukan.username,
+                        tipe: akunDitemukan.tipe
+                    };
+                    
+                    localStorage.setItem("warga_session", JSON.stringify(payloadSesi));
+                    
+                    const sapaan = dapatkanSapaanWaktu();
+                    showNotif(`Login berhasil.\n${sapaan} Bpk/Ibu ${akunDitemukan.nama}!`, 'sukses');
+                    
+                    setTimeout(() => { redirectSesuaiTipe(akunDitemukan.tipe); }, 2500);
+                } else {
+                    showNotif('Password Anda Salah!', 'gagal'); loader.style.display = 'none';
+                }
+            } else {
+                showNotif('Nomor WhatsApp tidak terdaftar!', 'gagal'); loader.style.display = 'none';
+            }
+        } catch (error) {
+            showNotif('Gagal terhubung ke server.', 'gagal'); loader.style.display = 'none';
+        }
+    }
+
+    function redirectSesuaiTipe(tipe) {
+        if (tipe === "PON") { window.location.href = "../pone/"; } 
+        else { window.location.href = "../tetap/"; }
+    }
+
+    function showNotif(msg, type) {
+        const box = document.getElementById('notificationAlert');
+        box.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-[99999] p-4 rounded-2xl bg-white border text-xs font-black uppercase flex items-center gap-3 shadow-lg leading-relaxed ${type === 'sukses' ? 'text-emerald-600 border-emerald-100' : 'text-rose-600 border-rose-100'}`;
+        document.getElementById('notifIcon').className = `fa-solid text-sm ${type === 'sukses' ? 'fa-circle-check' : 'fa-circle-xmark'}`;
+        document.getElementById('notifText').innerText = msg;
+        box.classList.remove('hidden');
+        if(type !== 'sukses') setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>
