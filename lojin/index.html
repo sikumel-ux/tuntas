@@ -109,19 +109,22 @@
 
             if (akunDitemukan) {
                 if (akunDitemukan.password === passwordInput) {
+                    // Beri fallback "Anggota Tetap" jika kolom 'tipe' kosong di Firebase
+                    const tipeUser = akunDitemukan.tipe || "Anggota Tetap";
+                    
                     const payloadSesi = {
                         key: keyWarga,
                         nama: akunDitemukan.nama,
                         username: akunDitemukan.username,
-                        tipe: akunDitemukan.tipe
+                        tipe: tipeUser
                     };
                     
                     localStorage.setItem("warga_session", JSON.stringify(payloadSesi));
                     
                     const sapaan = dapatkanSapaanWaktu();
-                    showNotif(`Login berhasil.\n${sapaan} pak ${akunDitemukan.nama}!`, 'sukses');
+                    showNotif(`Login berhasil.\n${sapaan} Bpk/Ibu ${akunDitemukan.nama}!`, 'sukses');
                     
-                    setTimeout(() => { redirectSesuaiTipe(akunDitemukan.tipe); }, 2500);
+                    setTimeout(() => { redirectSesuaiTipe(tipeUser); }, 2500);
                 } else {
                     showNotif('Password Anda Salah!', 'gagal'); loader.style.display = 'none';
                 }
