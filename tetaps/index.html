@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TUNTAS - Portal Anggota Tetap</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -55,7 +55,6 @@
 </header>
 
 <main class="max-w-md mx-auto">
-    <!-- SUBHEADER: TANGGAL & JAM -->
     <div class="p-3 bg-white/60 border-b border-slate-100 text-center">
         <span id="txtHeaderTanggalJam" class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Memuat Waktu...</span>
     </div>
@@ -163,7 +162,7 @@
     <button id="nav-btn-profile" onclick="switchTab('scr-profile')" class="nav-btn flex flex-col items-center flex-1 text-slate-400 text-[9px] font-bold"><i class="fa-solid fa-user-gear text-base mb-0.5"></i>Profil</button>
 </nav>
 
-<!-- POPUP UTAMA -->
+<!-- POPUP INFO -->
 <div id="mInfoLoginPopup" class="fixed inset-0 bg-slate-900/40 z-[999] backdrop-blur-sm hidden items-center justify-center p-4 [&.active]:flex">
     <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 space-y-3 text-center">
         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl flex items-center justify-center mx-auto"><i class="fa-solid fa-bullhorn"></i></div>
@@ -178,7 +177,8 @@
     let DATA_LOG_SAMPAH_GLOBAL = {};
 
     window.addEventListener('DOMContentLoaded', () => {
-        if (!SESI_WARGA || SESI_WARGA.tipe !== "Anggota Tetap") { window.location.href = "../lojin/"; return; }
+        // PERBAIKAN: Jika tipenya PON, tendang keluar. Mengizinkan masuk jika bertipe "Anggota Tetap"
+        if (!SESI_WARGA || SESI_WARGA.tipe === "PON") { window.location.href = "../lojin/"; return; }
         
         document.getElementById('displayProfilNama').innerText = SESI_WARGA.nama.toUpperCase();
         document.getElementById('displayProfilWa').innerText = "+62 " + SESI_WARGA.username;
@@ -272,7 +272,7 @@
             let count = 0;
             Object.keys(data).forEach(key => {
                 const i = data[key];
-                if(i.warga_key === SESI_WARGA.key && i.tipe_user === "Anggota Tetap") {
+                if(i.warga_key === SESI_WARGA.key && (i.tipe_user === "Anggota Tetap" || !i.tipe_user)) {
                     count++;
                     const urlKuitansi = `../kuitansi/?id=${i.token_kuitansi || key}`;
                     list.insertAdjacentHTML('afterbegin', `
