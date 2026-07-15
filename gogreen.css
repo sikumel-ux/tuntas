@@ -1,0 +1,18 @@
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8fafc;
+    background-image: url('gogreen.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Fix Layout & Custom Utilities */
+.text-micro { font-size: 8px !important; }
+.text-mini { font-size: 10px !important; }
+.text-semi-xs { font-size: 11px !important; }
+.rounded-custom-card { border-radius: 1.5rem !important; }
+.rounded-custom-main { border-radius: 2rem !important; }
+.shadow-lg_custom {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
